@@ -8,7 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const BLOCKER_TO: Record<string, string> = {
-  no_singlet: "/join/singlet", no_size: "/join/singlet", paid: "/join/confirmed", closed: "/join/checkout?error=closed",
+  no_singlet: "/join/singlet", no_size: "/join/singlet", paid: "/join/confirmed",
 };
 
 // "Pay $15" → create a Square checkout page with the member's real details → send them there.
@@ -24,7 +24,7 @@ export async function startCheckout(formData: FormData) {
 
   if (supabaseReady()) {
     const me = await getCurrentMember();
-    if (!me) redirect("/join/sign-in");
+    if (!me) redirect("/login?next=/join/checkout");
     const blocker = checkoutBlocker(me.registration, new Date());
     if (blocker) redirect(BLOCKER_TO[blocker]);
     const supabase = await createClient();

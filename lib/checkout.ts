@@ -1,12 +1,11 @@
 import type { Profile, Registration } from "@/lib/types";
-import { isSingletLocked, singletLabel } from "@/lib/singlet";
+import { singletLabel } from "@/lib/singlet";
 
 type Reg = Pick<Registration, "fit" | "colour" | "size" | "payment_status">;
 
 /** What stops this member paying right now (null = good to go). */
-export function checkoutBlocker(reg: Reg | null, now: Date): "no_singlet" | "no_size" | "paid" | "closed" | null {
+export function checkoutBlocker(reg: Reg | null, _now?: Date): "no_singlet" | "no_size" | "paid" | null {
   if (reg?.payment_status === "paid") return "paid";
-  if (isSingletLocked(now)) return "closed";
   if (!reg?.fit || !reg.colour) return "no_singlet";
   if (!reg.size) return "no_size";
   return null;

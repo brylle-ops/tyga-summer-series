@@ -14,8 +14,8 @@ export default function Welcome() {
         <p className="sm" style={{ textAlign: "center", color: "rgba(250,250,250,.82)", marginBottom: 6 }}>
           Stay moving, stay connected, and get rewarded for showing up this summer.
         </p>
-        <Link href="/join/sign-in" className="btn">Join the Summer Series · $15</Link>
-        <Link href="/login" className="btn ghost" style={{ height: 46, fontSize: 14 }}>I&apos;ve already joined</Link>
+        <Link href="/shop" className="btn">Shop the Summer Series</Link>
+        <Link href="/login" className="btn ghost" style={{ height: 46, fontSize: 14 }}>Sign-in</Link>
       </div>
     </Screen>
   );

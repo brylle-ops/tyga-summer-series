@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
-import JoinSteps from "@/components/JoinSteps";
 import { Screen, TopNav } from "@/components/ui";
 import { getCurrentMember, supabaseReady } from "@/lib/session";
-import { GOALS, isSingletLocked } from "@/lib/singlet";
+import { GOALS } from "@/lib/singlet";
 import { saveGoal } from "../actions";
 
 const ERRORS: Record<string, string> = {
@@ -12,17 +11,15 @@ const ERRORS: Record<string, string> = {
 };
 
 // Join · step 2: the three-a-week commitment and a goal
-export default async function Commit({ searchParams }: { searchParams: Promise<{ error?: string; locked?: string }> }) {
-  const { error, locked } = await searchParams;
+export default async function Commit({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
   const me = await getCurrentMember();
-  if (supabaseReady() && !me) redirect("/join/sign-in");
-  const closed = Boolean(locked) || isSingletLocked(new Date());
+  if (supabaseReady() && !me) redirect("/login");
   const current = me?.profile.goal ?? null;
 
   return (
     <Screen>
-      <TopNav title="Join the Summer Series" back="/join/sign-in" />
-      <JoinSteps current={2} />
+      <TopNav title="Your summer" back="/" />
       <div style={{ marginTop: 6 }}>
         <div className="eyebrow">{me?.profile.first_name ? `Welcome, ${me.profile.first_name}` : "Your summer commitment"}</div>
         <div className="h1" style={{ marginTop: 6 }}>
@@ -36,7 +33,7 @@ export default async function Commit({ searchParams }: { searchParams: Promise<{
         <div><b>3</b><small>Summer or<br />holiday workout</small></div>
       </div>
       <form action={saveGoal} style={{ display: "contents" }}>
-        <fieldset style={{ border: 0, padding: 0, margin: 0, display: "contents" }} disabled={closed}>
+        <fieldset style={{ border: 0, padding: 0, margin: 0, display: "contents" }}>
           {me && (!me.profile.first_name || !me.profile.last_name) && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <label className="field"><span className="eyebrow">First name</span>
@@ -54,13 +51,12 @@ export default async function Commit({ searchParams }: { searchParams: Promise<{
             ))}
           </div>
           <div style={{ flex: 1 }} />
-          {closed && <p className="notice" role="alert">Sign-ups closed on 30 Nov.</p>}
           {error && ERRORS[error] && <p className="notice" role="alert">{ERRORS[error]}</p>}
           <label className="check">
             <input type="checkbox" name="commit" required />
             <span>I&apos;m in for 3 sessions a week, 7 Dec – 26 Jan.</span>
           </label>
-          <button type="submit" className="btn">Continue</button>
+          <button type="submit" className="btn">Let&apos;s go</button>
         </fieldset>
       </form>
     </Screen>

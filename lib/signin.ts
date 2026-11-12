@@ -22,7 +22,7 @@ export async function checkMembership(
 }
 
 /** Where to send someone after sign-in: same-site paths only, so the link can't bounce people to another site. */
-export function safeNext(next: string | null | undefined, fallback = "/join/commit"): string {
+export function safeNext(next: string | null | undefined, fallback = "/home"): string {
   if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return fallback;
   return next;
 }

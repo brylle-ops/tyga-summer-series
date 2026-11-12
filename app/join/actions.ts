@@ -2,21 +2,20 @@
 
 import { redirect } from "next/navigation";
 import { getCurrentMember, supabaseReady } from "@/lib/session";
-import { isGoal, isSingletLocked, parseSingletInput } from "@/lib/singlet";
+import { isGoal, parseSingletInput } from "@/lib/singlet";
 import { createClient } from "@/lib/supabase/server";
 
 // Each save runs as the member (RLS-checked), so nobody can change someone else's choices.
 
-async function requireMember(step: string) {
+async function requireMember() {
   if (!supabaseReady()) return null; // example mode before Supabase is set up: just move on
   const me = await getCurrentMember();
-  if (!me) redirect("/join/sign-in");
-  if (isSingletLocked(new Date())) redirect(`${step}?locked=1`);
+  if (!me) redirect("/login");
   return me;
 }
 
 export async function saveGoal(formData: FormData) {
-  const me = await requireMember("/join/commit");
+  const me = await requireMember();
   if (me) {
     const goal = String(formData.get("goal") ?? "");
     if (!isGoal(goal)) redirect("/join/commit?error=goal");
@@ -28,11 +27,11 @@ export async function saveGoal(formData: FormData) {
     const { error } = await supabase.from("profiles").update({ goal, first_name, last_name }).eq("id", me.profile.id);
     if (error) { console.error("[join] saveGoal:", error.message); redirect("/join/commit?error=save"); }
   }
-  redirect("/join/singlet");
+  redirect("/home");
 }
 
 export async function saveSinglet(formData: FormData) {
-  const me = await requireMember("/join/singlet");
+  const me = await requireMember();
   if (me) {
     const choice = parseSingletInput(formData);
     if (!choice) redirect("/join/singlet?error=choice");

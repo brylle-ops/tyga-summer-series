@@ -26,10 +26,10 @@ describe("checkMembership", () => {
 describe("safeNext", () => {
   it("allows same-site paths only", () => {
     expect(safeNext("/join/commit")).toBe("/join/commit");
-    expect(safeNext("//evil.com")).toBe("/join/commit");
-    expect(safeNext("https://evil.com")).toBe("/join/commit");
-    expect(safeNext("/\\evil.com")).toBe("/join/commit");
-    expect(safeNext(null)).toBe("/join/commit");
+    expect(safeNext("//evil.com")).toBe("/home");
+    expect(safeNext("https://evil.com")).toBe("/home");
+    expect(safeNext("/\\evil.com")).toBe("/home");
+    expect(safeNext(null)).toBe("/home");
   });
 });
 

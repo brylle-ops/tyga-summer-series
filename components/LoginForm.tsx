@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import { requestLoginLink, type LoginState } from "@/app/join/sign-in/actions";
 
-export default function LoginForm() {
+export default function LoginForm({ next = "/home" }: { next?: string }) {
   const [state, action, pending] = useActionState<LoginState, FormData>(requestLoginLink, {});
   return (
     <form action={action} style={{ display: "contents" }}>
+      <input type="hidden" name="next" value={next} />
       <label className="field">
         <span className="eyebrow">Email</span>
         <input name="email" type="email" inputMode="email" autoComplete="email" required
@@ -16,11 +16,10 @@ export default function LoginForm() {
       {state.message && (
         <div id="login-msg" className="notice" role="alert">
           {state.message}
-          {state.notFound && <> Check the spelling, or <Link href="/join/sign-in" className="link">join the Summer Series</Link>.</>}
         </div>
       )}
       <div style={{ flex: 1 }} />
-      <button type="submit" className="btn" disabled={pending}>{pending ? "Checking…" : "Email me a sign-in link"}</button>
+      <button type="submit" className="btn" disabled={pending}>{pending ? "Sending…" : "Email me a sign-in link"}</button>
     </form>
   );
 }

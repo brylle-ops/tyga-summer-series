@@ -7,7 +7,7 @@ export default async function CheckEmail({ searchParams }: { searchParams: Promi
   const { expired, not_member } = await searchParams;
   return (
     <Screen>
-      <TopNav title="Join the Summer Series" back="/join/sign-in" />
+      <TopNav title="Sign in" back="/login" />
       <JoinSteps current={1} />
       {not_member ? (
         <p className="notice" role="alert" style={{ marginTop: 6 }}>We couldn&apos;t find your membership — check with the front desk</p>
@@ -27,7 +27,7 @@ export default async function CheckEmail({ searchParams }: { searchParams: Promi
         </>
       )}
       <div style={{ flex: 1 }} />
-      <Link href="/join/sign-in" className={`btn ${expired ? "" : "ghost"}`}>{expired ? "Send a new link" : "Use a different email"}</Link>
+      <Link href="/login" className={`btn ${expired ? "" : "ghost"}`}>{expired ? "Send a new link" : "Use a different email"}</Link>
     </Screen>
   );
 }

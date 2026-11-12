@@ -11,7 +11,7 @@ const START = new Date("2026-12-07T00:00:00+11:00");
 // You're in — member ticket, countdown, welcome mission
 export default async function Confirmed() {
   const member = await getCurrentMember();
-  if (supabaseReady() && !member) redirect("/join/sign-in");
+  if (supabaseReady() && !member) redirect("/login");
   const reg = member?.registration;
   if (member && reg?.payment_status !== "paid") {
     return (

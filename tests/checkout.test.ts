@@ -11,9 +11,9 @@ describe("checkoutBlocker", () => {
     expect(checkoutBlocker(reg({ colour: null }), before)).toBe("no_singlet");
     expect(checkoutBlocker(reg({ size: null }), before)).toBe("no_size");
   });
-  it("stops paid and closed", () => {
+  it("stops paid, never on a date", () => {
     expect(checkoutBlocker(reg({ payment_status: "paid" }), before)).toBe("paid");
-    expect(checkoutBlocker(reg(), after)).toBe("closed");
+    expect(checkoutBlocker(reg(), after)).toBeNull();
   });
   it("lets unpaid and pending through", () => {
     expect(checkoutBlocker(reg(), before)).toBeNull();

@@ -3,12 +3,6 @@ export type Colour = "cream" | "charcoal";
 export const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"] as const;
 export type Size = (typeof SIZES)[number];
 
-/** Singlet choices (and new sign-ups) close at the end of 30 Nov, Albury time. */
-export const SINGLET_LOCK_AT = new Date("2026-12-01T00:00:00+11:00");
-export function isSingletLocked(now: Date): boolean {
-  return now.getTime() >= SINGLET_LOCK_AT.getTime();
-}
-
 export const GOALS = ["Maintain my fitness", "Stay consistent over Christmas", "Keep my strength", "Start February strong"] as const;
 export function isGoal(v: string): boolean {
   return (GOALS as readonly string[]).includes(v);

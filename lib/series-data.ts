@@ -24,27 +24,23 @@ export function seriesWeekNow() {
   return currentWeek(new Date(), process.env.SERIES_PREVIEW_WEEK);
 }
 
-/** For series screens: the signed-in, paid member (staff always allowed). Null = example mode (no Supabase yet). */
+/** For series screens: any signed-in member (no payment needed). New members add their name and goal first. Null = example mode. */
 export async function requireSeriesMember(): Promise<Profile | null> {
   if (!supabaseReady()) return null;
   const me = await getCurrentMember();
   if (!me) redirect("/login");
-  if (me.profile.role !== "staff" && me.registration?.payment_status !== "paid") {
-    // Started joining but not finished: pick up where they left off.
-    const r = me.registration;
-    redirect(!me.profile.goal ? "/join/commit" : !r?.size ? "/join/singlet" : r.payment_status === "pending" ? "/join/confirmed" : "/join/checkout");
-  }
+  if (me.profile.role !== "staff" && (!me.profile.goal || !me.profile.first_name || !me.profile.last_name)) redirect("/join/commit");
   return me.profile;
 }
 
 type Everyone = { profile: Pick<Profile, "id" | "first_name" | "last_name" | "mobile" | "holiday_until">; checkins: Checkin[]; done: number[] }[];
 
-/** Every paid member's activity (server only; screens only ever show first name + last initial). */
+/** Every member's activity (server only; screens only ever show first name + last initial). */
 export async function loadEveryone(): Promise<{ everyone: Everyone; missions: MissionRow[] }> {
   const db = createAdminClient();
   const [regs, checkins, done, { data: missions }] = await Promise.all([
     fetchAll<{ profile_id: string; profiles: unknown }>((a, b) =>
-      db.from("registrations").select("profile_id, profiles(id, first_name, last_name, mobile, holiday_until, role)").eq("payment_status", "paid").order("profile_id").range(a, b)),
+      db.from("registrations").select("profile_id, profiles(id, first_name, last_name, mobile, holiday_until, role)").order("profile_id").range(a, b)),
     // Only sessions that can count, from the series start — keeps the load small.
     fetchAll<Checkin & { profile_id: string }>((a, b) =>
       db.from("checkins").select("profile_id, day, kind, status").in("kind", ["yard", "run", "workout"])

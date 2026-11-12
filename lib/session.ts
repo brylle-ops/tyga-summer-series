@@ -1,6 +1,5 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { allowNonMembers } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import type { Profile, Registration } from "@/lib/types";
@@ -29,9 +28,8 @@ export async function isStaff(): Promise<boolean> {
   return me?.profile.role === "staff";
 }
 
-/** After a magic-link sign-in: create the profile (members can't insert it themselves) from the member list.
- *  Returns false for someone who isn't on the list — the member check runs here too, because anyone can ask
- *  Supabase's public sign-in API for a link directly, skipping our sign-in screen. */
+/** After a magic-link sign-in: create the profile (members can't insert it themselves). Open to any email;
+ *  if the email is on the old gym member list we pre-fill their name and mobile. */
 export async function ensureProfile(userId: string, email: string): Promise<boolean> {
   const admin = createAdminClient();
   const e = email.trim().toLowerCase();
@@ -41,10 +39,6 @@ export async function ensureProfile(userId: string, email: string): Promise<bool
     return true;
   }
   const { data: member } = await admin.from("active_members").select("*").eq("email", e).maybeSingle();
-  if (!member && !allowNonMembers()) {
-    console.warn("[profile] not on the member list and sign-ups are members-only (ALLOW_NON_MEMBERS)");
-    return false;
-  }
   const { error: profileError } = await admin.from("profiles").insert({
     id: userId, email: e,
     first_name: member?.first_name ?? null, last_name: member?.last_name ?? null, mobile: member?.mobile ?? null,
