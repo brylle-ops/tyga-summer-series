@@ -334,3 +334,6 @@ a.btn,a.chip,a.mini{text-decoration:none}
 .privacy p,.privacy li{color:var(--mute);line-height:1.5}
 .privacy ul{padding-left:18px;display:grid;gap:6px}
 .privacy b{color:var(--text);font-weight:600}
+.move:has(input:checked){border-color:var(--sun);background:rgba(227,203,164,.08)}
+.move:has(input:checked) .radio{background:var(--sun);border-color:var(--sun)}
+.move:has(input:disabled){opacity:.6}

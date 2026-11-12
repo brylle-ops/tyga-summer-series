@@ -83,3 +83,14 @@ export function LockedTeaser({ title, when }: { title: string; when: string }) {
     </div>
   );
 }
+
+/** Segmented control made of links (tabs that actually switch). */
+export function SegLinks({ options, active }: { options: { label: string; href: string }[]; active: string }) {
+  return (
+    <div className="seg">
+      {options.map((o) => (
+        <Link key={o.label} href={o.href} className={o.label === active ? "on" : ""} style={{ textDecoration: "none", color: "inherit", textAlign: "center" }}>{o.label}</Link>
+      ))}
+    </div>
+  );
+}

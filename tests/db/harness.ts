@@ -38,3 +38,9 @@ export async function addUser(db: PGlite, id: string, email: string, role: "memb
   await db.query(`insert into auth.users (id, email) values ($1, $2)`, [id, email]);
   await db.query(`insert into profiles (id, email, role) values ($1, $2, $3)`, [id, email, role]);
 }
+
+export async function bootDbStage2() {
+  const db = await bootDb();
+  await db.exec(readFileSync(path.join(__dirname, "../../supabase/migrations/0002_stage2.sql"), "utf8"));
+  return db;
+}
