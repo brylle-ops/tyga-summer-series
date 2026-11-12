@@ -27,8 +27,12 @@ export function seriesWeekNow() {
 export async function requireSeriesMember(): Promise<Profile | null> {
   if (!supabaseReady()) return null;
   const me = await getCurrentMember();
-  if (!me) redirect("/join/sign-in");
-  if (me.profile.role !== "staff" && me.registration?.payment_status !== "paid") redirect("/join/confirmed");
+  if (!me) redirect("/login");
+  if (me.profile.role !== "staff" && me.registration?.payment_status !== "paid") {
+    // Started joining but not finished: pick up where they left off.
+    const r = me.registration;
+    redirect(!me.profile.goal ? "/join/commit" : !r?.size ? "/join/singlet" : r.payment_status === "pending" ? "/join/confirmed" : "/join/checkout");
+  }
   return me.profile;
 }
 

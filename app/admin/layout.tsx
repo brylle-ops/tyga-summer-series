@@ -5,7 +5,7 @@ import { getCurrentMember, supabaseReady } from "@/lib/session";
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   if (supabaseReady()) {
     const me = await getCurrentMember();
-    if (!me) redirect("/join/sign-in");
+    if (!me) redirect("/login");
     if (me.profile.role !== "staff") redirect("/home");
   }
   return children;

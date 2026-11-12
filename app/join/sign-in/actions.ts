@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { siteUrl } from "@/lib/env";
-import { NON_MEMBER_MESSAGE, checkMembership } from "@/lib/signin";
+import { NON_MEMBER_MESSAGE, checkMembership, safeNext } from "@/lib/signin";
 import { supabaseReady } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -29,11 +29,31 @@ export async function requestSignInLink(_prev: SignInState, formData: FormData):
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: `${siteUrl()}/auth/confirm?next=/join/commit`, shouldCreateUser: true },
+    options: { emailRedirectTo: `${siteUrl()}/auth/confirm?next=${encodeURIComponent(safeNext(String(formData.get("next") ?? ""), "/join/commit"))}`, shouldCreateUser: true },
   });
   if (error) {
     console.error("[sign-in] could not send link:", error.message);
+    // Too many emails (per person or per hour): a link was sent recently — point them to it.
+    if (error.status === 429 || /rate limit|security purposes|only request this after/i.test(error.message)) {
+      redirect("/join/check-email?already=1");
+    }
     return { email: raw, message: "We couldn't send the link just now — please try again in a minute." };
   }
   redirect("/join/check-email");
+}
+
+// "Continue with Google": Supabase sends them to Google and back to /auth/confirm.
+export async function signInWithGoogle(formData: FormData) {
+  if (!supabaseReady()) redirect("/login?error=setup");
+  const next = safeNext(String(formData.get("next") ?? ""), "/home");
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${siteUrl()}/auth/confirm?next=${encodeURIComponent(next)}` },
+  });
+  if (error || !data.url) {
+    console.error("[google] could not start sign-in:", error?.message);
+    redirect("/login?error=google");
+  }
+  redirect(data.url);
 }

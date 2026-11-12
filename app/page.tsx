@@ -15,7 +15,7 @@ export default function Welcome() {
           Stay moving, stay connected, and get rewarded for showing up this summer.
         </p>
         <Link href="/join/sign-in" className="btn">Join the Summer Series · $15</Link>
-        <Link href="/home" className="btn ghost" style={{ height: 46, fontSize: 14 }}>I&apos;ve already joined</Link>
+        <Link href="/login" className="btn ghost" style={{ height: 46, fontSize: 14 }}>I&apos;ve already joined</Link>
       </div>
     </Screen>
   );
