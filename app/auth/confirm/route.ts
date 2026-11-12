@@ -11,8 +11,18 @@ export async function GET(request: NextRequest) {
   const type = (searchParams.get("type") ?? "email") as EmailOtpType;
   const next = safeNext(searchParams.get("next"));
 
+  // Email safety scanners open links before the member does, which would use up the one-time token.
+  // So a token link only shows a "Continue" page; the token is used when the member taps the button.
+  if (tokenHash) {
+    const to = new URL("/auth/continue", request.url);
+    to.searchParams.set("token_hash", tokenHash);
+    to.searchParams.set("type", type);
+    to.searchParams.set("next", next);
+    return NextResponse.redirect(to);
+  }
+
   const code = searchParams.get("code");
-  if (tokenHash || code) {
+  if (code) {
     const supabase = await createClient();
     // Custom email template sends token_hash; Supabase's default template sends a one-time code.
     const { data, error } = tokenHash
