@@ -7,6 +7,8 @@ import { SIZES } from "@/lib/singlet";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { followUps as exampleFollowUps } from "@/lib/mock-data";
 import { loadEveryone, seriesWeekNow } from "@/lib/series-data";
+import { fetchAll } from "@/lib/paging";
+import type { Registration } from "@/lib/types";
 import { alburyDay, followUpFlags, sessionDaysByWeek, shortName } from "@/lib/series";
 
 const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "short", timeZone: "Australia/Sydney" }) : "—";
@@ -19,12 +21,13 @@ export async function loadAdminData() {
   }
   if (!(await isStaff())) redirect("/login");
   const db = createAdminClient();
-  const [{ data: regs }, { count: members }, { count: duplicates }] = await Promise.all([
-    db.from("registrations").select("*, profiles(first_name, last_name, email, mobile)").order("updated_at", { ascending: false }),
+  const [regs, { count: members }, { count: duplicates }] = await Promise.all([
+    fetchAll<Registration & { profiles: unknown }>((a, b) =>
+      db.from("registrations").select("*, profiles(first_name, last_name, email, mobile)").order("updated_at", { ascending: false }).range(a, b)),
     db.from("active_members").select("*", { count: "exact", head: true }),
     db.from("square_payments").select("*", { count: "exact", head: true }).eq("duplicate", true),
   ]);
-  const list = regs ?? [];
+  const list = regs;
   const sum = paymentSummary(list);
   const STATUS: Record<string, string> = { paid: "Paid", pending: "Started, not paid", unpaid: "Started, not paid", refunded: "Refunded" };
   const payments = list.filter((r) => r.payment_status !== "unpaid" || r.size).map((r) => {
@@ -33,7 +36,7 @@ export async function loadAdminData() {
       name: [p?.first_name, p?.last_name].filter(Boolean).join(" ") || p?.email || "—",
       mobile: p?.mobile ?? "",
       status: STATUS[r.payment_status],
-      when: fmtDate(r.paid_at ?? r.updated_at),
+      when: fmtDate(r.paid_at ?? r.updated_at ?? null),
       amount: r.payment_status === "paid" ? `$${((r.amount_cents ?? 0) / 100).toFixed(2)}` : "—",
     };
   });
@@ -57,7 +60,7 @@ export async function loadSeriesAdmin() {
   const followUps = everyone.map((e) => {
     const flags = followUpFlags(e.checkins, today, e.profile.holiday_until ?? null, week);
     const last = e.checkins.filter((c) => c.status !== "rejected" && ["yard", "run", "workout"].includes(c.kind)).map((c) => c.day).sort().at(-1);
-    return { name: shortName(e.profile.first_name, e.profile.last_name).name, last: last ?? "—",
+    return { name: shortName(e.profile.first_name, e.profile.last_name).name, mobile: e.profile.mobile ?? "", last: last ?? "—",
       week: `${Math.min(3, sessionDaysByWeek(e.checkins).get(week)?.length ?? 0)}/3`, flags, away: Boolean(e.profile.holiday_until && e.profile.holiday_until >= today) };
   }).filter((f) => f.flags.length).sort((a, b) => b.flags.length - a.flags.length);
   const { data: pendingRows } = await db.from("checkins").select("id, day, profiles(first_name, last_name)").eq("status", "pending").order("day");

@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { allowNonMembers } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import type { Profile, Registration } from "@/lib/types";
@@ -40,7 +41,10 @@ export async function ensureProfile(userId: string, email: string): Promise<bool
     return true;
   }
   const { data: member } = await admin.from("active_members").select("*").eq("email", e).maybeSingle();
-  if (!member && process.env.ALLOW_NON_MEMBERS !== "true") return false;
+  if (!member && !allowNonMembers()) {
+    console.warn("[profile] not on the member list and sign-ups are members-only (ALLOW_NON_MEMBERS)");
+    return false;
+  }
   const { error: profileError } = await admin.from("profiles").insert({
     id: userId, email: e,
     first_name: member?.first_name ?? null, last_name: member?.last_name ?? null, mobile: member?.mobile ?? null,

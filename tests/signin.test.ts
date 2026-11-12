@@ -32,3 +32,16 @@ describe("safeNext", () => {
     expect(safeNext(null)).toBe("/join/commit");
   });
 });
+
+import { afterEach } from "vitest";
+import { allowNonMembers } from "@/lib/env";
+describe("allowNonMembers", () => {
+  afterEach(() => { delete process.env.ALLOW_NON_MEMBERS; });
+  it("accepts true in any reasonable spelling", () => {
+    for (const v of ["true", "TRUE", " true ", '"true"', "1", "yes"]) { process.env.ALLOW_NON_MEMBERS = v; expect(allowNonMembers()).toBe(true); }
+  });
+  it("is off by default and for false", () => {
+    expect(allowNonMembers()).toBe(false);
+    process.env.ALLOW_NON_MEMBERS = "false"; expect(allowNonMembers()).toBe(false);
+  });
+});

@@ -7,6 +7,6 @@ export type Registration = {
   profile_id: string; fit: "women" | "men" | null; colour: "cream" | "charcoal" | null;
   size: "XS" | "S" | "M" | "L" | "XL" | "2XL" | "3XL" | null; terms_accepted_at: string | null;
   payment_status: "unpaid" | "pending" | "paid" | "refunded"; square_order_id: string | null;
-  square_payment_id: string | null; paid_at: string | null; amount_cents: number | null;
+  square_payment_id: string | null; paid_at: string | null; amount_cents: number | null; updated_at?: string;
 };
 

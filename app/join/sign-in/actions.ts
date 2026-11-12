@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { siteUrl } from "@/lib/env";
+import { allowNonMembers, siteUrl } from "@/lib/env";
 import { normaliseEmail } from "@/lib/members";
 import { NON_MEMBER_MESSAGE, checkMembership, safeNext } from "@/lib/signin";
 import { supabaseReady } from "@/lib/session";
@@ -19,7 +19,7 @@ export async function requestSignInLink(_prev: SignInState, formData: FormData):
   const result = await checkMembership(
     raw,
     async (email) => (await admin.from("active_members").select("*").eq("email", email).maybeSingle()).data,
-    { allowNonMembers: process.env.ALLOW_NON_MEMBERS === "true" },
+    { allowNonMembers: allowNonMembers() },
   );
   if (result.status === "invalid") return { email: raw, message: "Please enter a valid email." };
 

@@ -7,6 +7,7 @@ import {
   type Checkin, type CheckinKind, type Mission,
 } from "@/lib/series";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { fetchAll, groupBy } from "@/lib/paging";
 
 const KIND_LABEL: Record<CheckinKind, string> = { yard: "Yard", run: "Run", workout: "Workout", recovery: "Recovery", rest: "Rest" };
 export type MissionRow = Mission & { title: string; detail: string; is_secret: boolean; reveal_at: string | null };
@@ -36,24 +37,27 @@ export async function requireSeriesMember(): Promise<Profile | null> {
   return me.profile;
 }
 
-type Everyone = { profile: Pick<Profile, "id" | "first_name" | "last_name" | "holiday_until">; checkins: Checkin[]; done: number[] }[];
+type Everyone = { profile: Pick<Profile, "id" | "first_name" | "last_name" | "mobile" | "holiday_until">; checkins: Checkin[]; done: number[] }[];
 
 /** Every paid member's activity (server only; screens only ever show first name + last initial). */
 export async function loadEveryone(): Promise<{ everyone: Everyone; missions: MissionRow[] }> {
   const db = createAdminClient();
-  const [{ data: regs }, { data: checkins }, { data: done }, { data: missions }] = await Promise.all([
-    db.from("registrations").select("profile_id, profiles(id, first_name, last_name, holiday_until, role)").eq("payment_status", "paid"),
-    db.from("checkins").select("profile_id, day, kind, status"),
-    db.from("mission_completions").select("profile_id, mission_id"),
+  const [regs, checkins, done, { data: missions }] = await Promise.all([
+    fetchAll<{ profile_id: string; profiles: unknown }>((a, b) =>
+      db.from("registrations").select("profile_id, profiles(id, first_name, last_name, mobile, holiday_until, role)").eq("payment_status", "paid").order("profile_id").range(a, b)),
+    // Only sessions that can count, from the series start — keeps the load small.
+    fetchAll<Checkin & { profile_id: string }>((a, b) =>
+      db.from("checkins").select("profile_id, day, kind, status").in("kind", ["yard", "run", "workout"])
+        .gte("day", "2026-12-07").order("id").range(a, b)),
+    fetchAll<{ profile_id: string; mission_id: number }>((a, b) =>
+      db.from("mission_completions").select("profile_id, mission_id").order("created_at").range(a, b)),
     db.from("missions").select("*").order("week").order("id"),
   ]);
-  const everyone: Everyone = (regs ?? []).map((r) => {
+  const checkinsBy = groupBy(checkins, (c) => c.profile_id);
+  const doneBy = groupBy(done, (d) => d.profile_id);
+  const everyone: Everyone = regs.map((r) => {
     const p = r.profiles as unknown as Profile;
-    return {
-      profile: p,
-      checkins: (checkins ?? []).filter((c) => c.profile_id === p.id) as Checkin[],
-      done: (done ?? []).filter((d) => d.profile_id === p.id).map((d) => Number(d.mission_id)),
-    };
+    return { profile: p, checkins: checkinsBy.get(p.id) ?? [], done: (doneBy.get(p.id) ?? []).map((d) => Number(d.mission_id)) };
   });
   return { everyone, missions: (missions ?? []) as MissionRow[] };
 }

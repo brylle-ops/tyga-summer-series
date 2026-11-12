@@ -43,7 +43,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <tr key={f.name}>
                     <td>{f.name}</td><td>{f.last}</td><td>{f.week}</td>
                     <td>{f.flags.map((fl) => <span key={fl} className={`flag ${f.away ? "away" : ""}`}>{fl}</span>)}</td>
-                    <td></td>
+                    <td>{"mobile" in f && f.mobile ? <a className="mini ghost" href={`sms:${String(f.mobile).replace(/[^\d+]/g, "")}`}>Text</a> : null}</td>
                   </tr>
                 ))}
               </tbody>
