@@ -1,4 +1,5 @@
 import "server-only";
+import { redirect } from "next/navigation";
 import { buildSingletGrid, paymentSummary } from "@/lib/admin-report";
 import { adminKpis, payments as examplePayments, singletOrder as exampleOrder, singletSizes } from "@/lib/mock-data";
 import { isStaff, supabaseReady } from "@/lib/session";
@@ -16,7 +17,7 @@ export async function loadAdminData() {
     return { real: false, registeredPaid: adminKpis.registeredPaid, pctOfActive: adminKpis.pctOfActive, payments: examplePayments,
       sizes: singletSizes, order: exampleOrder.map((r) => ({ ...r, total: r.counts.reduce((a, b) => a + b, 0) })), duplicates: 0, members: 0 };
   }
-  if (!(await isStaff())) throw new Error("Staff only");
+  if (!(await isStaff())) redirect("/login");
   const db = createAdminClient();
   const [{ data: regs }, { count: members }, { count: duplicates }] = await Promise.all([
     db.from("registrations").select("*, profiles(first_name, last_name, email, mobile)").order("updated_at", { ascending: false }),
@@ -48,7 +49,7 @@ export async function loadSeriesAdmin() {
   if (!supabaseReady()) {
     return { real: false, week: 3, hit3Last: 97, pctHit: 66, pending: [] as { id: number; name: string; day: string }[], followUps: exampleFollowUps, lastSync: "Today 6:42am" };
   }
-  if (!(await isStaff())) throw new Error("Staff only");
+  if (!(await isStaff())) redirect("/login");
   const db = createAdminClient();
   const { everyone } = await loadEveryone();
   const today = alburyDay(new Date());
