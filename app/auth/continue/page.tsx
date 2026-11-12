@@ -1,4 +1,5 @@
 import { Screen, Wordmark } from "@/components/ui";
+import SubmitOnce from "@/components/SubmitOnce";
 import { confirmLink } from "./actions";
 
 export const metadata = { robots: { index: false } };
@@ -18,7 +19,7 @@ export default async function Continue({ searchParams }: { searchParams: Promise
         <input type="hidden" name="token_hash" value={q.token_hash ?? ""} />
         <input type="hidden" name="type" value={q.type ?? "email"} />
         <input type="hidden" name="next" value={q.next ?? ""} />
-        <button type="submit" className="btn">Continue</button>
+        <SubmitOnce pendingText="Signing you in…">Continue</SubmitOnce>
       </form>
     </Screen>
   );

@@ -41,11 +41,16 @@ export async function ensureProfile(userId: string, email: string): Promise<bool
   }
   const { data: member } = await admin.from("active_members").select("*").eq("email", e).maybeSingle();
   if (!member && process.env.ALLOW_NON_MEMBERS !== "true") return false;
-  await admin.from("profiles").insert({
+  const { error: profileError } = await admin.from("profiles").insert({
     id: userId, email: e,
     first_name: member?.first_name ?? null, last_name: member?.last_name ?? null, mobile: member?.mobile ?? null,
     last_seen_at: new Date().toISOString(),
   });
-  await admin.from("registrations").insert({ profile_id: userId });
+  if (profileError && profileError.code !== "23505") {
+    console.error("[profile] could not create profile:", profileError.message);
+    return false;
+  }
+  const { error: regError } = await admin.from("registrations").insert({ profile_id: userId });
+  if (regError && regError.code !== "23505") console.error("[profile] could not create registration:", regError.message);
   return true;
 }
