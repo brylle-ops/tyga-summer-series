@@ -11,9 +11,13 @@ export async function GET(request: NextRequest) {
   const type = (searchParams.get("type") ?? "email") as EmailOtpType;
   const next = safeNext(searchParams.get("next"));
 
-  if (tokenHash) {
+  const code = searchParams.get("code");
+  if (tokenHash || code) {
     const supabase = await createClient();
-    const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    // Custom email template sends token_hash; Supabase's default template sends a one-time code.
+    const { data, error } = tokenHash
+      ? await supabase.auth.verifyOtp({ type, token_hash: tokenHash })
+      : await supabase.auth.exchangeCodeForSession(code!);
     if (!error && data.user?.email) {
       if (await ensureProfile(data.user.id, data.user.email)) return NextResponse.redirect(new URL(next, request.url));
       await supabase.auth.signOut(); // not on the member list
