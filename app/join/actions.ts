@@ -3,19 +3,20 @@
 import { redirect } from "next/navigation";
 import { getCurrentMember, supabaseReady } from "@/lib/session";
 import { isGoal, parseSingletInput } from "@/lib/singlet";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 // Each save runs as the member (RLS-checked), so nobody can change someone else's choices.
 
-async function requireMember() {
+async function requireMember(next: string) {
   if (!supabaseReady()) return null; // example mode before Supabase is set up: just move on
   const me = await getCurrentMember();
-  if (!me) redirect("/login");
+  if (!me) redirect(`/login?next=${next}`);
   return me;
 }
 
 export async function saveGoal(formData: FormData) {
-  const me = await requireMember();
+  const me = await requireMember("/join/commit");
   if (me) {
     const goal = String(formData.get("goal") ?? "");
     if (!isGoal(goal)) redirect("/join/commit?error=goal");
@@ -31,15 +32,16 @@ export async function saveGoal(formData: FormData) {
 }
 
 export async function saveSinglet(formData: FormData) {
-  const me = await requireMember();
+  const me = await requireMember("/join/singlet");
   if (me) {
+    if (me.registration?.payment_status === "pending") redirect("/join/checkout"); // order already started
     const choice = parseSingletInput(formData);
     if (!choice) redirect("/join/singlet?error=choice");
-    const supabase = await createClient();
-    const { error } = await supabase.from("registrations")
-      .update({ ...choice, updated_at: new Date().toISOString() }).eq("profile_id", me.profile.id);
+    // Upsert so a missing registration row can never make the save silently do nothing.
+    const { error } = await createAdminClient().from("registrations")
+      .upsert({ profile_id: me.profile.id, ...choice, updated_at: new Date().toISOString() }, { onConflict: "profile_id" });
     if (error) { console.error("[join] saveSinglet:", error.message); redirect("/join/singlet?error=save"); }
-    // Paid members can still change their singlet until 30 Nov; the admin order uses the latest choice.
+    // Paid members can still change their singlet; the admin order uses the latest choice.
     if (me.registration?.payment_status === "paid") redirect("/join/confirmed");
   }
   redirect("/join/checkout");

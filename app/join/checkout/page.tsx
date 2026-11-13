@@ -6,7 +6,7 @@ import { singletLabel } from "@/lib/singlet";
 import { startCheckout } from "./actions";
 
 const ERRORS: Record<string, string> = {
-  setup: "Payments aren't set up yet — add the Square keys to .env.local (see README).",
+  setup: "Payments aren't available right now. Please try again later.",
   square: "We couldn't reach Square just now. Please try again in a moment.",
   terms: "Please accept the Summer Series terms.",
 };
@@ -46,7 +46,6 @@ export default async function Checkout({ searchParams }: { searchParams: Promise
           <li>Collect your singlet at The Yard from launch week.</li>
           <li>Prize draws have their own eligibility rules.</li>
         </ul>
-        <div className="xs link" style={{ marginTop: 8 }}>Read the full terms ›</div>
       </div>
       <form action={startCheckout} style={{ display: "contents" }}>
         <label className="check">

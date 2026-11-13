@@ -355,3 +355,11 @@ a.btn,a.chip,a.mini{text-decoration:none}
 .skel{border-radius:var(--r);background:linear-gradient(90deg,var(--char-2) 25%,var(--char-3) 50%,var(--char-2) 75%);background-size:200% 100%;animation:skel 1.2s ease-in-out infinite}
 @keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){.skel{animation:none}}
+
+/* Accessibility: visible focus everywhere, comfortable tap targets, readable small text */
+a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.chip:focus-within{outline:2px solid var(--sun-2);outline-offset:2px}
+.back,.mini,.chip,.tabs a{min-height:44px}
+.back{display:inline-flex;align-items:center;min-width:44px}
+.mini,.chip{display:inline-flex;align-items:center}
+.xs{font-size:12px}
+.tabs a{font-size:11px}

@@ -55,7 +55,7 @@ export default function SingletPicker({ initial, paid = false }: {
           <button key={s} type="button" aria-pressed={size === s} onClick={() => setSize(s)}>{s}</button>
         ))}
       </div>
-      <p className="xs mute">Limited edition: only for registered members. Change it until 30 Nov.</p>
+      <p className="xs mute">Limited edition. $15, collected at The Yard from launch week.</p>
       <div style={{ flex: 1 }} />
       <button type="submit" className="btn" disabled={!size}>{label}</button>
     </form>

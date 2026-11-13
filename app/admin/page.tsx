@@ -23,13 +23,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           </div>
           <div className="li" style={{ gap: 8, flexWrap: "wrap" }}>
             <Pill>{s.week >= 1 ? `Week ${s.week} · ${seriesWeeks[s.week - 1].theme}` : "Starts Mon 7 Dec"}</Pill>
-            <span className="xs mute">Member list synced: {s.lastSync}</span>
             {d.real ? <MemberUpload /> : <span className="xs mute">Example data until Supabase is set up</span>}
           </div>
         </div>
 
         <div className="desk-grid">
-          <div className="card kpi"><small>Registered &amp; paid</small><b>{d.registeredPaid}</b><small>{d.pctOfActive}% of {d.real ? `${d.members} ` : ""}active members{d.duplicates ? ` · ${d.duplicates} paid twice — refund in Square` : ""}</small></div>
+          <div className="card kpi"><small>Signed up</small><b>{d.real ? d.signedUp : d.registeredPaid}</b><small>{d.registeredPaid} singlets paid{d.duplicates ? ` · ${d.duplicates} paid twice — refund in Square` : ""}</small></div>
           <div className="card kpi"><small>Hit 3/3 last week</small><b>{s.hit3Last}</b><small>{s.pctHit}% of participants</small></div>
           <div className="card kpi"><small>Check-ins to approve</small><b style={{ color: "var(--sun-2)" }}>{s.real ? s.pending.length : k.toApprove}</b><small>Yard sessions vs roster</small></div>
           <div className="cream-card kpi"><small style={{ color: "var(--ink-mute)" }}>Need a follow-up</small><b>{s.real ? followUps.length : k.followUps}</b><small style={{ color: "var(--ink-mute)" }}>see list below</small></div>
@@ -52,7 +51,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
 
           <div className="card span2">
             <div className="li" style={{ marginBottom: 6 }}>
-              <b className="grow">Singlet order</b><Pill>Cutoff 30 Nov</Pill>
+              <b className="grow">Singlet order</b>
               <a className="mini" href="/admin/singlets.csv" style={{ marginLeft: 8 }}>Supplier CSV</a>
             </div>
             <div className="tablewrap"><table>
@@ -67,14 +66,14 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                 ))}
               </tbody>
             </table></div>
-            <p className="xs mute" style={{ marginTop: 8 }}>Paid registrations only.</p>
+            <p className="xs mute" style={{ marginTop: 8 }}>Paid singlet orders only.</p>
           </div>
 
           <div className="card span4">
             <div className="li" style={{ marginBottom: 6, gap: 10, flexWrap: "wrap" }}>
-              <b className="grow">Payments · Square</b>
-              <span className="sm">Collected <b>{k.collected}</b></span>
-              <span className="flag">{k.startedUnpaid} started, not paid</span>
+              <b className="grow">Singlet orders · Square</b>
+              <span className="sm">Collected <b>{d.real ? d.collected : k.collected}</b></span>
+              <span className="flag">{d.real ? d.startedUnpaid : k.startedUnpaid} started, not paid</span>
             </div>
             <div className="tablewrap"><table>
               <thead><tr><th>Member</th><th>Status</th><th>Date</th><th className="n">Amount</th></tr></thead>

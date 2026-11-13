@@ -34,7 +34,7 @@ function CodeStep({ email, note, next, onBack }: { email: string; note?: string;
       <p className="sm mute">We emailed a code to <b>{email}</b>. It works once and expires in an hour.</p>
       <label className="field">
         <span className="eyebrow">Code</span>
-        <input name="code" inputMode="numeric" autoComplete="one-time-code" required maxLength={12}
+        <input name="code" inputMode="numeric" pattern="[0-9 ]*" autoFocus autoComplete="one-time-code" required maxLength={12}
           placeholder="Code from your email" aria-describedby="login-msg" />
       </label>
       {message && <div id="login-msg" className="notice" role="alert">{message}</div>}

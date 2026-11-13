@@ -30,12 +30,14 @@ export async function completeMission(formData: FormData) {
   const me = await requireSeriesMember();
   if (!me) redirect("/missions");
   const id = Number(formData.get("mission"));
+  if (!Number.isInteger(id)) redirect("/missions?error=closed");
   const db = createAdminClient();
   const { data: m } = await db.from("missions").select("week, is_secret, reveal_at").eq("id", id).maybeSingle();
   const revealed = !m?.is_secret || (m.reveal_at && Date.parse(m.reveal_at) <= Date.now());
   // Only this week's missions can be ticked off — no catching up on old weeks, no peeking ahead.
   if (!m || m.week !== seriesWeekNow() || !revealed) redirect("/missions?error=closed");
-  await db.from("mission_completions").upsert({ profile_id: me.id, mission_id: id }, { ignoreDuplicates: true });
+  const { error } = await db.from("mission_completions").upsert({ profile_id: me.id, mission_id: id }, { ignoreDuplicates: true });
+  if (error) { console.error("[mission]", error.message); redirect("/missions?error=closed"); }
   revalidatePath("/missions"); revalidatePath("/home");
   redirect("/missions");
 }
@@ -47,7 +49,8 @@ export async function setHoliday(formData: FormData) {
   const today = alburyDay(new Date());
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(until) && until >= today && until <= "2027-01-31";
   if (until && !valid) redirect("/holiday?error=date");
-  await createAdminClient().from("profiles").update({ holiday_until: until || null }).eq("id", me.id);
+  const { error } = await createAdminClient().from("profiles").update({ holiday_until: until || null }).eq("id", me.id);
+  if (error) { console.error("[holiday]", error.message); redirect("/holiday?error=date"); }
   revalidatePath("/holiday");
   redirect("/holiday");
 }
@@ -57,7 +60,9 @@ export async function setHoliday(formData: FormData) {
 export async function reviewCheckin(formData: FormData) {
   if (!(await isStaff())) redirect("/home");
   const status = formData.get("decision") === "approve" ? "confirmed" : "rejected";
-  await createAdminClient().from("checkins").update({ status }).eq("id", Number(formData.get("id"))).eq("status", "pending");
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) return;
+  await createAdminClient().from("checkins").update({ status }).eq("id", id).eq("status", "pending");
   revalidatePath("/admin");
 }
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { Pill, Screen } from "@/components/ui";
+import { LEVELS } from "@/lib/series";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
 
 const QUICK: { href: string; label: string; icon: IconName }[] = [
@@ -23,7 +24,6 @@ export default async function Home() {
           <div className="sm mute">Hey, {me.firstName}</div>
           <div className="h2">{v.week >= 1 ? <>Week {thisWeek.no} · <span className="script" style={{ fontSize: 22 }}>{thisWeek.theme}</span></> : "Series starts Mon 7 Dec"}</div>
         </div>
-        <span className="ico" style={{ borderRadius: "50%" }} aria-label="Notifications"><Icon name="bell" /></span>
       </div>
 
       <div className="cream-card">
@@ -33,7 +33,7 @@ export default async function Home() {
           </div>
           <div className="grow">
             <b style={{ fontSize: 15 }}>{v.week < 1 ? "Get ready for week 1" : left <= 0 ? `Week ${thisWeek.no} locked in!` : `${left} more to lock in week ${thisWeek.no}`}</b>
-            <div className="sm mute" style={{ marginTop: 3 }}>Hit 3 by Sunday for <b style={{ color: "#6e5330" }}>+20 bonus</b></div>
+            {v.week >= 1 && left > 0 && <div className="sm mute" style={{ marginTop: 3 }}>Hit 3 by Sunday for <b style={{ color: "#6e5330" }}>+20 bonus</b></div>}
             <div className="pips">
               {[0, 1, 2].map((i) => (
                 <i key={i} className={thisWeek.pips[i] ? "on" : ""}>{thisWeek.pips[i] ?? "+"}</i>
@@ -51,8 +51,8 @@ export default async function Home() {
 
       <Link href="/levels" className="card" style={{ textDecoration: "none", display: "block" }}>
         <div className="li">
-          <div className="grow"><div className="xs mute">LEVEL {me.level}</div><b>Stay Consistent</b></div>
-          <span className="sm mute">{me.pointsToNext} pts to L{me.level + 1}</span>
+          <div className="grow"><div className="xs mute">LEVEL {me.level}</div><b>{LEVELS[me.level - 1].name}</b></div>
+          <span className="sm mute">{me.level >= LEVELS.length ? "Top level" : `${me.pointsToNext} pts to L${me.level + 1}`}</span>
         </div>
         <div className="bar" style={{ marginTop: 10 }}><i style={{ width: `${me.levelProgressPct}%` }} /></div>
       </Link>

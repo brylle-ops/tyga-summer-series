@@ -23,15 +23,15 @@ export default function Privacy() {
         <ul>
           <li><b>Your details:</b> email, first and last name, and (for Yard members) the mobile number on your membership.</li>
           <li><b>Your Summer Series choices:</b> your goal, singlet fit, colour and size, and when you accepted the terms.</li>
-          <li><b>Your payment record:</b> whether you&apos;ve paid the $15, the amount, the date and Square&apos;s payment reference. <b>We never see or store your card details</b> — payment is handled entirely by Square.</li>
-          <li><b>Sign-in records:</b> when you sign in, and sign-in attempts (email and whether it matched a membership), to keep accounts secure.</li>
-          <li><b>Membership check:</b> if you&apos;re a Yard member, we check your email against the gym&apos;s member list (from our booking system) to confirm your membership and fill in your name.</li>
+          <li><b>Your payment record:</b> whether you&apos;ve paid for a singlet, the amount, the date and Square&apos;s payment reference. <b>We never see or store your card details</b> — payment is handled entirely by Square.</li>
+          <li><b>Sign-in records:</b> when you sign in, and sign-in attempts, to keep accounts secure.</li>
+          <li><b>Member list:</b> if your email is on the gym&apos;s member list (from our booking system), we use it only to fill in your name and mobile number. Anyone can use the app.</li>
           <li><b>During the series:</b> the sessions and workouts you log, points, missions, perks and Holiday Mode dates you set.</li>
         </ul>
 
         <h2>Why we use it</h2>
         <ul>
-          <li>To sign you in, register you and take your $15 payment.</li>
+          <li>To sign you in and, if you order one, take payment for your singlet.</li>
           <li>To order and hand out your singlet.</li>
           <li>To run the series: points, levels, missions, perks, prize draws and the leaderboard.</li>
           <li>For staff to check in with members who might need a hand staying on track.</li>
@@ -58,7 +58,7 @@ export default function Privacy() {
         </ul>
 
         <h2>Keeping it safe</h2>
-        <p>Sign-in uses one-time email links (no passwords to steal), your connection is encrypted, and database rules stop anyone seeing another member&apos;s details.</p>
+        <p>Sign-in uses one-time email codes (no passwords to steal), your connection is encrypted, and database rules stop anyone seeing another member&apos;s details.</p>
       </div>
     </Screen>
   );

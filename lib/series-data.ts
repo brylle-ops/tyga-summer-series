@@ -62,7 +62,10 @@ async function fetchEveryone(): Promise<EveryoneData> {
   ]);
   const checkinsBy = groupBy(checkins, (c) => c.profile_id);
   const doneBy = groupBy(done, (d) => d.profile_id);
-  const everyone: Everyone = regs.map((r) => {
+  const everyone: Everyone = regs.filter((r) => {
+    const p = r.profiles as unknown as (Profile | null);
+    return p && p.role !== "staff" && Boolean(p.first_name); // only named, non-staff members are ranked
+  }).map((r) => {
     const p = r.profiles as unknown as Profile;
     return { profile: p, checkins: checkinsBy.get(p.id) ?? [], done: (doneBy.get(p.id) ?? []).map((d) => Number(d.mission_id)) };
   });
@@ -84,7 +87,7 @@ export async function loadMemberView(profile: Profile | null) {
   // Your own sessions and missions are read fresh, so logging something shows up straight away.
   const db = createAdminClient();
   const [{ data: ownCheckins }, { data: ownDone }] = await Promise.all([
-    db.from("checkins").select("day, kind, status").eq("profile_id", profile.id).in("kind", ["yard", "run", "workout"]).gte("day", "2026-12-07"),
+    db.from("checkins").select("day, kind, status").eq("profile_id", profile.id).gte("day", "2026-12-07"),
     db.from("mission_completions").select("mission_id").eq("profile_id", profile.id),
   ]);
   const mine: Everyone[number] = { profile, checkins: (ownCheckins ?? []) as Checkin[], done: (ownDone ?? []).map((d) => Number(d.mission_id)) };

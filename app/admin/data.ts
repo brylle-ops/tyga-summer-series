@@ -16,16 +16,17 @@ const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString("en-AU"
 /** Real stage 1 numbers once Supabase is set up; the example data before that. (Page is staff-only via layout.) */
 export async function loadAdminData() {
   if (!supabaseReady()) {
-    return { real: false, registeredPaid: adminKpis.registeredPaid, pctOfActive: adminKpis.pctOfActive, payments: examplePayments,
+    return { real: false, signedUp: 0, collected: "", startedUnpaid: 0, registeredPaid: adminKpis.registeredPaid, pctOfActive: adminKpis.pctOfActive, payments: examplePayments,
       sizes: singletSizes, order: exampleOrder.map((r) => ({ ...r, total: r.counts.reduce((a, b) => a + b, 0) })), duplicates: 0, members: 0 };
   }
   if (!(await isStaff())) redirect("/login");
   const db = createAdminClient();
-  const [regs, { count: members }, { count: duplicates }] = await Promise.all([
+  const [regs, { count: members }, { count: duplicates }, { count: signedUp }] = await Promise.all([
     fetchAll<Registration & { profiles: unknown }>((a, b) =>
       db.from("registrations").select("*, profiles(first_name, last_name, email, mobile)").order("updated_at", { ascending: false }).range(a, b)),
     db.from("active_members").select("*", { count: "exact", head: true }),
     db.from("square_payments").select("*", { count: "exact", head: true }).eq("duplicate", true),
+    db.from("profiles").select("*", { count: "exact", head: true }),
   ]);
   const list = regs;
   const sum = paymentSummary(list);
@@ -41,7 +42,7 @@ export async function loadAdminData() {
     };
   });
   return {
-    real: true, registeredPaid: sum.paid, pctOfActive: members ? Math.round((sum.paid / members) * 100) : 0,
+    real: true, signedUp: signedUp ?? 0, collected: `$${(sum.collectedCents / 100).toFixed(2)}`, startedUnpaid: sum.pendingOrUnpaid, registeredPaid: sum.paid, pctOfActive: members ? Math.round((sum.paid / members) * 100) : 0,
     payments, sizes: [...SIZES], order: buildSingletGrid(list), duplicates: duplicates ?? 0, members: members ?? 0,
   };
 }

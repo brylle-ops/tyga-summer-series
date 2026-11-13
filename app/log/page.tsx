@@ -8,7 +8,7 @@ import { logCheckin } from "../series/actions";
 const KINDS = ["yard", "run", "workout", "recovery", "rest"] as const;
 const DONE: Record<string, string> = {
   yard: "Yard session logged — it counts once the class roster confirms it (usually next morning).",
-  run: "Run logged. +5", workout: "Workout logged. +5", recovery: "Recovery logged. Nice.", rest: "Rest day logged. Rest is part of the standard.",
+  run: "Run logged. One counted session a day earns +5.", workout: "Workout logged. One counted session a day earns +5.", recovery: "Recovery logged. Nice.", rest: "Rest day logged. Rest is part of the standard.",
 };
 const ERRORS: Record<string, string> = {
   early: "Logging opens when the series starts on Mon 7 Dec.", save: "Couldn't save that — try again.", kind: "Pick what you did.",
@@ -44,7 +44,7 @@ export default async function Log({ searchParams }: { searchParams: Promise<{ do
           <b className="sm grow">Need workout ideas?</b>
           <Link href="/holiday" className="chip" style={{ padding: "6px 10px" }}>Holiday workouts</Link>
         </div>
-        <button className="btn" type="submit">Log it</button>
+        {KINDS.every((k) => v.todays.includes(k)) ? <p className="notice" role="status">All logged for today. See you tomorrow.</p> : <button className="btn" type="submit">Log it</button>}
       </form>
     </Screen>
   );

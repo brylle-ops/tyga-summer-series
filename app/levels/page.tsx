@@ -1,5 +1,5 @@
 import { Screen, TopNav } from "@/components/ui";
-import { levels } from "@/lib/mock-data";
+import { LEVELS } from "@/lib/series";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
 
 // Points along the sunrise arc for levels 1–5
@@ -35,14 +35,15 @@ export default async function Levels() {
         </svg>
       </div>
       <div className="card" style={{ padding: "4px 14px" }}>
-        {levels.map((l) => (
+        {LEVELS.map((l) => (
           <div key={l.no} className={`lvl ${l.no < me.level ? "done" : l.no === me.level ? "cur" : ""}`}>
             <span className="badge">{l.no}</span>
-            <div className="grow"><b className="sm">{l.name}</b><div className="xs mute">{l.note}</div></div>
-            <span className="xs mute">{l.at}</span>
+            <div className="grow"><b className="sm">{l.name}</b><div className="xs mute">{l.note.includes(": ") ? `${l.no <= me.level ? "Unlocked" : "Unlocks"}: ${l.note.split(": ")[1]}` : l.note}</div></div>
+            <span className="xs mute">{l.at} pts</span>
           </div>
         ))}
       </div>
+      <p className="sm mute" style={{ textAlign: "center" }}>{me.level >= LEVELS.length ? "You've reached the top level. Legend." : `${me.pointsToNext} points to ${LEVELS[me.level].name}.`}</p>
     </Screen>
   );
 }

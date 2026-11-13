@@ -14,7 +14,7 @@ const ERRORS: Record<string, string> = {
 export default async function Commit({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   const me = await getCurrentMember();
-  if (supabaseReady() && !me) redirect("/login");
+  if (supabaseReady() && !me) redirect("/login?next=/join/commit");
   const current = me?.profile.goal ?? null;
 
   return (

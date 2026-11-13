@@ -16,7 +16,7 @@ const BLOCKER_TO: Record<string, string> = {
 export async function startCheckout(formData: FormData) {
   if (formData.get("terms") !== "on") redirect("/join/checkout?error=terms");
 
-  let note = "TYGA Summer Series registration";
+  let note = "TYGA Summer Series singlet";
   let email: string | undefined;
   let profileId: string | null = null;
 
