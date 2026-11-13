@@ -32,7 +32,7 @@ export function buildPaymentLinkBody(input: CheckoutInput, locationId: string, s
   return {
     idempotency_key: idempotencyKey,
     quick_pay: {
-      name: "TYGA 2026 Summer Series — Registration + singlet",
+      name: "TYGA 2026 Summer Series singlet",
       price_money: { amount: PRICE_CENTS, currency: "AUD" },
       location_id: locationId,
     },
