@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 async function requireMember(next: string) {
   if (!supabaseReady()) return null; // example mode before Supabase is set up: just move on
   const me = await getCurrentMember();
-  if (!me) redirect(`/login?next=${next}`);
+  if (!me) redirect(`/login?next=${encodeURIComponent(next)}`);
   return me;
 }
 
@@ -32,7 +32,10 @@ export async function saveGoal(formData: FormData) {
 }
 
 export async function saveSinglet(formData: FormData) {
-  const me = await requireMember("/join/singlet");
+  // Keep their picks through sign-in so they land back on the same selection.
+  const picks = new URLSearchParams();
+  for (const k of ["fit", "colour", "size"]) picks.set(k, String(formData.get(k) ?? "").slice(0, 10));
+  const me = await requireMember(`/join/singlet?${picks}`);
   if (me) {
     if (me.registration?.payment_status === "pending") redirect("/join/checkout"); // order already started
     const choice = parseSingletInput(formData);

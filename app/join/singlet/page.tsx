@@ -1,28 +1,30 @@
-import { redirect } from "next/navigation";
-import SingletPicker from "@/components/SingletPicker";
+import SingletProduct from "@/components/SingletProduct";
 import { Screen, TopNav } from "@/components/ui";
-import { getCurrentMember, supabaseReady } from "@/lib/session";
+import { getCurrentMember } from "@/lib/session";
 import { toUiFit } from "@/lib/singlet";
 
 const ERRORS: Record<string, string> = {
   choice: "Pick a fit, colour and size.",
-  save: "We couldn't save that just now — please try again.",
+  save: "We couldn't save that just now. Please try again.",
 };
+const FITS = ["womens", "mens"] as const;
+const COLOURS = ["cream", "charcoal"] as const;
+const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"] as const;
+const pick = <T extends string>(list: readonly T[], v?: string) => list.find((x) => x === v);
 
-// Join · step 3: singlet fit, colour and size — the runner follows the choices
-export default async function Singlet({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const { error } = await searchParams;
+// Singlet product page. Anyone can browse; signing in happens when they go to checkout.
+export default async function Singlet({ searchParams }: { searchParams: Promise<{ error?: string; fit?: string; colour?: string; size?: string }> }) {
+  const q = await searchParams;
   const me = await getCurrentMember();
-  if (supabaseReady() && !me) redirect("/login?next=/join/singlet");
   const reg = me?.registration;
+  const initial = reg?.fit || reg?.colour || reg?.size
+    ? { fit: reg.fit ? toUiFit(reg.fit) : undefined, colour: reg.colour ?? undefined, size: reg.size }
+    : { fit: pick(FITS, q.fit), colour: pick(COLOURS, q.colour), size: pick(SIZES, q.size) };
   return (
-    <Screen>
-      <TopNav title="Your singlet" back="/shop" />
-      {error && ERRORS[error] && <p className="notice" role="alert">{ERRORS[error]}</p>}
-      <SingletPicker
-        paid={reg?.payment_status === "paid"}
-        initial={reg ? { fit: reg.fit ? toUiFit(reg.fit) : undefined, colour: reg.colour ?? undefined, size: reg.size } : undefined}
-      />
+    <Screen bodyStyle={{ gap: 12 }}>
+      <TopNav title="Summer Series singlet" back="/" />
+      {q.error && ERRORS[q.error] && <p className="notice" role="alert">{ERRORS[q.error]}</p>}
+      <SingletProduct paid={reg?.payment_status === "paid"} initial={initial} />
     </Screen>
   );
 }

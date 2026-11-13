@@ -363,3 +363,20 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .mini,.chip{display:inline-flex;align-items:center}
 .xs{font-size:12px}
 .tabs a{font-size:11px}
+
+/* Product page (singlet) */
+.pp-view{position:relative;aspect-ratio:4/5;border-radius:var(--r);overflow:hidden;background:var(--char-3);flex:none}
+.pp-view.picker-stage{height:auto}
+.pp-view img{width:100%;height:100%;object-fit:cover;display:block}
+.pp-thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pp-thumbs button{position:relative;min-height:64px;border-radius:12px;overflow:hidden;border:2px solid transparent;background:var(--char-3);padding:0;cursor:pointer;color:var(--cream)}
+.pp-thumbs button[aria-pressed="true"]{border-color:var(--cream)}
+.pp-thumbs img{width:100%;height:64px;object-fit:cover;object-position:50% 25%;display:block}
+.pp-thumbs span{display:block;font-size:11px;font-weight:600;padding:3px 0;text-align:center}
+.pp-model{display:grid;place-items:center;align-content:center;gap:2px}
+.pp-run{font-size:18px;line-height:1}
+.pp-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.pp-price{font-size:22px;font-weight:800}
+.pp-swatches{display:flex;gap:12px;margin-top:8px}
+.pp-swatches button{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.pp-swatches button[aria-pressed="true"]{outline:2px solid var(--cream);outline-offset:3px}
