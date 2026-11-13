@@ -40,7 +40,10 @@ export default async function Home() {
         </div>
       </div>
 
-      <WeekStrip strip={v.strip} />
+      <div className="strip-card">
+        <div className="eyebrow">Your week</div>
+        <WeekStrip strip={v.strip} />
+      </div>
 
       <div className="stats">
         <div><b>{me.points}</b><small>points</small></div>

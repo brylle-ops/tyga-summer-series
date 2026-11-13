@@ -89,7 +89,7 @@ export function SegLinks({ options, active }: { options: { label: string; href: 
   return (
     <div className="seg">
       {options.map((o) => (
-        <Link key={o.label} href={o.href} className={o.label === active ? "on" : ""} style={{ textDecoration: "none", color: "inherit", textAlign: "center" }}>{o.label}</Link>
+        <Link key={o.label} href={o.href} className={o.label === active ? "on" : ""} aria-current={o.label === active ? "page" : undefined}>{o.label}</Link>
       ))}
     </div>
   );

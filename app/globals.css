@@ -460,3 +460,15 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .nu-quick .chip{cursor:default}
 
 .nu-title .script{color:#7a4f22}
+
+/* Tabs made of links: readable active state, 44px tap target */
+.seg a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:8px 6px;border-radius:10px;font-size:13px;font-weight:600;color:var(--mute);text-decoration:none;text-align:center}
+.seg a.on{background:var(--cream);color:var(--ink)}
+
+/* Week strip: clearer outlines, and a card behind it on Home */
+.strip .d i{border-color:rgba(244,241,236,.45);color:var(--cream)}
+.strip .d.counted i{color:var(--ink)}
+.strip .d.future i{border-color:rgba(244,241,236,.22)}
+.strip-card{display:grid;gap:10px;background:var(--char-2);border:1px solid var(--line);border-radius:20px;padding:14px}
+
+.cream-card .link{color:#6e5330;font-weight:600}
