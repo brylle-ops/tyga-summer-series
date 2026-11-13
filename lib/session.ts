@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -11,16 +12,18 @@ export function supabaseReady(): boolean {
 }
 
 /** The signed-in member with their registration, or null if signed out. */
-export async function getCurrentMember(): Promise<{ profile: Profile; registration: Registration | null } | null> {
+export const getCurrentMember = cache(async function getCurrentMember(): Promise<{ profile: Profile; registration: Registration | null } | null> {
   if (!supabaseReady()) return null;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle<Profile>();
+  const [{ data: profile }, { data: registration }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle<Profile>(),
+    supabase.from("registrations").select("*").eq("profile_id", user.id).maybeSingle<Registration>(),
+  ]);
   if (!profile) return null;
-  const { data: registration } = await supabase.from("registrations").select("*").eq("profile_id", user.id).maybeSingle<Registration>();
   return { profile, registration: registration ?? null };
-}
+});
 
 /** Staff check for admin actions and pages. */
 export async function isStaff(): Promise<boolean> {

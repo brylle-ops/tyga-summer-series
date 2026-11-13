@@ -45,3 +45,13 @@ describe("allowNonMembers", () => {
     process.env.ALLOW_NON_MEMBERS = "false"; expect(allowNonMembers()).toBe(false);
   });
 });
+
+import { normaliseCode } from "@/lib/signin";
+describe("normaliseCode", () => {
+  it("keeps 6-10 digits, ignores spaces", () => {
+    expect(normaliseCode(" 123 456 ")).toBe("123456");
+    expect(normaliseCode("12345")).toBeNull();
+    expect(normaliseCode("12ab56")).toBeNull();
+    expect(normaliseCode("")).toBeNull();
+  });
+});
