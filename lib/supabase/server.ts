@@ -11,7 +11,7 @@ export async function createClient() {
       getAll: () => cookieStore.getAll(),
       setAll: (list) => {
         try {
-          list.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          list.forEach(({ name, value, options }) => cookieStore.set(name, value, { ...options, httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production" }));
         } catch {
           // Called from a Server Component: cookies can't be written there. proxy.ts refreshes the session instead.
         }

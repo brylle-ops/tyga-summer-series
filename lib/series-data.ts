@@ -22,12 +22,17 @@ const weekInfo = (no: number) => {
 };
 
 /** Today's series day (honours the preview week while testing). */
+/** Testing-only preview week. Ignored once Square is in production, so nobody can unlock future weeks by accident. */
+function previewWeek(): string | undefined {
+  return process.env.SQUARE_ENVIRONMENT === "production" ? undefined : process.env.SERIES_PREVIEW_WEEK;
+}
+
 export function seriesDayNow() {
-  return seriesToday(new Date(), process.env.SERIES_PREVIEW_WEEK);
+  return seriesToday(new Date(), previewWeek());
 }
 
 export function seriesWeekNow() {
-  return currentWeek(new Date(), process.env.SERIES_PREVIEW_WEEK);
+  return currentWeek(new Date(), previewWeek());
 }
 
 /** For series screens: any signed-in member (no payment needed). New members add their name and goal first. Null = example mode. */

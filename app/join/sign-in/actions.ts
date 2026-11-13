@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { normaliseEmail } from "@/lib/members";
 import { ensureProfile, supabaseReady } from "@/lib/session";
 import { normaliseCode, safeNext } from "@/lib/signin";
+import { loginRequestBlocked, loginVerifyBlocked, recordLoginEvent } from "@/lib/ratelimit";
 import { createClient } from "@/lib/supabase/server";
 
 export type LoginState = { message?: string; email?: string; sent?: boolean };
@@ -18,6 +19,8 @@ export async function requestLoginLink(_prev: LoginState, formData: FormData): P
   const email = normaliseEmail(raw);
   if (!email) return { email: raw, message: "Please enter a valid email." };
 
+  if (await loginRequestBlocked(email)) return { email, message: "Too many tries. Please wait a few minutes and try again." };
+  await recordLoginEvent(email, true);
   const { error } = await (await createClient()).auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
   if (error) {
     console.error("[login] could not send code:", error.message);
@@ -34,10 +37,12 @@ export async function verifyLoginCode(_prev: LoginState, formData: FormData): Pr
   const token = normaliseCode(String(formData.get("code") ?? ""));
   if (!token) return { email, sent: true, message: "Enter the code from your email." };
 
+  if (await loginVerifyBlocked(email)) return { email, sent: true, message: "Too many wrong codes. Please wait 10 minutes, then request a new code." };
   const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
   if (error || !data.user) {
     console.error("[login] code not accepted:", error?.message);
+    await recordLoginEvent(email, false);
     return { email, sent: true, message: "That code didn't work. It may have expired — check for the newest email, or go back and send a new one." };
   }
   if (!(await ensureProfile(data.user.id, email))) {
