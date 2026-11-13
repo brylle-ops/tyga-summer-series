@@ -1,5 +1,15 @@
 # TYGA Summer Series — handoff for Claude (read this first)
 
+> **STATUS UPDATE (13 Nov 2026) — supersedes older sections below where they conflict**
+> - **Open access:** anyone signs in at `/login` with an emailed **code** (not a link); new emails get an account, then name + goal at `/join/commit`, then `/home`. No $15 registration fee, no member-list gate, no 30 Nov cutoff. `/join/sign-in` just redirects to `/login`. The old link flow (`/auth/*`, `/join/check-email`) is deleted.
+> - **Square is only for the optional singlet ($15)**: Welcome -> `/shop` -> `/join/singlet` -> `/join/checkout` -> `/join/confirmed` (order page).
+> - Series screens are open to any signed-in member. Leaderboard ranks only named, non-staff members.
+> - **Staff dashboards:** `/admin` (orders, approvals, follow-ups) and `/admin/leaderboard` (top 10, consistency, perk candidates, "Mark redeemed", CSV). Pure logic in `lib/dashboard.ts` (tested).
+> - Perf: Vercel region `syd1` (`vercel.json`), 20s cache of everyone's stats, per-request cached `getCurrentMember`.
+> - Installable PWA (`app/manifest.ts`, `public/icons`). Env: `ALLOW_NON_MEMBERS` and `MEMBER_SYNC_SECRET` are no longer needed.
+> - **Still open:** Resources + Holiday workouts are placeholder content; double-points dates; holiday mode doesn't protect streaks; 25-26 Jan check-ins dropped; guessable perk codes; DB name-length constraints; bot limit on code login; real perk partners; Resend sender domain; delete `SERIES_PREVIEW_WEEK` before launch.
+
+
 Also read `AGENTS.md` (Next.js 16 has breaking changes — check `node_modules/next/dist/docs/` before writing Next code).
 
 ## What this is

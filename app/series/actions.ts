@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireSeriesMember, seriesWeekNow } from "@/lib/series-data";
 import { alburyDay, type CheckinKind } from "@/lib/series";
+import { PERKS } from "@/lib/perks";
 import { isStaff } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -80,4 +81,16 @@ export async function addMission(formData: FormData) {
   });
   revalidatePath("/admin");
   redirect("/admin?mission=added");
+}
+
+// Staff: mark a member's perk as handed over (stops it showing as "to hand out").
+export async function redeemPerk(formData: FormData) {
+  if (!(await isStaff())) redirect("/home");
+  const profile = String(formData.get("profile") ?? "");
+  const perk = String(formData.get("perk") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(profile) || !PERKS.some((p) => p.key === perk)) return;
+  const { error } = await createAdminClient().from("perk_redemptions")
+    .upsert({ profile_id: profile, perk_key: perk }, { onConflict: "profile_id,perk_key", ignoreDuplicates: true });
+  if (error) console.error("[redeem]", error.message);
+  revalidatePath("/admin/leaderboard");
 }
