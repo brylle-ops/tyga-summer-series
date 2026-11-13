@@ -50,3 +50,9 @@ export async function verifyLoginCode(_prev: LoginState, formData: FormData): Pr
   }
   redirect(safeNext(String(formData.get("next") ?? ""), "/home"));
 }
+
+// Log out: end the session on this device and go back to the Welcome screen.
+export async function signOut() {
+  if (supabaseReady()) await (await createClient()).auth.signOut();
+  redirect("/");
+}

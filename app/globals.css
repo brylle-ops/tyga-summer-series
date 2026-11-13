@@ -475,3 +475,6 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 
 .move.done{opacity:.6}
 .move.on .radio{background:var(--ink);border-color:var(--ink)}
+
+.account{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 2px 14px}
+.account .xs{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}

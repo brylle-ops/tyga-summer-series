@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { Pill, Screen } from "@/components/ui";
 import WeekStrip from "@/components/WeekStrip";
+import { signOut } from "@/app/join/sign-in/actions";
+import { getCurrentMember } from "@/lib/session";
 import { LEVELS } from "@/lib/series";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
 
@@ -15,6 +17,7 @@ const QUICK: { href: string; label: string; icon: IconName }[] = [
 // Home dashboard
 export default async function Home() {
   const v = await loadMemberView(await requireSeriesMember());
+  const account = await getCurrentMember();
   const { me, weekInfo: thisWeek } = v;
   const left = 3 - thisWeek.sessionsDone;
   const ringPct = Math.round((thisWeek.sessionsDone / 3) * 100);
@@ -88,6 +91,12 @@ export default async function Home() {
         <div className="grow"><b className="sm">Summer resources</b><div className="xs mute">Holiday workouts, recovery, more</div></div>
         <span className="mute">›</span>
       </Link>
+      {account && (
+        <div className="account">
+          <span className="xs mute">Signed in as {account.profile.email}</span>
+          <form action={signOut}><button type="submit" className="mini ghost">Log out</button></form>
+        </div>
+      )}
     </Screen>
   );
 }
