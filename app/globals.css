@@ -472,3 +472,6 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .strip-card{display:grid;gap:10px;background:var(--char-2);border:1px solid var(--line);border-radius:20px;padding:14px}
 
 .cream-card .link{color:#6e5330;font-weight:600}
+
+.move.done{opacity:.6}
+.move.on .radio{background:var(--ink);border-color:var(--ink)}

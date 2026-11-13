@@ -15,16 +15,18 @@ const KINDS: CheckinKind[] = ["yard", "run", "workout", "recovery", "rest"];
 export async function logCheckin(formData: FormData) {
   const me = await requireSeriesMember();
   if (!me) redirect("/log?example=1");
-  const kind = String(formData.get("kind")) as CheckinKind;
-  if (!KINDS.includes(kind)) redirect("/log?error=kind");
+  // One or more activities can be logged together; unknown values are dropped, repeats are ignored.
+  const kinds = [...new Set(formData.getAll("kind").map(String))].filter((k): k is CheckinKind => (KINDS as string[]).includes(k));
+  if (kinds.length === 0) redirect("/log?error=kind");
   if (seriesWeekNow() < 1) redirect("/log?error=early");
+  const day = seriesDayNow();
   const { error } = await createAdminClient().from("checkins").upsert(
-    { profile_id: me.id, day: seriesDayNow(), kind, status: kind === "yard" ? "pending" : "confirmed" },
+    kinds.map((kind) => ({ profile_id: me.id, day, kind, status: kind === "yard" ? "pending" : "confirmed" })),
     { onConflict: "profile_id,day,kind", ignoreDuplicates: true },
   );
   if (error) { console.error("[log]", error.message); redirect("/log?error=save"); }
   revalidatePath("/home");
-  redirect(`/log?done=${kind}`);
+  redirect(`/log?done=${kinds.join(",")}`);
 }
 
 export async function completeMission(formData: FormData) {
