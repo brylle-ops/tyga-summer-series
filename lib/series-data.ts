@@ -111,7 +111,7 @@ export async function loadMemberView(profile: Profile | null) {
   const now = Date.now();
 
   return {
-    real: true, week, weekInfo: { ...weekInfo(week), sessionsDone: s.sessionsThisWeek, pips }, nextWeek: week < 7 ? weekInfo(week + 1) : null,
+    real: true, week, weekInfo: { ...weekInfo(week), sessionsDone: s.sessionsThisWeek, pips, pending: mine.checkins.filter((c) => c.kind === "yard" && c.status === "pending" && weekOfDay(c.day) === week).length }, nextWeek: week < 7 ? weekInfo(week + 1) : null,
     me: {
       firstName: profile.first_name || "there", ...shortName(profile.first_name, profile.last_name),
       shortName: shortName(profile.first_name, profile.last_name).name, points: s.points, rank: meRank?.rank ?? 0,

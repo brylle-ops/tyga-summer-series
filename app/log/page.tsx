@@ -44,6 +44,7 @@ export default async function Log({ searchParams }: { searchParams: Promise<{ do
           <b className="sm grow">Need workout ideas?</b>
           <Link href="/holiday" className="chip" style={{ padding: "6px 10px" }}>Holiday workouts</Link>
         </div>
+        <p className="xs mute" style={{ margin: 0 }}>Run and Workout count straight away. A Yard session counts once the class roster confirms it.</p>
         {KINDS.every((k) => v.todays.includes(k)) ? <p className="notice" role="status">All logged for today. See you tomorrow.</p> : <button className="btn" type="submit">Log it</button>}
       </form>
     </Screen>

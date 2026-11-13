@@ -35,6 +35,11 @@ export default async function Home() {
           <div className="grow">
             <b style={{ fontSize: 15 }}>{v.week < 1 ? "Get ready for week 1" : left <= 0 ? `Week ${thisWeek.no} locked in!` : `${left} more to lock in week ${thisWeek.no}`}</b>
             {v.week >= 1 && left > 0 && <div className="sm mute" style={{ marginTop: 3 }}>Hit 3 by Sunday for <b style={{ color: "#6e5330" }}>+20 bonus</b></div>}
+            {"pending" in thisWeek && thisWeek.pending > 0 && (
+              <div className="xs" style={{ marginTop: 6, color: "#6e5330", fontWeight: 600 }}>
+                {thisWeek.pending} Yard session{thisWeek.pending > 1 ? "s" : ""} waiting for the class roster. {thisWeek.pending > 1 ? "They count" : "It counts"} once confirmed.
+              </div>
+            )}
             <Link href="/activity" className="xs link" style={{ display: "inline-block", marginTop: 6 }}>See all activity ›</Link>
           </div>
         </div>
