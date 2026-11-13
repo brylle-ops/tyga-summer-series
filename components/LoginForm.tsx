@@ -1,13 +1,21 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { requestLoginLink, verifyLoginCode, type LoginState } from "@/app/join/sign-in/actions";
 
 // Two explicit steps instead of one form full of flags: ask for the email, then check the code.
+const EMAIL_KEY = "tyga-email";
+
+// Remember the email on this device so returning members don't retype it (storage can be blocked, so every access is guarded).
 function EmailStep({ onSent }: { onSent: (s: LoginState) => void }) {
+  const [saved, setSaved] = useState("");
+  useEffect(() => { try { setSaved(localStorage.getItem(EMAIL_KEY) ?? ""); } catch { /* storage blocked: fine */ } }, []);
   const [state, action, pending] = useActionState<LoginState, FormData>(async (prev, formData) => {
     const next = await requestLoginLink(prev, formData);
-    if (next.sent) onSent(next);
+    if (next.sent) {
+      try { if (next.email) localStorage.setItem(EMAIL_KEY, next.email); } catch { /* ignore */ }
+      onSent(next);
+    }
     return next;
   }, {});
   return (
@@ -15,7 +23,7 @@ function EmailStep({ onSent }: { onSent: (s: LoginState) => void }) {
       <label className="field">
         <span className="eyebrow">Email</span>
         <input name="email" type="email" inputMode="email" autoComplete="email" required
-          placeholder="you@example.com" defaultValue={state.email} aria-describedby="login-msg" />
+          placeholder="you@example.com" key={saved} defaultValue={state.email ?? saved} aria-describedby="login-msg" />
       </label>
       {state.message && <div id="login-msg" className="notice" role="alert">{state.message}</div>}
       <div style={{ flex: 1 }} />
