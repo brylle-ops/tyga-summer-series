@@ -350,3 +350,8 @@ a.btn,a.chip,a.mini{text-decoration:none}
 .shop-foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
 .shop-price{font-weight:700}
 .shop-card:not(.soon):focus-visible{outline:2px solid var(--sun-2);outline-offset:2px}
+
+/* Loading skeleton */
+.skel{border-radius:var(--r);background:linear-gradient(90deg,var(--char-2) 25%,var(--char-3) 50%,var(--char-2) 75%);background-size:200% 100%;animation:skel 1.2s ease-in-out infinite}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}

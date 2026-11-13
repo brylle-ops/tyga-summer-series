@@ -19,11 +19,11 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  await supabase.auth.getClaims(); // refreshes the session without a network call when possible
   return response;
 }
 
 export const config = {
   // Skip static files, images, the runner bundle and Square's webhook.
-  matcher: ["/((?!_next/static|_next/image|img/|runner/|icon.svg|api/square|api/members).*)"],
+  matcher: ["/((?!_next/static|_next/image|img/|runner/|icon.svg|icons/|manifest.webmanifest|api/square|api/members).*)"],
 };

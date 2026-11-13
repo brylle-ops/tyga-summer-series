@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "TYGA Summer Series",
   description: "Maintain the standard — The Yard Gym Albury summer series, 7 Dec – 26 Jan.",
-  icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
+  icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icons/icon-192.png" },
   appleWebApp: { capable: true, title: "TYGA Summer", statusBarStyle: "black-translucent" },
 };
 

@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentMember } from "@/lib/session";
 import WelcomeRunner from "@/components/WelcomeRunner";
 import { Screen, Sky, Wordmark } from "@/components/ui";
 
 // Welcome — the running 3D character, with a Women's / Men's choice
-export default function Welcome() {
+export default async function Welcome() {
+  if (await getCurrentMember()) redirect("/home"); // already signed in: never ask for a code again
   return (
     <Screen className="welcome">
       <Sky hills={230} />

@@ -13,9 +13,8 @@ const COLOURS: { value: Colour; label: string; img: string }[] = [
 ];
 
 // Fit, colour and size. The runner follows the choices live; "Save" stores them on the member's registration.
-export default function SingletPicker({ initial, locked = false, paid = false }: {
+export default function SingletPicker({ initial, paid = false }: {
   initial?: { fit?: Fit; colour?: Colour; size?: Size | null };
-  locked?: boolean;
   paid?: boolean;
 }) {
   const [fit, setFit] = useState<Fit>(initial?.fit ?? "womens");
@@ -31,8 +30,8 @@ export default function SingletPicker({ initial, locked = false, paid = false }:
       <input type="hidden" name="colour" value={colour} />
       <input type="hidden" name="size" value={size ?? ""} />
       <div className="seg" role="group" aria-label="Fit">
-        <button type="button" disabled={locked} aria-pressed={fit === "womens"} onClick={() => setFit("womens")}>Women&apos;s fit</button>
-        <button type="button" disabled={locked} aria-pressed={fit === "mens"} onClick={() => setFit("mens")}>Men&apos;s fit</button>
+        <button type="button" aria-pressed={fit === "womens"} onClick={() => setFit("womens")}>Women&apos;s fit</button>
+        <button type="button" aria-pressed={fit === "mens"} onClick={() => setFit("mens")}>Men&apos;s fit</button>
       </div>
       <div className="picker-stage">
         <Sky />
@@ -41,7 +40,7 @@ export default function SingletPicker({ initial, locked = false, paid = false }:
       </div>
       <div className="colours" role="group" aria-label="Colour">
         {COLOURS.map((c) => (
-          <button key={c.value} type="button" disabled={locked} className={`colour ${colour === c.value ? "on" : ""}`}
+          <button key={c.value} type="button" className={`colour ${colour === c.value ? "on" : ""}`}
             aria-pressed={colour === c.value} onClick={() => setColour(c.value)}>
             <img src={c.img} alt={`${c.label} singlet, back print`} /><span>{c.label}</span>
           </button>
@@ -53,12 +52,12 @@ export default function SingletPicker({ initial, locked = false, paid = false }:
       </div>
       <div className="sizes" role="group" aria-label="Size">
         {SIZES.map((s) => (
-          <button key={s} type="button" disabled={locked} aria-pressed={size === s} onClick={() => setSize(s)}>{s}</button>
+          <button key={s} type="button" aria-pressed={size === s} onClick={() => setSize(s)}>{s}</button>
         ))}
       </div>
       <p className="xs mute">Limited edition: only for registered members. Change it until 30 Nov.</p>
       <div style={{ flex: 1 }} />
-      <button type="submit" className="btn" disabled={locked || !size}>{label}</button>
+      <button type="submit" className="btn" disabled={!size}>{label}</button>
     </form>
   );
 }

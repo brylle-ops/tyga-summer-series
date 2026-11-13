@@ -36,7 +36,18 @@ export async function requireSeriesMember(): Promise<Profile | null> {
 type Everyone = { profile: Pick<Profile, "id" | "first_name" | "last_name" | "mobile" | "holiday_until">; checkins: Checkin[]; done: number[] }[];
 
 /** Every member's activity (server only; screens only ever show first name + last initial). */
-export async function loadEveryone(): Promise<{ everyone: Everyone; missions: MissionRow[] }> {
+type EveryoneData = { everyone: Everyone; missions: MissionRow[] };
+let everyoneCache: { at: number; data: EveryoneData } | null = null;
+const EVERYONE_TTL_MS = 20_000; // other members' numbers may be up to 20s old; your own are always fresh
+
+export async function loadEveryone(): Promise<EveryoneData> {
+  if (everyoneCache && Date.now() - everyoneCache.at < EVERYONE_TTL_MS) return everyoneCache.data;
+  const data = await fetchEveryone();
+  everyoneCache = { at: Date.now(), data };
+  return data;
+}
+
+async function fetchEveryone(): Promise<EveryoneData> {
   const db = createAdminClient();
   const [regs, checkins, done, { data: missions }] = await Promise.all([
     fetchAll<{ profile_id: string; profiles: unknown }>((a, b) =>
@@ -70,13 +81,14 @@ export async function loadMemberView(profile: Profile | null) {
   const { everyone, missions } = await loadEveryone();
   const byId = new Map(missions.map((m) => [Number(m.id), m]));
   const statsFor = (e: Everyone[number]) => memberStats(e.checkins, e.done.map((id) => byId.get(id)).filter(Boolean) as Mission[], week);
-  let mine = everyone.find((e) => e.profile.id === profile.id);
-  if (!mine) {
-    // Staff who haven't paid still get a view of their own activity.
-    const { data: own } = await createAdminClient().from("checkins").select("day, kind, status").eq("profile_id", profile.id);
-    mine = { profile, checkins: (own ?? []) as Checkin[], done: [] };
-  }
-  const ranked = rankEntries(everyone.map((e) => ({ id: e.profile.id, ...shortName(e.profile.first_name, e.profile.last_name), points: statsFor(e).points })));
+  // Your own sessions and missions are read fresh, so logging something shows up straight away.
+  const db = createAdminClient();
+  const [{ data: ownCheckins }, { data: ownDone }] = await Promise.all([
+    db.from("checkins").select("day, kind, status").eq("profile_id", profile.id).in("kind", ["yard", "run", "workout"]).gte("day", "2026-12-07"),
+    db.from("mission_completions").select("mission_id").eq("profile_id", profile.id),
+  ]);
+  const mine: Everyone[number] = { profile, checkins: (ownCheckins ?? []) as Checkin[], done: (ownDone ?? []).map((d) => Number(d.mission_id)) };
+  const ranked = rankEntries(everyone.map((e) => (e.profile.id === profile.id ? mine : e)).map((e) => ({ id: e.profile.id, ...shortName(e.profile.first_name, e.profile.last_name), points: statsFor(e).points })));
   const s = statsFor(mine);
   const meRank = ranked.find((r) => r.id === profile.id);
   const days = sessionDaysByWeek(mine.checkins).get(week) ?? [];
