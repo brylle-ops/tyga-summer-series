@@ -24,6 +24,18 @@ export function alburyDay(now: Date): string {
   return now.toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
 }
 
+/**
+ * "Today" for the series. Normally Albury's date. In preview/testing mode (SERIES_PREVIEW_WEEK) the real weekday is
+ * mapped into that week, so logged sessions land inside the series and actually count.
+ */
+export function seriesToday(now: Date, previewWeek?: string): string {
+  const p = Number(previewWeek);
+  if (!previewWeek || !Number.isInteger(p) || p < 1 || p > SERIES_WEEKS) return alburyDay(now);
+  const dow = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(now.toLocaleDateString("en-AU", { weekday: "short", timeZone: "Australia/Sydney" }));
+  const t = SERIES_START.getTime() + ((p - 1) * 7 + Math.max(0, dow)) * 86_400_000 + 12 * 3_600_000;
+  return alburyDay(new Date(t));
+}
+
 /** Series week (1–7) a YYYY-MM-DD day falls in; 0 before the series, 8+ after. */
 export function weekOfDay(day: string): number {
   const t = new Date(`${day}T12:00:00+11:00`).getTime();

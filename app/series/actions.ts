@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireSeriesMember, seriesWeekNow } from "@/lib/series-data";
-import { alburyDay, type CheckinKind } from "@/lib/series";
+import { requireSeriesMember, seriesDayNow, seriesWeekNow } from "@/lib/series-data";
+import type { CheckinKind } from "@/lib/series";
 import { PERKS } from "@/lib/perks";
 import { isStaff } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -19,7 +19,7 @@ export async function logCheckin(formData: FormData) {
   if (!KINDS.includes(kind)) redirect("/log?error=kind");
   if (seriesWeekNow() < 1) redirect("/log?error=early");
   const { error } = await createAdminClient().from("checkins").upsert(
-    { profile_id: me.id, day: alburyDay(new Date()), kind, status: kind === "yard" ? "pending" : "confirmed" },
+    { profile_id: me.id, day: seriesDayNow(), kind, status: kind === "yard" ? "pending" : "confirmed" },
     { onConflict: "profile_id,day,kind", ignoreDuplicates: true },
   );
   if (error) { console.error("[log]", error.message); redirect("/log?error=save"); }
@@ -47,7 +47,7 @@ export async function setHoliday(formData: FormData) {
   const me = await requireSeriesMember();
   if (!me) redirect("/holiday");
   const until = String(formData.get("until") ?? "");
-  const today = alburyDay(new Date());
+  const today = seriesDayNow();
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(until) && until >= today && until <= "2027-01-31";
   if (until && !valid) redirect("/holiday?error=date");
   const { error } = await createAdminClient().from("profiles").update({ holiday_until: until || null }).eq("id", me.id);

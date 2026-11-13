@@ -386,3 +386,77 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .pp-view img[data-s="front"]{object-fit:cover;object-position:50% 0}
 .pp-view img[data-s="back"],.pp-view img[data-s="detail"]{object-fit:contain;background:#0e0e0e}
 .pp-thumbs img{object-position:50% 12%}
+
+/* Week strip (Home + Activity) */
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.strip .d{display:flex;flex-direction:column;align-items:center;gap:5px}
+.strip .d i{width:100%;max-width:44px;aspect-ratio:1;border-radius:50%;border:1.5px dashed var(--line);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:15px;color:var(--ink)}
+.strip .d small{font-size:11px;font-weight:600;color:var(--mute)}
+.strip .d.counted i{background:var(--cream);border:0}
+.strip .d.pending i{border-style:solid;border-color:var(--sun-2);color:var(--sun-2)}
+.strip .d.logged i{border-style:solid;color:var(--mute)}
+.strip .d.today i{outline:2px solid var(--cream);outline-offset:2px}
+.strip .d.today small{color:var(--cream)}
+.strip .d.future{opacity:.45}
+.strip .d.none i,.strip .d.future i{color:var(--mute)}
+
+/* Activity feed */
+.wk-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:4px 0 8px}
+.feed{display:grid;gap:8px}
+.feed-item{display:flex;align-items:center;gap:12px;background:var(--char-2);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+.feed-item b{display:block;font-size:14.5px}
+.feed-item small{display:block;font-size:12px;color:var(--mute);margin-top:2px}
+.feed-ico{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--char-3);color:var(--cream)}
+.feed-ico svg{width:20px;height:20px}
+.feed-pts{font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;color:var(--cream);white-space:nowrap}
+.feed-item.counted .feed-ico,.feed-item.mission .feed-ico{background:var(--cream);color:var(--ink)}
+.feed-item.bonus .feed-ico{background:var(--sun-2);color:var(--ink)}
+.feed-item.pending .feed-pts,.feed-item.extra .feed-pts,.feed-item.logged .feed-pts{font-weight:600;font-size:12px;color:var(--mute)}
+
+/* Shop promo on Home */
+.shop-promo{display:flex;align-items:center;gap:14px;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#e9dfcf,#d9c29a);color:var(--ink);text-decoration:none;min-height:96px}
+.shop-promo img{width:84px;height:96px;object-fit:cover;object-position:50% 12%;flex:none}
+.shop-promo span{display:grid;gap:2px;padding:10px 14px 10px 0}
+.shop-promo small{font-size:10.5px;font-weight:700;letter-spacing:.8px;opacity:.7}
+.shop-promo b{font-size:16px}
+.shop-promo em{font-style:normal;font-weight:700;font-size:13px}
+.res a{position:relative;height:118px;border-radius:20px;overflow:hidden;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;color:var(--cream);text-decoration:none}
+.res a b{font-size:13.5px;font-weight:700;position:relative}
+.res a small{font-size:10.5px;opacity:.85;position:relative}
+.res a svg{position:absolute;right:10px;top:10px;width:30px;height:30px;opacity:.9}
+
+/* Yard Fuel (nutrition) — summer: sun-washed tan, warm accents, script heading */
+.nu-hero{position:relative;overflow:hidden;border-radius:24px;padding:20px 18px;color:var(--ink);background:linear-gradient(160deg,#efe3cb 0%,#e3cba4 55%,#d4a26a 100%)}
+.nu-hero .eyebrow{color:rgba(29,27,24,.7)}
+.nu-sun{position:absolute;right:-34px;top:-34px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#fff4d6 0%,rgba(255,244,214,.0) 68%)}
+.nu-title{font-family:Inter,sans-serif;font-weight:800;font-size:34px;line-height:1.02;margin:8px 0 6px;position:relative}
+.nu-title .script{font-size:40px;font-weight:400;line-height:1.1}
+.nu-hero p{color:rgba(29,27,24,.8);position:relative}
+.nu-count{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;position:relative}
+.nu-count b{display:block;font-size:26px;font-weight:800}
+.nu-count small{font-size:11px;font-weight:600;color:rgba(29,27,24,.7)}
+.nu-days{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;margin:0 -16px;padding-inline:16px}
+.nu-day{flex:none;width:190px;scroll-snap-align:start;background:var(--char-2);border:1px solid var(--line);border-radius:20px;padding:12px;display:grid;gap:7px}
+.nu-day>b{font-size:13px;letter-spacing:.3px}
+.nu-chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 10px;border-radius:14px;font-size:13px;font-weight:600;color:var(--cream);text-decoration:none;background:var(--char-3);border-left:4px solid var(--tone,#e3cba4)}
+.nu-chip span{font-size:11px;font-weight:800;opacity:.75;min-width:20px}
+.nu-chip.breakfast,.nu-card.breakfast{--tone:#e8c98a}
+.nu-chip.lunch,.nu-card.lunch{--tone:#d9a46a}
+.nu-chip.dinner,.nu-card.dinner{--tone:#c4693f}
+.nu-chip.snack,.nu-card.snack{--tone:#9bb18a}
+.nu-list{display:grid;gap:10px}
+.nu-card{background:var(--char-2);border:1px solid var(--line);border-left:5px solid var(--tone,#e3cba4);border-radius:20px;overflow:hidden}
+.nu-card summary{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer;list-style:none;min-height:64px}
+.nu-card summary::-webkit-details-marker{display:none}
+.nu-card summary b{display:block;font-size:15px}
+.nu-card summary small{display:block;font-size:12px;color:var(--mute);margin-top:3px}
+.nu-code{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:14px;background:var(--tone,#e3cba4);color:var(--ink)}
+.nu-ico{width:22px;height:22px;color:var(--tone,#e3cba4);flex:none}
+.nu-body{padding:2px 16px 16px}
+.nu-body ul{margin:8px 0 0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+.nu-card[open]{background:linear-gradient(180deg,var(--char-2),#1d1b19)}
+.nu-card summary:focus-visible{outline:2px solid var(--sun-2);outline-offset:-2px}
+.nu-card:target{outline:2px solid var(--tone);outline-offset:2px}
+.nu-quick .chip{cursor:default}
+
+.nu-title .script{color:#7a4f22}

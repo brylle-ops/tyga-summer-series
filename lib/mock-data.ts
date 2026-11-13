@@ -105,7 +105,7 @@ export const holidayWorkouts: { week: number; icon: IconName; title: string; det
 ];
 
 export const resources: { week: number; icon: IconName; title: string; detail: string; bg: string }[] = [
-  { week: 1, icon: "bowl", title: "High-protein recipes", detail: "12 quick summer meals", bg: "linear-gradient(160deg,#6b5440,#1f1b17)" },
+  { week: 1, icon: "bowl", title: "High-protein recipes", detail: "Yard Fuel: 10 recipes", bg: "linear-gradient(160deg,#6b5440,#1f1b17)" },
   { week: 1, icon: "plane", title: "Holiday workouts", detail: "Train anywhere", bg: "linear-gradient(160deg,#4a5359,#1b1d1e)" },
   { week: 2, icon: "leaf", title: "Recovery & mobility", detail: "Feel good, keep going", bg: "linear-gradient(160deg,#5c5547,#1e1c18)" },
   { week: 2, icon: "drop", title: "Hydration", detail: "Hot-weather basics", bg: "linear-gradient(160deg,#41545a,#1a1e1f)" },

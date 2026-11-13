@@ -6,7 +6,7 @@ import { isStaff, supabaseReady } from "@/lib/session";
 import { SIZES } from "@/lib/singlet";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { followUps as exampleFollowUps } from "@/lib/mock-data";
-import { loadEveryone, seriesWeekNow } from "@/lib/series-data";
+import { loadEveryone, seriesDayNow, seriesWeekNow } from "@/lib/series-data";
 import { fetchAll } from "@/lib/paging";
 import type { Registration } from "@/lib/types";
 import { alburyDay, followUpFlags, sessionDaysByWeek, shortName } from "@/lib/series";
@@ -56,7 +56,7 @@ export async function loadSeriesAdmin() {
   if (!(await isStaff())) redirect("/login");
   const db = createAdminClient();
   const { everyone } = await loadEveryone();
-  const today = alburyDay(new Date());
+  const today = seriesDayNow();
   const hit3Last = everyone.filter((e) => (sessionDaysByWeek(e.checkins).get(week - 1)?.length ?? 0) >= 3).length;
   const followUps = everyone.map((e) => {
     const flags = followUpFlags(e.checkins, today, e.profile.holiday_until ?? null, week);

@@ -3,11 +3,12 @@ import { redirect } from "next/navigation";
 import * as mock from "@/lib/mock-data";
 import { getCurrentMember, supabaseReady, type Profile } from "@/lib/session";
 import {
-  COUNTED, alburyDay, currentWeek, memberStats, rankEntries, sessionDaysByWeek, shortName, weekOfDay,
+  COUNTED, alburyDay, currentWeek, seriesToday, memberStats, rankEntries, sessionDaysByWeek, shortName, weekOfDay,
   type Checkin, type CheckinKind, type Mission,
 } from "@/lib/series";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchAll, groupBy } from "@/lib/paging";
+import { buildActivity, weekStrip, type CompletedMission } from "@/lib/activity";
 
 const KIND_LABEL: Record<CheckinKind, string> = { yard: "Yard", run: "Run", workout: "Workout", recovery: "Recovery", rest: "Rest" };
 export type MissionRow = Mission & { title: string; detail: string; is_secret: boolean; reveal_at: string | null };
@@ -19,6 +20,11 @@ const weekInfo = (no: number) => {
   const f = (d: Date, m = false) => d.toLocaleDateString("en-AU", { day: "numeric", ...(m ? { month: "short" } : {}), timeZone: "Australia/Sydney" });
   return { no, theme: w?.theme ?? "", dates: no >= 1 ? `${f(start)}–${f(end, true)}` : "", unlocks: w?.unlocks ?? "" };
 };
+
+/** Today's series day (honours the preview week while testing). */
+export function seriesDayNow() {
+  return seriesToday(new Date(), process.env.SERIES_PREVIEW_WEEK);
+}
 
 export function seriesWeekNow() {
   return currentWeek(new Date(), process.env.SERIES_PREVIEW_WEEK);
@@ -79,7 +85,7 @@ export async function loadMemberView(profile: Profile | null) {
     return { real: false, week, weekInfo: { ...mock.thisWeek, unlocks: "" }, nextWeek: mock.nextWeek ? weekInfo(mock.nextWeek.no) : null,
       me: mock.me, missions: mock.missions.map((m, i) => ({ id: i, week: m.week, title: m.title, detail: m.detail, points: Number(m.points.replace(/\D/g, "")) || 0,
         secret: Boolean(m.secret), done: Boolean(m.done), double: false })),
-      todays: [] as CheckinKind[], podium: mock.podium, leaderboard: mock.leaderboard, club: mock.clubThisWeek, holidayUntil: null as string | null };
+      strip: weekStrip([], 1, "2000-01-01"), todays: [] as CheckinKind[], podium: mock.podium, leaderboard: mock.leaderboard, club: mock.clubThisWeek, holidayUntil: null as string | null };
   }
   const { everyone, missions } = await loadEveryone();
   const byId = new Map(missions.map((m) => [Number(m.id), m]));
@@ -96,7 +102,7 @@ export async function loadMemberView(profile: Profile | null) {
   const meRank = ranked.find((r) => r.id === profile.id);
   const days = sessionDaysByWeek(mine.checkins).get(week) ?? [];
   const pips = days.slice(0, 3).map((d) => KIND_LABEL[mine!.checkins.find((c) => c.day === d && COUNTED.includes(c.kind) && c.status === "confirmed")!.kind]);
-  const today = alburyDay(new Date());
+  const today = seriesDayNow();
   const now = Date.now();
 
   return {
@@ -111,6 +117,7 @@ export async function loadMemberView(profile: Profile | null) {
       return { id: Number(m.id), week: m.week, title: hidden ? "Secret mission" : m.title, detail: hidden ? "Drops sometime this week" : m.detail,
         points: m.points, secret: hidden, done: mine!.done.includes(Number(m.id)), double: m.double };
     }),
+    strip: weekStrip(mine.checkins, Math.max(week, 1), today),
     todays: mine.checkins.filter((c) => c.day === today).map((c) => c.kind),
     podium: [ranked[1], ranked[0], ranked[2]].filter(Boolean),
     leaderboard: ranked.slice(3, 10),
@@ -120,3 +127,20 @@ export async function loadMemberView(profile: Profile | null) {
 }
 
 export { weekOfDay };
+
+/** The member's own history for the Activity screen (all kinds, newest first). Empty in example mode. */
+export async function loadActivity(profile: Profile | null) {
+  if (!profile) return { weeks: [] as ReturnType<typeof buildActivity> };
+  const db = createAdminClient();
+  const [{ data: rows }, { data: done }, { missions }] = await Promise.all([
+    db.from("checkins").select("day, kind, status").eq("profile_id", profile.id).order("day"),
+    db.from("mission_completions").select("mission_id, created_at").eq("profile_id", profile.id),
+    loadEveryone(),
+  ]);
+  const byId = new Map(missions.map((m) => [Number(m.id), m]));
+  const completed: CompletedMission[] = (done ?? []).flatMap((d) => {
+    const m = byId.get(Number(d.mission_id));
+    return m ? [{ id: m.id, week: m.week, title: m.title, points: m.points, double: m.double, at: alburyDay(new Date(d.created_at as string)) }] : [];
+  });
+  return { weeks: buildActivity((rows ?? []) as Checkin[], completed) };
+}

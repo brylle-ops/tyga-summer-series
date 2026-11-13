@@ -9,7 +9,7 @@ const TABS: { href: string; label: string; icon: IconName }[] = [
   { href: "/missions", label: "Missions", icon: "target" },
   { href: "/log", label: "Log", icon: "plus" },
   { href: "/ranks", label: "Ranks", icon: "trophy" },
-  { href: "/perks", label: "Perks", icon: "gift" },
+  { href: "/shop", label: "Shop", icon: "shirt" },
 ];
 
 export default function TabBar() {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import { LockedTeaser, Screen, TopNav } from "@/components/ui";
 import { resources } from "@/lib/mock-data";
@@ -13,12 +14,12 @@ export default async function Resources() {
       <TopNav title="Summer resources" back="/home" />
       <p className="sm mute">New ones land with each week&apos;s missions. Short and useful, never overwhelming.</p>
       <div className="res">
-        {resources.filter((r) => r.week <= wk).map((r) => (
-          <div key={r.title} style={{ background: r.bg }}>
-            <Icon name={r.icon} style={{ color: "var(--cream)" }} />
-            <b>{r.title}</b><small>{r.detail}</small>
-          </div>
-        ))}
+        {resources.filter((r) => r.week <= wk).map((r) => {
+          const inner = <><Icon name={r.icon} style={{ color: "var(--cream)" }} /><b>{r.title}</b><small>{r.detail}</small></>;
+          return r.title === "High-protein recipes"
+            ? <Link key={r.title} href="/nutrition" style={{ background: r.bg }}>{inner}</Link>
+            : <div key={r.title} style={{ background: r.bg }}>{inner}</div>;
+        })}
       </div>
       {resources.some((r) => r.week > wk) && nextWeek && <LockedTeaser title="New resources next week" when={`Unlocks ${nextWeek.unlocks}`} />}
     </Screen>

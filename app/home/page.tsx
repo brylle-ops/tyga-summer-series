@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { Pill, Screen } from "@/components/ui";
+import WeekStrip from "@/components/WeekStrip";
 import { LEVELS } from "@/lib/series";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
 
 const QUICK: { href: string; label: string; icon: IconName }[] = [
-  { href: "/log", label: "Log", icon: "plus" },
-  { href: "/missions", label: "Missions", icon: "target" },
+  { href: "/activity", label: "Activity", icon: "run" },
   { href: "/perks", label: "Perks", icon: "gift" },
+  { href: "/nutrition", label: "Nutrition", icon: "bowl" },
   { href: "/holiday", label: "Holiday", icon: "plane" },
 ];
 
@@ -34,14 +35,12 @@ export default async function Home() {
           <div className="grow">
             <b style={{ fontSize: 15 }}>{v.week < 1 ? "Get ready for week 1" : left <= 0 ? `Week ${thisWeek.no} locked in!` : `${left} more to lock in week ${thisWeek.no}`}</b>
             {v.week >= 1 && left > 0 && <div className="sm mute" style={{ marginTop: 3 }}>Hit 3 by Sunday for <b style={{ color: "#6e5330" }}>+20 bonus</b></div>}
-            <div className="pips">
-              {[0, 1, 2].map((i) => (
-                <i key={i} className={thisWeek.pips[i] ? "on" : ""}>{thisWeek.pips[i] ?? "+"}</i>
-              ))}
-            </div>
+            <Link href="/activity" className="xs link" style={{ display: "inline-block", marginTop: 6 }}>See all activity ›</Link>
           </div>
         </div>
       </div>
+
+      <WeekStrip strip={v.strip} />
 
       <div className="stats">
         <div><b>{me.points}</b><small>points</small></div>
@@ -71,9 +70,14 @@ export default async function Home() {
         </Link>
       ))}
 
+      <Link href="/join/singlet" className="shop-promo">
+        <img src="/img/shop-cream-front.webp" alt="" />
+        <span><small>NEW · LIMITED EDITION</small><b>Summer Series singlet</b><em>$15 · Shop now ›</em></span>
+      </Link>
+
       <Link href="/resources" className="li card" style={{ padding: "11px 13px", textDecoration: "none" }}>
         <span className="ico"><Icon name="leaf" /></span>
-        <div className="grow"><b className="sm">Summer resources</b><div className="xs mute">Recipes, holiday workouts, recovery</div></div>
+        <div className="grow"><b className="sm">Summer resources</b><div className="xs mute">Holiday workouts, recovery, more</div></div>
         <span className="mute">›</span>
       </Link>
     </Screen>

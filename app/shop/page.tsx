@@ -14,8 +14,8 @@ const PRODUCTS: Product[] = [
 // Shop: merch and products. Joining the series is free — you only sign in to buy or to take part.
 export default function Shop() {
   return (
-    <Screen>
-      <TopNav title="Shop" back="/" />
+    <Screen tabs>
+      <TopNav title="Shop" back="/home" />
       <div style={{ marginTop: 6 }}>
         <div className="eyebrow">TYGA Summer Series</div>
         <div className="h1" style={{ marginTop: 6 }}>
