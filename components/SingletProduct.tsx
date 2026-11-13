@@ -44,7 +44,7 @@ export default function SingletProduct({ initial, paid = false }: { initial?: In
 
       <div className={current ? "pp-view" : "pp-view picker-stage"}>
         {current ? (
-          <img src={current.src} alt={current.alt} width={700} height={695} />
+          <img src={current.src} alt={current.alt} data-s={current.key} />
         ) : (
           <>
             <Sky />

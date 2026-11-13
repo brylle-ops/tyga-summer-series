@@ -380,3 +380,9 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .pp-swatches{display:flex;gap:12px;margin-top:8px}
 .pp-swatches button{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
 .pp-swatches button[aria-pressed="true"]{outline:2px solid var(--cream);outline-offset:3px}
+
+/* Product photos: front is anchored to the top so heads are never cropped; back and detail show whole. */
+.pp-view{aspect-ratio:3/4}
+.pp-view img[data-s="front"]{object-fit:cover;object-position:50% 0}
+.pp-view img[data-s="back"],.pp-view img[data-s="detail"]{object-fit:contain;background:#0e0e0e}
+.pp-thumbs img{object-position:50% 12%}
