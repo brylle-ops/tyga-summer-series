@@ -5,7 +5,7 @@ const mem = (id: string, first: string, days: string[], done: number[] = []): Da
   profile: { id, first_name: first, last_name: "Smith", mobile: "0400" },
   checkins: days.map((day) => ({ day, kind: "run" as const, status: "confirmed" as const })), done,
 });
-const WEEK1 = ["2026-12-07", "2026-12-08", "2026-12-09"]; // 3 sessions = 15 + 20 bonus = 35 pts
+const WEEK1 = ["2026-12-07", "2026-12-08", "2026-12-09"]; // 3 sessions = 30 pts
 const missions = [{ id: 1, week: 1, points: 60, double: false }];
 
 describe("buildDashboard", () => {
@@ -13,10 +13,10 @@ describe("buildDashboard", () => {
   const d = buildDashboard(everyone, missions, 1, new Set());
 
   it("ranks by points and counts consistency", () => {
-    expect(d.rows.map((r) => [r.name, r.points, r.rank])).toEqual([["Amy Smith", 95, 1], ["Bo Smith", 35, 2], ["Cy Smith", 0, 3]]);
+    expect(d.rows.map((r) => [r.name, r.points, r.rank])).toEqual([["Amy Smith", 90, 1], ["Bo Smith", 30, 2], ["Cy Smith", 0, 3]]);
     expect(d.rows[0].weeksHit3).toBe(1);
     expect(d.hitThisWeek).toBe(2);
-    expect(d.avgPoints).toBe(43);
+    expect(d.avgPoints).toBe(40);
   });
   it("finds who has earned or nearly earned each perk", () => {
     const coffee = d.perks.find((p) => p.key === "coffee")!; // level 2 = 50 pts

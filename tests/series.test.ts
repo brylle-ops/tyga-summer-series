@@ -19,14 +19,14 @@ describe("weeks", () => {
 });
 
 describe("points", () => {
-  it("5 per session, one per day, pending yard doesn't count, +20 for 3/3", () => {
+  it("30 for 3 sessions, one per day, pending yard doesn't count", () => {
     const s = memberStats([
       c("2026-12-07"), c("2026-12-07", "workout"), // same day → one
       c("2026-12-08", "yard", "pending"),           // not yet
       c("2026-12-09", "yard"), c("2026-12-10"),
       c("2026-12-11", "recovery"), c("2026-12-12", "rest"),
     ], [], 1);
-    expect(s.points).toBe(3 * 5 + 20);
+    expect(s.points).toBe(30);
     expect(s.sessionsThisWeek).toBe(3);
     expect(s.hit3).toBe(true);
     expect(s.streak).toBe(1);

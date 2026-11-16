@@ -4,20 +4,25 @@ import { Pill, Screen } from "@/components/ui";
 import WeekStrip from "@/components/WeekStrip";
 import { signOut } from "@/app/join/sign-in/actions";
 import { getCurrentMember } from "@/lib/session";
+import { isReleased } from "@/lib/rewards";
+import { loadMemberRewards } from "@/lib/rewards-data";
 import { LEVELS } from "@/lib/series";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
 
 const QUICK: { href: string; label: string; icon: IconName }[] = [
   { href: "/activity", label: "Activity", icon: "run" },
-  { href: "/perks", label: "Perks", icon: "gift" },
+  { href: "/perks", label: "Rewards", icon: "gift" },
   { href: "/nutrition", label: "Nutrition", icon: "bowl" },
   { href: "/holiday", label: "Holiday", icon: "plane" },
 ];
 
 // Home dashboard
 export default async function Home() {
-  const v = await loadMemberView(await requireSeriesMember());
-  const account = await getCurrentMember();
+  const profile = await requireSeriesMember();
+  const [v, account, rv] = await Promise.all([loadMemberView(profile), getCurrentMember(), profile ? loadMemberRewards(profile.id) : null]);
+  // Rewards banners: a win beats "new reward", and both go straight to the Rewards page.
+  const won = rv ? rv.rewards.filter((r) => { const w = rv.ctx.won.get(r.id); return w?.announced && !w.collected; }) : [];
+  const fresh = rv ? rv.rewards.filter((r) => isReleased(r, rv.ctx.week) && r.week === rv.ctx.week) : [];
   const { me, weekInfo: thisWeek } = v;
   const left = 3 - thisWeek.sessionsDone;
   const ringPct = Math.round((thisWeek.sessionsDone / 3) * 100);
@@ -30,6 +35,17 @@ export default async function Home() {
         </div>
       </div>
 
+      {won.length > 0 && (
+        <Link href="/perks" className="reward-banner win">
+          <Icon name="trophy" /><span><b>YOU&apos;RE A WINNER!</b> Head to your Summer Series rewards to see what you&apos;ve unlocked.</span>
+        </Link>
+      )}
+      {won.length === 0 && fresh.length > 0 && (
+        <Link href="/perks" className="reward-banner">
+          <Icon name="gift" /><span><b>YOUR NEW SUMMER SERIES REWARD HAS UNLOCKED!</b> {fresh[0].title}{fresh.length > 1 ? ` + ${fresh.length - 1} more` : ""}. Tap to open.</span>
+        </Link>
+      )}
+
       <div className="cream-card">
         <div className="week-card">
           <div className="ring" style={{ "--p": ringPct } as React.CSSProperties}>
@@ -37,7 +53,7 @@ export default async function Home() {
           </div>
           <div className="grow">
             <b style={{ fontSize: 15 }}>{v.week < 1 ? "Get ready for week 1" : left <= 0 ? `Week ${thisWeek.no} locked in!` : `${left} more to lock in week ${thisWeek.no}`}</b>
-            {v.week >= 1 && left > 0 && <div className="sm mute" style={{ marginTop: 3 }}>Hit 3 by Sunday for <b style={{ color: "#6e5330" }}>+20 bonus</b></div>}
+            {v.week >= 1 && left > 0 && <div className="sm mute" style={{ marginTop: 3 }}>Hit 3 by Sunday for <b style={{ color: "#6e5330" }}>+30 points</b></div>}
             {"pending" in thisWeek && thisWeek.pending > 0 && (
               <div className="xs" style={{ marginTop: 6, color: "#6e5330", fontWeight: 600 }}>
                 {thisWeek.pending} Yard session{thisWeek.pending > 1 ? "s" : ""} waiting for the class roster. {thisWeek.pending > 1 ? "They count" : "It counts"} once confirmed.

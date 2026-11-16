@@ -46,12 +46,11 @@ export function buildActivity(checkins: Checkin[], missions: CompletedMission[])
     } else {
       countedDays.add(c.day);
       f.sessions += 1;
-      f.points += POINTS.session;
-      f.items.push({ id, day: c.day, kind: c.kind, title: TITLE[c.kind], detail: "Counts to your 3 a week", points: POINTS.session, state: "counted" });
+      f.items.push({ id, day: c.day, kind: c.kind, title: TITLE[c.kind], detail: "Counts to your 3 a week", points: 0, state: "counted" });
       if (f.sessions === 3) {
         f.hit3 = true;
         f.points += POINTS.threeOfThree;
-        f.items.push({ id: `${c.day}:bonus`, day: c.day, kind: "bonus", title: "3 of 3 this week", detail: "Weekly bonus", points: POINTS.threeOfThree, state: "bonus" });
+        f.items.push({ id: `${c.day}:bonus`, day: c.day, kind: "bonus", title: "3 of 3 this week", detail: "3 sessions done", points: POINTS.threeOfThree, state: "bonus" });
       }
     }
   }

@@ -4,7 +4,8 @@ export const SERIES_START = new Date("2026-12-07T00:00:00+11:00"); // Monday wee
 export const SERIES_WEEKS = 7;
 const WEEK_MS = 7 * 86_400_000;
 
-export const POINTS = { session: 5, threeOfThree: 20 } as const;
+// Simplified points (Amy's table): 3 weekly sessions 30 · featured mission 15 · tag us 5 · surprise bonus 10 (missions carry their own points).
+export const POINTS = { session: 0, threeOfThree: 30, featuredMission: 15, tag: 5, surpriseBonus: 10 } as const;
 
 export type CheckinKind = "yard" | "run" | "workout" | "recovery" | "rest";
 export const COUNTED: CheckinKind[] = ["yard", "run", "workout"];
@@ -13,10 +14,10 @@ export type Mission = { id: number; week: number; points: number; double: boolea
 
 export const LEVELS = [
   { no: 1, name: "Show Up", note: "Registered and ready", at: 0 },
-  { no: 2, name: "Build Momentum", note: "Unlocked: coffee upgrade", at: 50 },
-  { no: 3, name: "Stay Consistent", note: "Unlocked: prize draw entry", at: 100 },
-  { no: 4, name: "Maintain the Standard", note: "Unlocks: massage discount", at: 200 },
-  { no: 5, name: "Summer Series Legend", note: "Unlocks: Recovery Room session", at: 300 },
+  { no: 2, name: "Build Momentum", note: "50 points in", at: 50 },
+  { no: 3, name: "Stay Consistent", note: "100 points in", at: 100 },
+  { no: 4, name: "Maintain the Standard", note: "200 points in", at: 200 },
+  { no: 5, name: "Summer Series Legend", note: "300 points. Top of the Series", at: 300 },
 ];
 
 /** Today's date in Albury as YYYY-MM-DD. */
@@ -71,14 +72,19 @@ export function levelFor(points: number) {
   return { level: level.no, name: level.name, pointsToNext: next ? next.at - points : 0, pct };
 }
 
+/** Points earned in each series week: 30 for completing 3 sessions, plus the missions completed from that week. */
+export function pointsByWeek(checkins: Checkin[], completedMissions: Mission[]): Map<number, number> {
+  const out = new Map<number, number>();
+  const add = (w: number, p: number) => out.set(w, (out.get(w) ?? 0) + p);
+  for (const [w, days] of sessionDaysByWeek(checkins)) if (days.length >= 3) add(w, POINTS.threeOfThree);
+  for (const m of completedMissions) add(m.week, m.points * (m.double ? 2 : 1));
+  return out;
+}
+
 export function memberStats(checkins: Checkin[], completedMissions: Mission[], week: number) {
   const byWeek = sessionDaysByWeek(checkins);
   let points = 0;
-  for (const days of byWeek.values()) {
-    points += days.length * POINTS.session;
-    if (days.length >= 3) points += POINTS.threeOfThree;
-  }
-  for (const m of completedMissions) points += m.points * (m.double ? 2 : 1);
+  for (const p of pointsByWeek(checkins, completedMissions).values()) points += p;
 
   const thisWeekDays = byWeek.get(week)?.length ?? 0;
   // Streak: consecutive 3/3 weeks, counting this week only once it's done.

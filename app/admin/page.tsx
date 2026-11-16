@@ -23,7 +23,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           </div>
           <div className="li" style={{ gap: 8, flexWrap: "wrap" }}>
             <Pill>{s.week >= 1 ? `Week ${s.week} · ${seriesWeeks[s.week - 1].theme}` : "Starts Mon 7 Dec"}</Pill>
-            <a className="mini" href="/admin/leaderboard">Leaderboard &amp; perks</a>
+            <a className="mini" href="/admin/leaderboard">Leaderboard</a>
+            <a className="mini" href="/admin/rewards">Rewards &amp; perks</a>
             {d.real ? <MemberUpload /> : <span className="xs mute">Example data until Supabase is set up</span>}
           </div>
         </div>

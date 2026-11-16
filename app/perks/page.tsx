@@ -1,52 +1,87 @@
-import { Icon } from "@/components/Icons";
-import { LockedTeaser, Screen, SegLinks, TopNav } from "@/components/ui";
-import { PERKS, perkCode } from "@/lib/perks";
-import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
-import { LEVELS } from "@/lib/series";
+import { Icon, type IconName } from "@/components/Icons";
+import { LockedTeaser, Screen, TopNav } from "@/components/ui";
+import { weekRange } from "@/lib/activity";
+import { canEnterDraw, canRedeem, isReleased, KIND_LABEL, rewardState, STATE_LABEL, type MemberRewardCtx, type Reward, type RewardKind } from "@/lib/rewards";
+import { loadMemberRewards } from "@/lib/rewards-data";
+import { requireSeriesMember } from "@/lib/series-data";
+import { SERIES_START } from "@/lib/series";
+import { enterDraw, markUsed } from "./actions";
 
-// Perks unlock by level; each member gets their own code to show at the counter
-export default async function Perks({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  const { tab } = await searchParams;
-  const profile = await requireSeriesMember();
-  const v = await loadMemberView(profile);
-  const released = PERKS.filter((p) => p.week <= Math.max(v.week, 1));
-  const mine = released.filter((p) => p.level <= v.me.level);
-  const later = released.filter((p) => p.level > v.me.level);
-  const all = tab === "all";
+const ICON: Record<RewardKind, IconName> = { leaderboard: "trophy", draw: "gift", discount: "shirt", partner: "star", finale: "trophy" };
+const MESSAGES: Record<string, string> = {
+  entered: "You're in the draw. Good luck!", used: "Marked as used.",
+};
+const ERRORS: Record<string, string> = { closed: "That reward isn't open any more.", save: "Couldn't save that. Try again." };
+
+const dateLabel = (d: string) => new Date(`${d}T12:00:00+11:00`).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney" });
+const unlockLabel = (week: number) =>
+  new Date(SERIES_START.getTime() + (week - 1) * 7 * 86_400_000 + 12 * 3_600_000)
+    .toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", timeZone: "Australia/Sydney" }) + ", 12:00 am";
+
+// Rewards & Perks: a new offer unlocks every Monday. Nothing here costs points; points only climb the leaderboard.
+export default async function Perks({ searchParams }: { searchParams: Promise<{ done?: string; error?: string }> }) {
+  const q = await searchParams;
+  const me = await requireSeriesMember();
+  if (!me) {
+    return <Screen tabs><TopNav title="Rewards & Perks" /><p className="notice">Example mode. Rewards show up once the app is connected.</p></Screen>;
+  }
+  const { rewards, ctx, drawClosed } = await loadMemberRewards(me.id);
+  const released = rewards.filter((r) => isReleased(r, ctx.week));
+  const now = released.filter((r) => r.week === ctx.week);
+  const earlier = released.filter((r) => r.week < ctx.week).sort((a, b) => b.week - a.week);
+  const upcoming = [...new Map(rewards.filter((r) => !isReleased(r, ctx.week) && r.week > ctx.week).map((r) => [r.week, r])).values()];
+
   return (
     <Screen tabs>
-      <TopNav title="Perks" />
-      <SegLinks options={[{ label: "My perks", href: "/perks" }, { label: "All perks", href: "/perks?tab=all" }]} active={all ? "All perks" : "My perks"} />
-      {!all && mine.length === 0 && <p className="notice">Reach level 2 (50 points) to unlock your first perk.</p>}
-      {!all && mine.map((p) => (
-        <div key={p.key} className="voucher">
-          <div className="v-top">
-            <span className="ico" style={{ background: "rgba(29,27,24,.08)", color: "var(--ink)", width: 48, height: 48, borderRadius: 15 }}><Icon name={p.icon} /></span>
-            <div className="grow">
-              <div className="xs" style={{ color: "var(--ink-mute)", fontWeight: 600, letterSpacing: 1.5 }}>UNLOCKED · LEVEL {p.level}</div>
-              <b style={{ fontSize: 16 }}>{p.title}</b>
-              <div className="sm" style={{ color: "var(--ink-mute)" }}>{p.partner}</div>
-            </div>
-          </div>
-          <div className="v-code"><b>{perkCode(p.key, profile?.member_no ?? 148)}</b><span className="xs" style={{ color: "var(--ink-mute)" }}>Show at the counter · use by 26 Jan</span></div>
-        </div>
+      <TopNav title="Rewards & Perks" />
+      <p className="sm mute" style={{ margin: 0 }}>A new reward unlocks every Monday. You don&apos;t spend points on these. Points just help you climb the leaderboard.</p>
+      {q.done && MESSAGES[q.done] && <p className="notice" role="status">{MESSAGES[q.done]}</p>}
+      {q.error && ERRORS[q.error] && <p className="notice" role="alert">{ERRORS[q.error]}</p>}
+
+      <div className="eyebrow" style={{ marginTop: 4 }}>{ctx.week >= 1 ? `This week · Week ${ctx.week} · ${weekRange(ctx.week)}` : "This week"}</div>
+      {now.length === 0 && <p className="notice">{ctx.week >= 1 ? "This week's reward is being finalised. Check back soon." : "Rewards start when the Series does, Mon 7 Dec."}</p>}
+      {now.map((r) => <RewardCard key={r.id} r={r} ctx={ctx} drawClosed={drawClosed.has(r.id)} />)}
+
+      {upcoming.length > 0 && <div className="eyebrow" style={{ marginTop: 8 }}>Coming up</div>}
+      {upcoming.map((r) => (
+        <LockedTeaser key={r.week} title={`Week ${r.week} · ${r.published ? r.title : "Reward to be confirmed"}`} when={`Unlocks ${unlockLabel(r.week)} · COMING SOON`} />
       ))}
-      <div className="eyebrow" style={{ marginTop: 4 }}>{all ? "All perks" : "Next to unlock"}</div>
-      {(all ? released : later).map((p) => {
-        const need = LEVELS[p.level - 1].at;
-        const unlocked = p.level <= v.me.level;
-        return (
-          <div key={p.key} className={`perk ${unlocked ? "" : "locked"}`}>
-            <div className="art" style={{ background: p.art }}><Icon name={p.icon} style={{ color: "var(--cream)" }} /></div>
-            <div className="grow">
-              <b>{p.title}</b><div className="xs mute">{p.partner} · Level {p.level}</div>
-              {!unlocked && <div className="bar" style={{ marginTop: 7 }}><i style={{ width: `${Math.min(100, Math.round((v.me.points / need) * 100))}%` }} /></div>}
-            </div>
-            {unlocked ? <span className="xs mute">Unlocked</span> : <span className="xs mute">{need - v.me.points} pts</span>}
-          </div>
-        );
-      })}
-      {PERKS.some((p) => p.week > Math.max(v.week, 1)) && v.nextWeek && <LockedTeaser title="More perks on the way" when={`Next drop ${v.nextWeek.unlocks}`} />}
+
+      {earlier.length > 0 && <div className="eyebrow" style={{ marginTop: 8 }}>Earlier weeks</div>}
+      {earlier.map((r) => <RewardCard key={r.id} r={r} ctx={ctx} drawClosed={drawClosed.has(r.id)} />)}
     </Screen>
+  );
+}
+
+function RewardCard({ r, ctx, drawClosed }: { r: Reward; ctx: MemberRewardCtx; drawClosed: boolean }) {
+  const state = rewardState(r, ctx);
+  const showCode = r.code && (state === "available" || state === "unlocked") && (r.kind === "discount" || r.kind === "partner" || state === "unlocked");
+  return (
+    <div className={`reward ${state}`} id={`r${r.id}`}>
+      {r.image_url && /* eslint-disable-next-line @next/next/no-img-element */ <img className="reward-img" src={r.image_url} alt={r.partner || r.title} loading="lazy" />}
+      <div className="li" style={{ alignItems: "flex-start", gap: 12 }}>
+        <span className="ico reward-ico"><Icon name={ICON[r.kind]} /></span>
+        <div className="grow">
+          <div className="xs mute" style={{ letterSpacing: 1.2, fontWeight: 600 }}>{KIND_LABEL[r.kind].toUpperCase()}{r.partner ? ` · ${r.partner}` : ""}</div>
+          <b style={{ fontSize: 16 }}>{r.title}</b>
+        </div>
+        <span className={`rstate ${state}`}>{STATE_LABEL[state]}</span>
+      </div>
+      {r.description && <p className="sm" style={{ margin: "8px 0 0" }}>{r.description}</p>}
+      {state === "unlocked" && <p className="notice" role="status" style={{ marginTop: 8 }}>You&apos;re a winner! Collect this at The Yard.</p>}
+      <dl className="reward-facts">
+        {r.eligibility && <><dt>Who can get it</dt><dd>{r.eligibility}</dd></>}
+        {r.how_to && <><dt>How to {r.kind === "draw" ? "enter" : r.kind === "leaderboard" ? "win" : "redeem"}</dt><dd>{r.how_to}</dd></>}
+        {r.expires_on && <><dt>Expires</dt><dd>{dateLabel(r.expires_on)}</dd></>}
+      </dl>
+      {showCode && <div className="v-code"><b>{r.code}</b><span className="xs mute">Show at The Yard</span></div>}
+      {canEnterDraw(r, ctx, drawClosed) && (
+        <form action={enterDraw}><input type="hidden" name="reward" value={r.id} /><button className="btn" type="submit">Enter draw</button></form>
+      )}
+      {state === "available" && r.kind === "draw" && drawClosed && <p className="xs mute" style={{ margin: "8px 0 0" }}>Entries are closed. The winner has been drawn.</p>}
+      {canRedeem(r, ctx) && (
+        <form action={markUsed}><input type="hidden" name="reward" value={r.id} /><button className="mini ghost" type="submit">I&apos;ve used this</button></form>
+      )}
+    </div>
   );
 }

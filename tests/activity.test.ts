@@ -10,12 +10,12 @@ describe("buildActivity", () => {
     const w1 = w[1];
     expect(w1.sessions).toBe(3);
     expect(w1.hit3).toBe(true);
-    expect(w1.points).toBe(35);
+    expect(w1.points).toBe(30);
     expect(w1.items.some((i) => i.state === "bonus")).toBe(true);
   });
   it("only the first counted session each day earns points", () => {
     const [w] = buildActivity([c("2026-12-07", "run"), c("2026-12-07", "workout")], []);
-    expect(w.points).toBe(5);
+    expect(w.points).toBe(0);
     expect(w.items.filter((i) => i.state === "extra")).toHaveLength(1);
   });
   it("pending yard and recovery earn nothing yet", () => {
