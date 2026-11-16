@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Pill, Wordmark } from "@/components/ui";
-import { lastSessionLabel } from "@/lib/retention";
+import { joinedLabel, lastSessionLabel } from "@/lib/retention";
 import { loadRetention } from "./retention-data";
 
 const SHOW = 25;
@@ -20,16 +20,25 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <Pill>{started ? `Week ${d.week}` : "Starts Mon 7 Dec"}</Pill>
         </div>
 
-        <div className="pos-grid three" aria-label="Main tools">
+        <div className="pos-grid four" aria-label="Main tools">
           <Link prefetch={false} href="/admin/checkin" className="pos-tile big"><span className="t">Check-in</span></Link>
           <Link prefetch={false} href="/admin/leaderboard" className="pos-tile big"><span className="t">Leaderboard</span></Link>
+          <Link prefetch={false} href="/admin/retention" className="pos-tile big"><span className="t">Retention</span></Link>
           <Link prefetch={false} href="/admin/orders" className="pos-tile big"><span className="t">Orders &amp; shirts</span></Link>
         </div>
 
         <section className="needs" aria-labelledby="needs-h">
           <h2 id="needs-h">Needs attention</h2>
           {!started ? (
-            <p className="note">The Series starts 7 Dec, retention tracking starts then. <span className="mute">{d.members} members so far.</span></p>
+            <>
+              <p className="summary">{d.members} members · {d.waiting.length} signed up, waiting for 7 Dec</p>
+              {d.waiting.length === 0 ? <p className="note">No sign-ups yet.</p> : (
+                <ul className="quiet">
+                  {d.waiting.slice(0, SHOW).map((r) => <li key={r.id}><b>{r.name}</b><span>{joinedLabel(r.joined)}</span></li>)}
+                </ul>
+              )}
+              <Link prefetch={false} className="mini ghost" href="/admin/retention">Open Retention</Link>
+            </>
           ) : (
             <>
               <p className="summary">{d.members} members · {d.active} active this week · {d.needAttention} need attention</p>

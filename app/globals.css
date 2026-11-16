@@ -708,9 +708,9 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .tv li{display:grid;grid-template-columns:5vw 1fr auto;align-items:center;gap:2vw;font-size:clamp(20px,3vw,44px);font-weight:700;padding:.5vw 1.5vw;border-radius:16px;background:#141414}
 .tv li:nth-child(-n+3){background:#2b2418;color:#e3cba4}
 .tv .pts{font-variant-numeric:tabular-nums}
-.tv .bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:2vw}
-.tv .bar a{min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:12px;border:1px solid #6a645c;color:#fff;font-size:16px;text-decoration:none}
-.tv .bar a.on{background:#e3cba4;color:#000}
+.tv .tv-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:24px}
+.tv .tv-bar a{flex:0 0 auto;transform:none;font-style:normal;min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:12px;border:1px solid #6a645c;color:#fff;font-size:16px;text-decoration:none}
+.tv .tv-bar a.on{background:#e3cba4;color:#000}
 
 .stats a{display:block;background:var(--char-2);border:1px solid var(--line);border-radius:18px;padding:11px 12px;color:inherit;text-decoration:none}
 .stats a b{display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
@@ -761,4 +761,16 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .more ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .more a{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 16px;border-radius:14px;background:#161514;border:1px solid #3a3631;color:#fff;text-decoration:none}
 .more .badge{background:#e3cba4;color:#000;border-radius:999px;padding:2px 10px;font-weight:800;font-size:14px}
-.tv .bar a.exit{border-color:#e3cba4}
+.tv .tv-bar a.exit{border-color:#e3cba4}
+.tv,.tv *{font-style:normal;transform:none}
+.tv{font-family:var(--ui)}
+.tv h1{text-transform:none;letter-spacing:0;line-height:1.1;margin:0 0 24px}
+.tv li{grid-template-columns:minmax(2.2em,auto) 1fr auto;column-gap:clamp(12px,2vw,32px);padding:10px clamp(12px,1.5vw,24px)}
+.tv li>span:first-child{text-align:right}
+@media (max-width:600px){.tv{padding:16px}.tv .tv-bar a{padding:0 12px;font-size:15px}}
+.pos-grid.four{grid-template-columns:repeat(2,1fr)}
+@media (min-width:900px){.pos-grid.four{grid-template-columns:repeat(4,1fr)}}
+.needs h2 .count{font-size:14px;letter-spacing:0;background:#2a2622;color:#fff;border-radius:999px;padding:2px 10px;margin-left:6px}
+.needs h2 .count.warn{background:#e3cba4;color:#000}
+.needs .note.mute{color:#d2cbc0}
+.tv h1{overflow-wrap:anywhere}

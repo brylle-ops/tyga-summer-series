@@ -134,7 +134,7 @@ async function BigScreen({ week, w }: { week: number; w?: string }) {
   return (
     <div className="tv">
       <AutoRefreshTimer seconds={30} />
-      <div className="bar">
+      <div className="tv-bar">
         <a className="exit" href="/admin/leaderboard">‹ Exit big screen</a>
         {weeks.map((n) => (
           <Link key={n} prefetch={false} href={`/admin/leaderboard?tv=1${n ? `&w=${n}` : ""}`} className={n === picked ? "on" : ""} aria-current={n === picked ? "true" : undefined}>

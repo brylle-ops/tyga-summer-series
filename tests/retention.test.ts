@@ -64,4 +64,22 @@ describe("buildRetention", () => {
     expect(r.active).toBe(1);
     expect(r.rows).toEqual([]);
   });
+
+  it("before the series starts, lists named sign-ups as waiting, newest first, with no alarms", () => {
+    const r = buildRetention(
+      [p("a", { created_at: "2026-11-01T00:00:00Z" }), p("b", { created_at: "2026-11-10T00:00:00Z" }), p("u", { first_name: null }),
+        p("st", { role: "staff" }), p("h", { holiday_until: "2026-12-01" })], [], "2026-11-17");
+    expect(r.started).toBe(false);
+    expect(r.waiting.map((x) => x.id)).toEqual(["b", "a"]);
+    expect(r.waiting[0].joined).toBe("2026-11-10");
+    expect(r.needAttention).toBe(0);
+    expect(r.rows).toEqual([]);
+  });
+  it("splits quiet, never-logged and active groups once started", () => {
+    const r = buildRetention([p("q"), p("n", { created_at: "2026-12-01T00:00:00Z" }), p("a")], [s("q", "2026-12-01"), s("a", "2026-12-19")], "2026-12-20");
+    expect(r.quiet.map((x) => x.id)).toEqual(["q"]);
+    expect(r.never.map((x) => x.id)).toEqual(["n"]);
+    expect(r.activeRows.map((x) => x.id)).toEqual(["a"]);
+    expect(r.waiting).toEqual([]);
+  });
 });
