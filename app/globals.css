@@ -671,3 +671,16 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 
 .app:not(.sand):not(.welcome) .btn:not(.ghost){background:linear-gradient(180deg,#c98a45,#a9651f);color:#fff}
 .more-hero{justify-content:center;text-align:center}
+
+/* Staff top menu */
+.admin-nav{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;background:#1b1511;position:sticky;top:0;z-index:20}
+.admin-nav a{font-size:13px;font-weight:600;color:#cdbca6;text-decoration:none;padding:7px 12px;border-radius:99px}
+.admin-nav a.on{background:#e08a35;color:#fff}
+.admin-nav a:last-child{margin-left:auto;color:#e3cba4}
+
+.stats a{display:block;background:var(--char-2);border:1px solid var(--line);border-radius:18px;padding:11px 12px;color:inherit;text-decoration:none}
+.stats a b{display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.stats a small{font-size:10.5px;color:var(--mute);font-weight:500}
+.hbtn{position:relative}
+.hbtn.dot::after{content:"";position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:#e08a35;box-shadow:0 0 0 2px #17130f}
+.rlink{color:inherit;text-decoration:none}

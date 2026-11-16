@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import AdminNav from "@/components/AdminNav";
 import { getCurrentMember, supabaseReady } from "@/lib/session";
 
 // Admin is staff-only once sign-in is set up.
@@ -10,5 +11,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     if (!me) redirect("/login");
     if (me.profile.role !== "staff") redirect("/home");
   }
-  return children;
+  return (
+    <>
+      <AdminNav />
+      {children}
+    </>
+  );
 }

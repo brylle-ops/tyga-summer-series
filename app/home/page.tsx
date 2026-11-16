@@ -37,7 +37,7 @@ export default async function Home() {
       <div className="htop">
         <Link href="/more" className="hbtn" aria-label="Menu"><span className="burger" aria-hidden="true" /></Link>
         <b className="htitle">TYGA</b>
-        <Link href="/perks" className="hbtn" aria-label="Rewards"><Icon name="bell" /></Link>
+        <Link href="/notifications" className={`hbtn ${won.length + fresh.length > 0 ? "dot" : ""}`} aria-label="Notifications"><Icon name="bell" /></Link>
       </div>
       <div className="hhero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -91,9 +91,9 @@ export default async function Home() {
       </div>
 
       <div className="stats">
-        <div><b>{me.points}</b><small>points</small></div>
-        <div><b>#{me.rank}</b><small>of {me.participants}</small></div>
-        <div><b>{me.streakWeeks} wks</b><small>streak</small></div>
+        <Link href="/points"><b>{me.points}</b><small>points</small></Link>
+        <Link href="/ranks"><b>#{me.rank}</b><small>of {me.participants}</small></Link>
+        <Link href="/activity"><b>{me.streakWeeks} wks</b><small>streak</small></Link>
       </div>
 
       <Link href="/levels" className="card" style={{ textDecoration: "none", display: "block" }}>

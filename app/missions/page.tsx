@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import { LockedTeaser, Screen, SegLinks, Tick, TopNav } from "@/components/ui";
 import { unlockLabel, weekRange } from "@/lib/activity";
@@ -39,20 +40,20 @@ export default async function Missions({ searchParams }: { searchParams: Promise
                 m.secret ? (
                   <div key={m.id} className="srow locked">
                     <span className="ico"><Icon name="lock" /></span>
-                    <span className="grow"><b>{m.title}</b><small>{m.detail}</small></span>
+                    <Link href={`/missions/${m.id}`} className="grow rlink"><b>{m.title}</b><small>{m.detail}</small></Link>
                     <span className="ptag">???</span>
                   </div>
                 ) : m.done || !live || !v.real ? (
                   <div key={m.id} className="srow">
                     <Tick on={m.done} />
-                    <span className="grow"><b>{m.title}</b><small>{m.detail}</small></span>
+                    <Link href={`/missions/${m.id}`} className="grow rlink"><b>{m.title}</b><small>{m.detail}</small></Link>
                     <span className="ptag">+{m.points * (m.double ? 2 : 1)} pts</span>
                   </div>
                 ) : (
                   <form key={m.id} action={completeMission} className="srow">
                     <input type="hidden" name="mission" value={m.id} />
                     <button type="submit" aria-label={`Mark "${m.title}" done`} className="plain"><Tick /></button>
-                    <span className="grow"><b>{m.title}</b><small>{m.detail}{m.double ? " · 2× points" : ""}</small></span>
+                    <Link href={`/missions/${m.id}`} className="grow rlink"><b>{m.title}</b><small>{m.detail}{m.double ? " · 2× points" : ""}</small></Link>
                     <button type="submit" className="ptag go">Done +{m.points * (m.double ? 2 : 1)}</button>
                   </form>
                 ),

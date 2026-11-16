@@ -26,11 +26,11 @@ export default async function Nutrition({ searchParams }: { searchParams: Promis
       </div>
       <div className="rgrid">
         {shown.map((r) => (
-          <a key={r.code} href={`#${r.code}`} className={`rtile ${r.meal}`}>
+          <Link key={r.code} href={`/nutrition/${r.code}`} className={`rtile ${r.meal}`}>
             <span className="rart"><Icon name={r.icon} /><i>{r.code}</i></span>
             <b>{r.title}</b>
             <small>{MEAL_LABEL[r.meal]} · {r.cook}</small>
-          </a>
+          </Link>
         ))}
       </div>
 
