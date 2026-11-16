@@ -9,9 +9,10 @@ export const metadata = { title: "The Points · TYGA Summer Series" };
 export default async function Points() {
   const signed = supabaseReady() && Boolean(await getCurrentMember());
   return (
-    <Screen tabs={signed}>
-      <TopNav title="The Points" back={signed ? "/more" : "/"} />
-      <p className="sm mute" style={{ margin: 0 }}>Earn points for showing up, getting it done and being part of the series.</p>
+    <Screen tabs={signed} className="sand">
+      <TopNav title="Points" back={signed ? "/more" : "/"} />
+      <div><h2 className="disp">How to earn points</h2>
+      <p className="sm mute" style={{ margin: "2px 0 0" }}>Turn your commitment into points, rewards and a spot on the leaderboard.</p></div>
       <div className="sheet">
         {POINT_ROWS.map((r) => (
           <div key={r.title} className="srow">

@@ -6,13 +6,14 @@ import { signOut } from "@/app/join/sign-in/actions";
 import { getCurrentMember, supabaseReady } from "@/lib/session";
 
 const ROWS: { href: string; icon: IconName; title: string; note: string }[] = [
+  { href: "/series", icon: "sun", title: "Summer Series", note: "The singlet, details and rules" },
   { href: "/log", icon: "plus", title: "Log today", note: "Tick off what you did" },
   { href: "/activity", icon: "run", title: "My activity", note: "Your week and history" },
   { href: "/holiday", icon: "plane", title: "Holiday Mode", note: "Training away from The Yard?" },
-  { href: "/nutrition", icon: "bowl", title: "Nutrition", note: "Yard Fuel recipes and meal plan" },
+  { href: "/nutrition", icon: "bowl", title: "Recipes", note: "Yard Fuel recipes and meal plan" },
   { href: "/shop", icon: "shirt", title: "Shop", note: "The Summer Series singlet" },
   { href: "/rules", icon: "info", title: "The Rules", note: "Your weekly commitment" },
-  { href: "/points", icon: "star", title: "The Points", note: "How to earn points" },
+  { href: "/points", icon: "star", title: "Points", note: "How to earn points" },
   { href: "/overview", icon: "calendar", title: "Series overview", note: "Dates and how it works" },
   { href: "/resources", icon: "leaf", title: "Summer resources", note: "Holiday workouts, recovery, more" },
 ];
@@ -25,8 +26,6 @@ export default async function More() {
     <Screen tabs>
       <TopNav title="More" />
       <div className="more-hero">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/img/summer-mark.webp" width={120} height={95} alt="" />
         <div><b className="disp">Maintain the standard</b><small>TYGA · SUMMER SERIES 2026</small></div>
       </div>
       <div className="sheet">

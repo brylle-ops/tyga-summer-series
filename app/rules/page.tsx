@@ -9,7 +9,7 @@ export const metadata = { title: "The Rules · TYGA Summer Series" };
 export default async function Rules() {
   const signed = supabaseReady() && Boolean(await getCurrentMember());
   return (
-    <Screen tabs={signed}>
+    <Screen tabs={signed} className="sand">
       <TopNav title="The Rules" back={signed ? "/more" : "/"} />
       <p className="sm mute" style={{ margin: 0 }}>A 7-week commitment to stay consistent, active and maintain the standard through summer.</p>
       <div className="sheet pad">

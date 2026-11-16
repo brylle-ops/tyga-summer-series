@@ -15,6 +15,13 @@ const QUICK: { href: string; label: string; icon: IconName }[] = [
   { href: "/points", label: "Points", icon: "star" },
 ];
 
+const PILLARS: { href: string; label: string; icon: IconName }[] = [
+  { href: "/log", label: "TRAIN", icon: "db" },
+  { href: "/holiday", label: "MOVE", icon: "run" },
+  { href: "/nutrition", label: "FUEL", icon: "bowl" },
+  { href: "/points", label: "EARN", icon: "trophy" },
+];
+
 // Home dashboard
 export default async function Home() {
   const profile = await requireSeriesMember();
@@ -26,10 +33,21 @@ export default async function Home() {
   const left = 3 - thisWeek.sessionsDone;
   const ringPct = Math.round((thisWeek.sessionsDone / 3) * 100);
   return (
-    <Screen tabs>
-      <div className="hdr">
+    <Screen tabs className="dark">
+      <div className="htop">
+        <Link href="/more" className="hbtn" aria-label="Menu"><span className="burger" aria-hidden="true" /></Link>
+        <b className="htitle">TYGA</b>
+        <Link href="/perks" className="hbtn" aria-label="Rewards"><Icon name="bell" /></Link>
+      </div>
+      <div className="hhero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="hdr-mark" src="/img/summer-mark.webp" width={64} height={51} alt="" />
+        <img src="/img/summer-series-logo.webp" width={900} height={1125} alt="TYGA Summer Series 2026. Maintain the standard." fetchPriority="high" />
+      </div>
+      <div className="wdates"><Icon name="calendar" /><span>MON 7 DEC – TUE 26 JAN<br /><small>7 WEEKS</small></span></div>
+      <ul className="pillars" aria-label="The Series">
+        {PILLARS.map((p) => (<li key={p.label}><Link href={p.href}><Icon name={p.icon} /><b>{p.label}</b></Link></li>))}
+      </ul>
+      <div className="hdr">
         <div>
           <div className="sm mute">Hey, {me.firstName}</div>
           <div className="h2">{v.week >= 1 ? <>Week {thisWeek.no} · <span className="script" style={{ fontSize: 22 }}>{thisWeek.theme}</span></> : "Series starts Mon 7 Dec"}</div>

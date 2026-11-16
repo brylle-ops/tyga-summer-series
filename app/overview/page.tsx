@@ -9,7 +9,7 @@ export const metadata = { title: "Series Overview · TYGA Summer Series" };
 export default async function Overview() {
   const signed = supabaseReady() && Boolean(await getCurrentMember());
   return (
-    <Screen tabs={signed}>
+    <Screen tabs={signed} className="sand">
       <TopNav title="Series Overview" back={signed ? "/more" : "/join/singlet"} />
       <div className="sheet">
         {OVERVIEW_ROWS.map((r) => (

@@ -1,8 +1,11 @@
+import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import { Screen, TopNav } from "@/components/ui";
 import { BEFORE_TRAINING, LINEUP, MEAL_LABEL, PLAN_NOTE, QUICK_FOOD, RECIPES, byCode, type Meal, type Recipe } from "@/lib/nutrition";
 
 export const metadata = { title: "Yard Fuel · TYGA Summer Series" };
+
+const CHIPS = [{ key: "all", label: "All" }, { key: "breakfast", label: "Breakfast" }, { key: "lunch", label: "Lunch" }, { key: "dinner", label: "Dinner" }, { key: "snack", label: "Snacks" }];
 
 const GROUPS: { meal: Meal | "dinner-snack"; title: string; sub: string; meals: Meal[] }[] = [
   { meal: "breakfast", title: "Start well", sub: "Three breakfasts", meals: ["breakfast"] },
@@ -11,23 +14,25 @@ const GROUPS: { meal: Meal | "dinner-snack"; title: string; sub: string; meals: 
 ];
 
 // Yard Fuel: the gym's seven-day meal plan, in summer colours. Recipes open on tap.
-export default function Nutrition() {
+export default async function Nutrition({ searchParams }: { searchParams: Promise<{ meal?: string }> }) {
+  const { meal } = await searchParams;
+  const shown = RECIPES.filter((r) => !meal || meal === "all" || r.meal === meal);
   return (
     <Screen tabs bodyStyle={{ gap: 14 }}>
-      <TopNav title="Yard Fuel" back="/home" />
+      <TopNav title="Recipes" back="/more" />
 
-      <section className="nu-hero" aria-labelledby="nu-h">
-        <span className="nu-sun" aria-hidden="true" />
-        <div className="eyebrow">The Yard · 7 days of Yard Fuel</div>
-        <h1 id="nu-h" className="nu-title">Start well.<br /><span className="script">keep going</span></h1>
-        <p className="sm">10 recipes. A simple rotation. Food that fits into your week.</p>
-        <div className="nu-count">
-          <div><b>3</b><small>breakfasts</small></div>
-          <div><b>3</b><small>lunches</small></div>
-          <div><b>3</b><small>dinners</small></div>
-          <div><b>1</b><small>snack</small></div>
-        </div>
-      </section>
+      <div className="chips" role="tablist" aria-label="Recipe type">
+        {CHIPS.map((c) => <Link key={c.key} href={c.key === "all" ? "/nutrition" : `/nutrition?meal=${c.key}`} className={`chip ${(meal ?? "all") === c.key ? "on" : ""}`}>{c.label}</Link>)}
+      </div>
+      <div className="rgrid">
+        {shown.map((r) => (
+          <a key={r.code} href={`#${r.code}`} className={`rtile ${r.meal}`}>
+            <span className="rart"><Icon name={r.icon} /><i>{r.code}</i></span>
+            <b>{r.title}</b>
+            <small>{MEAL_LABEL[r.meal]} · {r.cook}</small>
+          </a>
+        ))}
+      </div>
 
       <section aria-labelledby="nu-week">
         <div className="li"><h2 id="nu-week" className="h2 grow">The seven-day line-up</h2></div>

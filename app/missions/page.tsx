@@ -27,8 +27,8 @@ export default async function Missions({ searchParams }: { searchParams: Promise
         const live = w === v.week;
         return (
           <section key={w} className="mweek">
-            <h2 className="disp">Week {w} mission</h2>
-            <p className="xs mute" style={{ margin: "0 0 8px" }}>{weekRange(w)}{live ? " · closes Sunday 11:59 pm" : ""}</p>
+            <h2 className="disp">Week {w} missions</h2>
+            <p className="sm mute" style={{ margin: "2px 0 8px" }}>{live ? "Complete the missions, earn points and climb the leaderboard." : ""} <span className="xs">{weekRange(w)}{live ? " · closes Sunday 11:59 pm" : ""}</span></p>
             <div className="sheet">
               <div className="srow">
                 <Tick on={live ? targetDone : v.week > w ? true : false} />

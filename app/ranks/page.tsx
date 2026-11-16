@@ -9,45 +9,28 @@ export default async function Ranks({ searchParams }: { searchParams: Promise<{ 
   const v = await loadMemberView(await requireSeriesMember());
   const { me } = v;
   const week = tab === "week";
-  const board = v.weekBoard as Entry[];
-  const [second, first, third] = week ? [board[1], board[0], board[2]] : v.podium;
-  const list: Entry[] = week ? board.slice(3, 10) : v.leaderboard;
-  const mine = week ? board.find((r) => r.id && r.id === (me as { id?: string }).id) : undefined;
+  const myId = (me as { id?: string }).id;
+  // Overall comes as podium order [2nd, 1st, 3rd] plus the rest; put it back into one ranked list.
+  const rows: Entry[] = week ? (v.weekBoard as Entry[]) : [v.podium[1], v.podium[0], v.podium[2], ...v.leaderboard].filter(Boolean) as Entry[];
   return (
     <Screen tabs>
       <TopNav title="Leaderboard" />
       <SegLinks options={[{ label: "Overall", href: "/ranks" }, { label: "This week", href: "/ranks?tab=week" }]} active={week ? "This week" : "Overall"} />
       {week && <p className="sm mute" style={{ margin: 0 }}>{v.week >= 1 ? `Points earned in Week ${v.week} only.` : "Week 1 starts Mon 7 Dec."}</p>}
-      {!first ? <p className="notice">{week ? "Nobody has points this week yet. Be the first." : "No points yet. Log a session to get on the board."}</p> : (
-        <div className="podium" style={{ marginTop: 6 }}>
-          <div>{second && <><div className="av">{second.initials}</div><b>{second.name}</b><span className="xs mute">{second.points}</span></>}</div>
-          <div className="p1"><div className="av" style={{ color: "var(--cream)" }}>{first.initials}</div><b>{first.name}</b><span className="xs" style={{ color: "var(--ink-mute)" }}>{first.points} pts</span></div>
-          <div>{third && <><div className="av">{third.initials}</div><b>{third.name}</b><span className="xs mute">{third.points}</span></>}</div>
+      {rows.length === 0 ? <p className="notice">{week ? "Nobody has points this week yet. Be the first." : "No points yet. Log a session to get on the board."}</p> : (
+        <div className="lbl">
+          {rows.slice(0, 10).map((r, i) => (
+            <div key={`${r.name}-${i}`} className={`lbrow ${r.id && r.id === myId ? "me" : ""}`}>
+              <span className={`medal m${(r.rank ?? i + 1) <= 3 ? (r.rank ?? i + 1) : 0}`}>{r.rank ?? i + 1}</span>
+              <span className="av">{r.initials}</span>
+              <span className="grow"><b>{r.name}</b>{r.id && r.id === myId ? <small> · you</small> : null}</span>
+              <span className="pts">{r.points} pts</span>
+            </div>
+          ))}
         </div>
       )}
-      <div className="lb">
-        {list.map((r) => (
-          <div key={r.name + r.rank}>
-            <span className="rk">{r.rank}</span><span className="av">{r.initials}</span>
-            <span className="grow sm">{r.name}</span><span className="pts sm">{r.points}</span>
-          </div>
-        ))}
-      </div>
-      {!week && me.rank > 0 && (
-        <div className="you">
-          <span className="rk" style={{ width: 20, textAlign: "center", fontWeight: 700 }}>{me.rank}</span>
-          <span className="av" style={{ color: "var(--cream)" }}>{me.initials}</span>
-          <span className="grow sm"><b>You</b> · {me.shortName}</span>
-          <span className="pts">{me.points}</span>
-        </div>
-      )}
-      {week && mine && (
-        <div className="you">
-          <span className="rk" style={{ width: 20, textAlign: "center", fontWeight: 700 }}>{mine.rank}</span>
-          <span className="av" style={{ color: "var(--cream)" }}>{mine.initials}</span>
-          <span className="grow sm"><b>You</b> · {mine.name}</span>
-          <span className="pts">{mine.points}</span>
-        </div>
+      {!week && me.rank > 10 && (
+        <div className="lbl"><div className="lbrow me"><span className="medal m0">{me.rank}</span><span className="av">{me.initials}</span><span className="grow"><b>{me.shortName}</b><small> · you</small></span><span className="pts">{me.points} pts</span></div></div>
       )}
     </Screen>
   );

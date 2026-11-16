@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { LockedTeaser, Screen, TopNav } from "@/components/ui";
 import { weekRange } from "@/lib/activity";
@@ -19,14 +20,20 @@ const unlockLabel = (week: number) =>
     .toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", timeZone: "Australia/Sydney" }) + ", 12:00 am";
 
 // Rewards & Perks: a new offer unlocks every Monday. Nothing here costs points; points only climb the leaderboard.
-export default async function Perks({ searchParams }: { searchParams: Promise<{ done?: string; error?: string }> }) {
+export default async function Perks({ searchParams }: { searchParams: Promise<{ done?: string; error?: string; show?: string }> }) {
   const q = await searchParams;
   const me = await requireSeriesMember();
   if (!me) {
     return <Screen tabs><TopNav title="Rewards & Perks" /><p className="notice">Example mode. Rewards show up once the app is connected.</p></Screen>;
   }
   const { rewards, ctx, drawClosed } = await loadMemberRewards(me.id);
-  const released = rewards.filter((r) => isReleased(r, ctx.week));
+  const GROUPS = [
+    { key: "local", icon: "cup" as IconName, title: "Local business discounts", note: "Exclusive offers from our partners", kinds: ["partner", "discount"] },
+    { key: "prizes", icon: "gift" as IconName, title: "Weekly prizes", note: "Win draws and leaderboard rewards", kinds: ["draw", "leaderboard"] },
+    { key: "major", icon: "star" as IconName, title: "Major prize", note: "The big finale reward", kinds: ["finale"] },
+  ];
+  const group = GROUPS.find((g) => g.key === q.show);
+  const released = rewards.filter((r) => isReleased(r, ctx.week) && (!group || group.kinds.includes(r.kind)));
   const now = released.filter((r) => r.week === ctx.week);
   const earlier = released.filter((r) => r.week < ctx.week).sort((a, b) => b.week - a.week);
   const upcoming = [...new Map(rewards.filter((r) => !isReleased(r, ctx.week) && r.week > ctx.week).map((r) => [r.week, r])).values()];
@@ -35,6 +42,15 @@ export default async function Perks({ searchParams }: { searchParams: Promise<{ 
     <Screen tabs>
       <TopNav title="Rewards & Perks" />
       <div className="hero"><h2 className="disp">Exclusive perks for our Summer Series community.</h2></div>
+      <div className="sheet">
+        {GROUPS.map((g) => (
+          <Link key={g.key} href={group?.key === g.key ? "/perks" : `/perks?show=${g.key}`} className={`srow ${group?.key === g.key ? "sel" : ""}`}>
+            <span className="ico"><Icon name={g.icon} /></span>
+            <span className="grow"><h2 className="disp sm-d">{g.title}</h2><small>{g.note}</small></span>
+            <span className="mute" aria-hidden="true">{group?.key === g.key ? "✕" : "›"}</span>
+          </Link>
+        ))}
+      </div>
       <p className="sm mute" style={{ margin: 0 }}>A new reward unlocks every Monday. You don&apos;t spend points on these. Points just help you climb the leaderboard.</p>
       {q.done && MESSAGES[q.done] && <p className="notice" role="status">{MESSAGES[q.done]}</p>}
       {q.error && ERRORS[q.error] && <p className="notice" role="alert">{ERRORS[q.error]}</p>}

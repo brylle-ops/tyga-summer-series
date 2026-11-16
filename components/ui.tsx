@@ -7,7 +7,7 @@ export function Screen({ children, tabs = false, className = "", bodyStyle }: {
   children: React.ReactNode; tabs?: boolean; className?: string; bodyStyle?: React.CSSProperties;
 }) {
   return (
-    <div className={`app ${tabs ? "has-tabs" : ""} ${className}`}>
+    <div className={`app ${tabs ? "has-tabs" : ""} ${!className.split(" ").includes("dark") && (tabs || className.split(" ").includes("sand")) ? "sand" : ""} ${className}`}>
       <main className="body" style={bodyStyle}>{children}</main>
       {tabs && <TabBar />}
     </div>
