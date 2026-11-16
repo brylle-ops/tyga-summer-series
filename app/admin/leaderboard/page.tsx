@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Pill, Wordmark } from "@/components/ui";
+import AutoRefreshTimer from "@/components/AutoRefreshTimer";
 import { redeemPerk } from "@/app/series/actions";
 import { buildDashboard, type DashRow } from "@/lib/dashboard";
 import { loadEveryone, seriesWeekNow } from "@/lib/series-data";
@@ -38,7 +39,7 @@ export default async function Leaderboard({ searchParams }: { searchParams: Prom
           <div className="li" style={{ gap: 8, flexWrap: "wrap" }}>
             <Pill>{week >= 1 ? `Week ${week}` : "Starts Mon 7 Dec"}</Pill>
             <Link className="mini ghost" href="/admin">‹ Admin</Link>
-            <Link className="mini" href="/admin/leaderboard?tv=1">Open big screen</Link>
+            <a className="mini" href="/admin/leaderboard?tv=1">Open big screen</a>
             <a className="mini" href="/admin/leaderboard.csv">Download CSV</a>
           </div>
         </div>
@@ -114,27 +115,33 @@ async function BigScreen({ week, w }: { week: number; w?: string }) {
   const sel = Number(w);
   const picked = Number.isInteger(sel) && sel >= 1 && sel <= 7 ? sel : 0; // 0 = whole series
   const short = (n: string) => { const [f, ...r] = n.split(" "); return r.length ? `${f} ${r[r.length - 1][0]}.` : f; };
-  let rows: { rank: number; name: string; points: number }[];
-  if (picked) {
-    rows = rankWeek(await weekScores(picked), 20).rows.slice(0, 20).map((r) => ({ rank: r.rank, name: short(r.name), points: r.points }));
-  } else {
-    const { everyone, missions } = await loadEveryone();
-    rows = buildDashboard(everyone, missions, week, new Set()).rows.slice(0, 20).map((r) => ({ rank: r.rank, name: short(r.name), points: r.points }));
+  let rows: { rank: number; name: string; points: number }[] = [];
+  let failed = false;
+  try {
+    if (picked) {
+      rows = rankWeek(await weekScores(picked), 20).rows.slice(0, 20).map((r) => ({ rank: r.rank, name: short(r.name), points: r.points }));
+    } else {
+      const { everyone, missions } = await loadEveryone();
+      rows = buildDashboard(everyone, missions, week, new Set()).rows.slice(0, 20).map((r) => ({ rank: r.rank, name: short(r.name), points: r.points }));
+    }
+  } catch (e) {
+    console.error("[big screen]", e);
+    failed = true;
   }
   const weeks = [0, 1, 2, 3, 4, 5, 6, 7];
   return (
     <div className="tv">
-      <meta httpEquiv="refresh" content="30" />
+      <AutoRefreshTimer seconds={30} />
       <div className="bar">
-        <Link href="/admin/leaderboard">‹ Exit big screen</Link>
+        <a className="exit" href="/admin/leaderboard">‹ Exit big screen</a>
         {weeks.map((n) => (
-          <Link key={n} href={`/admin/leaderboard?tv=1${n ? `&w=${n}` : ""}`} className={n === picked ? "on" : ""} aria-current={n === picked ? "true" : undefined}>
+          <Link key={n} prefetch={false} href={`/admin/leaderboard?tv=1${n ? `&w=${n}` : ""}`} className={n === picked ? "on" : ""} aria-current={n === picked ? "true" : undefined}>
             {n === 0 ? "Series" : `Week ${n}`}
           </Link>
         ))}
       </div>
       <h1>{picked ? `Week ${picked} leaderboard` : "Summer Series leaderboard"}</h1>
-      {rows.length === 0 ? <p style={{ fontSize: "3vw" }}>No points yet.</p> : (
+      {failed ? <p style={{ fontSize: "3vw" }}>Could not load the leaderboard. It will try again in 30 seconds.</p> : rows.length === 0 ? <p style={{ fontSize: "3vw" }}>No points yet. Check back after the first sessions are logged.</p> : (
         <ol>{rows.map((r, i) => <li key={i}><span>{r.rank}</span><span>{r.name}</span><span className="pts">{r.points} pts</span></li>)}</ol>
       )}
     </div>

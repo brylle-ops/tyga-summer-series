@@ -130,14 +130,14 @@ export async function addMission(formData: FormData) {
   const points = Number(formData.get("points") || 10);
   const title = String(formData.get("title") ?? "").trim().slice(0, 80);
   const detail = String(formData.get("detail") ?? "").trim().slice(0, 140);
-  if (!title || !(week >= 1 && week <= 7) || !(points >= 0 && points <= 100)) redirect("/admin?mission=invalid");
+  if (!title || !(week >= 1 && week <= 7) || !(points >= 0 && points <= 100)) redirect("/admin/missions?m=invalid");
   // A week that has already started can't be changed underneath members.
-  if (week <= seriesWeekNow()) redirect("/admin?mission=live");
+  if (week <= seriesWeekNow()) redirect("/admin/missions?m=live");
   await createAdminClient().from("missions").insert({
     week, title, detail, points, double: formData.get("double") === "on",
   });
   revalidatePath("/admin");
-  redirect("/admin?mission=added");
+  redirect("/admin/missions?m=added");
 }
 
 // Staff: mark a member's perk as handed over (stops it showing as "to hand out").
