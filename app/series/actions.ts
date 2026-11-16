@@ -121,7 +121,7 @@ export async function reviewCheckin(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return;
   await createAdminClient().from("checkins").update({ status }).eq("id", id).eq("status", "pending");
-  revalidatePath("/admin");
+  revalidatePath("/admin"); revalidatePath("/admin/checkin"); revalidatePath("/home");
 }
 
 export async function addMission(formData: FormData) {

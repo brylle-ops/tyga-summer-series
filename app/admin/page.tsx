@@ -8,11 +8,9 @@ import {
 
 // Staff admin (Sarah and the team). Buttons are not wired up yet.
 export default async function Admin({ searchParams }: { searchParams: Promise<{ mission?: string }> }) {
-  const d = await loadAdminData();
-  const s = await loadSeriesAdmin();
+  const [d, s, toCollect] = await Promise.all([loadAdminData(), loadSeriesAdmin(), loadRewardsToCollect()]);
   const { followUps } = s;
   const { mission } = await searchParams;
-  const toCollect = await loadRewardsToCollect();
   const { payments, sizes: singletSizes, order: singletOrder } = d;
   return (
     <div className="admin-page">
@@ -33,7 +31,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <div className="pos-grid" aria-label="Owner tools">
           <a href="/admin/orders" className="pos-tile big"><span className="t">Orders &amp; shirts</span><span className="n">{d.registeredPaid}</span><span className="d">shirts ordered · {d.startedUnpaid} unpaid</span></a>
           <a href="/admin/leaderboard" className="pos-tile big"><span className="t">Leaderboard</span><span className="n">{s.real ? s.hit3Last : "–"}</span><span className="d">hit 3/3 last week · big screen</span></a>
-          <a href="/admin/checkin" className="pos-tile big"><span className="t">Check-in</span><span className="n">{s.real ? s.pending.length : k.toApprove}</span><span className="d">Yard check-ins to approve</span></a>
+          <a href="/admin/checkin" className="pos-tile big"><span className="t">Check-in</span><span className="n">{s.real ? s.pending.length : k.toApprove}</span><span className="d">to approve</span></a>
           <a href="/admin/rewards" className="pos-tile big"><span className="t">Rewards</span><span className="n">{toCollect ?? "–"}</span><span className="d">awaiting collection</span></a>
           <a href="/admin/missions" className="pos-tile small"><span className="t">Missions</span><span className="d">Add and review</span></a>
           <a href="/admin/members" className="pos-tile small"><span className="t">Members</span><span className="n">{d.real ? d.signedUp : d.registeredPaid}</span><span className="d">signed up</span></a>

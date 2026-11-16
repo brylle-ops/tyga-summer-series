@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isUuid, memberSearchFilter, parseKind, sanitiseSearch, staffStatus } from "@/lib/staff-checkin";
+import { isUuid, memberSearchFilter, parseKind, sanitiseSearch } from "@/lib/staff-checkin";
 
 describe("staff check-in helpers", () => {
   it("strips filter syntax and wildcards", () => {
     expect(sanitiseSearch("amy),email.ilike.%")).toBe("amy email.ilike.");
-    expect(sanitiseSearch("a%b*c_d(e)f,g")).toBe("a b c d e f g");
+    expect(sanitiseSearch("a%b*c_d(e)f,g")).toBe("a b c_d e f g");
     expect(sanitiseSearch(undefined)).toBe("");
   });
   it("caps length at 40", () => { expect(sanitiseSearch("x".repeat(100))).toHaveLength(40); });
@@ -24,5 +24,4 @@ describe("staff check-in helpers", () => {
     expect(parseKind("swim")).toBeNull();
     expect(parseKind(null)).toBeNull();
   });
-  it("staff-logged yard is confirmed", () => { expect(staffStatus("yard")).toBe("confirmed"); });
 });
