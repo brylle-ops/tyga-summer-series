@@ -14,7 +14,7 @@ const MESSAGES: Record<string, string> = {
   saved: "Saved.", added: "Reward added. It stays hidden until you tick Published.", "winners-ok": "Winners confirmed. They'll see it in the app.",
   "drawn-ok": "Winner drawn. They'll see it in the app.", collected: "Marked as collected.", removed: "Winner removed.",
   invalid: "Check the details and try again.", error: "Something went wrong. Try again.", winners: "Pick between 1 and the allowed number of ranked members.",
-  badimage: "Image must be a PNG, JPG or WebP under 2 MB.", uploaderror: "The image could not be uploaded. Try again.",
+  badimage: "Image must be a PNG, JPG or WebP under 3.5 MB.", uploaderror: "The image could not be uploaded. Try again.",
   posted: "Announcement posted.", deleted: "Announcement deleted.", annerror: "Announcements are not ready yet (run migration 0007), or something went wrong.",
   drawn: "This draw already has its winner(s).", noentries: "Nobody has entered this draw yet.",
 };
@@ -203,7 +203,7 @@ function RewardForm({ r }: { r: Reward }) {
         <label>Expires<input name="expires_on" type="date" defaultValue={r.expires_on ?? ""} /></label>
         <label>Winners<input name="winners_count" type="number" min={1} max={50} defaultValue={r.winners_count} /></label>
         <label className="wide">Logo / image link (https)<input name="image_url" type="url" defaultValue={r.image_url ?? ""} maxLength={500} placeholder="https://" /></label>
-        <label className="wide">Upload logo / image (PNG, JPG or WebP, max 2 MB)<input name="image_file" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+        <label className="wide">Upload logo / image (PNG, JPG or WebP, max 3.5 MB)<input name="image_file" type="file" accept="image/png,image/jpeg,image/webp" /></label>
         <label className="check"><input name="published" type="checkbox" defaultChecked={r.published} /> Published (unlocks on its Monday)</label>
         <button className="mini" type="submit">Save</button>
       </form>

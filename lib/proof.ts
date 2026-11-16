@@ -1,6 +1,6 @@
 import { sniffImageType, type SniffedImage } from "@/lib/image-sniff";
 
-export const MAX_PROOF_BYTES = 2.5 * 1024 * 1024;
+export const MAX_PROOF_BYTES = 3.5 * 1024 * 1024;
 
 /** Missions where a photo helps staff verify the completion. */
 export const PHOTO_MISSIONS = ["Fuel It", "Wear the Singlet", "Run It", "Hello, 2027!", "Squad Session"];

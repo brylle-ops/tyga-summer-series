@@ -2,13 +2,15 @@ import { redirect } from "next/navigation";
 import { Pill, Wordmark } from "@/components/ui";
 import { isStaff, supabaseReady } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import ConfirmButton from "@/components/ConfirmButton";
 import { revokeCompletion } from "../../series/actions";
 
 type C = { profile_id: string; mission_id: number; created_at: string; proof_path?: string | null };
 const when = (d: string) => new Date(d).toLocaleString("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Australia/Sydney" });
 
 // Backend: latest mission completions, with photo proof and a Revoke button. Staff only.
-export default async function MissionCheck() {
+export default async function MissionCheck({ searchParams }: { searchParams: Promise<{ m?: string }> }) {
+  const { m: notice } = await searchParams;
   if (!supabaseReady()) return <p style={{ padding: 24 }}>Connect Supabase to see missions.</p>;
   if (!(await isStaff())) redirect("/login");
   const db = createAdminClient();
@@ -41,6 +43,8 @@ export default async function MissionCheck() {
           <div className="li"><Wordmark short size={26} /><span className="eyebrow" style={{ marginLeft: 10 }}>Mission check</span></div>
           <Pill>{rows.length} latest</Pill>
         </div>
+        {notice === "revoked" && <p className="notice" role="status">Completion revoked.</p>}
+        {notice === "error" && <p className="notice" role="alert">Could not revoke that completion. Please try again.</p>}
         <div className="card">
           <div className="tablewrap"><table>
             <thead><tr><th>Member</th><th>Mission</th><th className="n">Week</th><th>When</th><th className="n">Points</th><th>Photo</th><th></th></tr></thead>
@@ -60,7 +64,7 @@ export default async function MissionCheck() {
                       <form action={revokeCompletion}>
                         <input type="hidden" name="profile" value={r.profile_id} />
                         <input type="hidden" name="mission" value={r.mission_id} />
-                        <button className="mini" type="submit">Revoke</button>
+                        <ConfirmButton className="mini" message="Revoke this completion? The member loses the points and any photo is deleted.">Revoke</ConfirmButton>
                       </form>
                     </td>
                   </tr>

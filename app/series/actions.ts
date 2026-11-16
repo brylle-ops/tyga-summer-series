@@ -85,18 +85,19 @@ export async function revokeCompletion(formData: FormData) {
   if (!(await isStaff())) redirect("/home");
   const profile = String(formData.get("profile") ?? "");
   const mission = Number(formData.get("mission"));
-  if (!/^[0-9a-f-]{36}$/i.test(profile) || !Number.isInteger(mission)) return;
+  if (!/^[0-9a-f-]{36}$/i.test(profile) || !Number.isInteger(mission)) redirect("/admin/missions?m=error");
   const db = createAdminClient();
   const { data: row, error: readErr } = await db.from("mission_completions").select("proof_path").eq("profile_id", profile).eq("mission_id", mission).maybeSingle();
   if (readErr) console.error("[revoke read]", readErr.message);
   const { error } = await db.from("mission_completions").delete().eq("profile_id", profile).eq("mission_id", mission);
-  if (error) { console.error("[revoke]", error.message); return; }
+  if (error) { console.error("[revoke]", error.message); redirect("/admin/missions?m=error"); }
   const path = (row as { proof_path?: string | null } | null)?.proof_path;
   if (path) {
     const rm = await db.storage.from("proofs").remove([path]);
     if (rm.error) console.error("[revoke file]", rm.error.message);
   }
   revalidatePath("/admin/missions"); revalidatePath("/missions"); revalidatePath("/home");
+  redirect("/admin/missions?m=revoked");
 }
 
 export async function setHoliday(formData: FormData) {

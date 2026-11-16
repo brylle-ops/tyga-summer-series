@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { Screen, TopNav } from "@/components/ui";
 import { unlockLabel, weekRange } from "@/lib/activity";
-import { wantsPhoto } from "@/lib/proof";
+import ProofInput from "@/components/ProofInput";
+import { MAX_PROOF_BYTES, wantsPhoto } from "@/lib/proof";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
 import { completeMission } from "../../series/actions";
 
@@ -39,10 +40,10 @@ export default async function Mission({ params, searchParams }: { params: Promis
         {open && (
           <form action={completeMission} encType="multipart/form-data" style={{ marginTop: 14 }}>
             <input type="hidden" name="mission" value={m.id} />
-            {error === "photo" && <p className="notice" role="alert">That photo could not be used. Please attach a PNG, JPG or WebP under 2.5 MB.</p>}
+            {error === "photo" && <p className="notice" role="alert">That photo could not be used. Please attach a PNG, JPG or WebP under 3.5 MB.</p>}
             <label className="sm" style={{ display: "block", marginBottom: 10 }}>
-              Add a photo or screenshot (optional, PNG/JPG/WebP, max 2.5 MB)
-              <input type="file" name="proof" accept="image/png,image/jpeg,image/webp" style={{ display: "block", marginTop: 6 }} />
+              Add a photo or screenshot (optional, PNG/JPG/WebP, max 3.5 MB)
+              <ProofInput maxBytes={MAX_PROOF_BYTES} maxLabel="3.5 MB" />
               {wantsPhoto(m.title) && <span className="xs mute" style={{ display: "block", marginTop: 4 }}>A photo helps staff verify this one.</span>}
             </label>
             <button className="btn" type="submit">I&apos;ve done it · +{pts} pts</button>

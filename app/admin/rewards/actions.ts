@@ -52,7 +52,7 @@ export async function saveReward(formData: FormData) {
 }
 
 const IMAGE_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
-const MAX_IMAGE = 2 * 1024 * 1024;
+const MAX_IMAGE = 3.5 * 1024 * 1024;
 
 /** Validates and uploads to the public "rewards" bucket (created on first use). Returns the public URL, "invalid", or null on failure. */
 async function uploadRewardImage(file: File): Promise<string | "invalid" | null> {
