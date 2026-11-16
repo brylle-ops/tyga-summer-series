@@ -41,4 +41,27 @@ describe("buildRetention", () => {
   it("formats the label", () => {
     expect(lastSessionLabel({ lastSession: "2026-12-08", daysAgo: 9 })).toBe("Last session: Tue 8 Dec (9 days ago)");
   });
+
+  it("counts from the series start for people who joined earlier, with a 3-day grace", () => {
+    const early = [p("n", { created_at: "2026-11-05T00:00:00Z" })];
+    expect(buildRetention(early, [], "2026-12-09").rows).toEqual([]);
+    expect(buildRetention(early, [], "2026-12-10").rows).toEqual([]);
+    const r = buildRetention(early, [], "2026-12-11");
+    expect(r.rows.map((x) => x.quietDays)).toEqual([4]);
+  });
+  it("counts from the join date for people who joined after the start", () => {
+    const late = [p("n", { created_at: "2026-12-12T00:00:00Z" })];
+    expect(buildRetention(late, [], "2026-12-15").rows).toEqual([]);
+    expect(buildRetention(late, [], "2026-12-16").rows.length).toBe(1);
+  });
+  it("a pending-only session counts as activity", () => {
+    const r = buildRetention([p("a")], [s("a", "2026-12-19")], today);
+    expect(r.active).toBe(1);
+    expect(r.needAttention).toBe(0);
+  });
+  it("holiday ending yesterday with a recent session is active, not flagged", () => {
+    const r = buildRetention([p("a", { holiday_until: "2026-12-19" })], [s("a", "2026-12-18")], today);
+    expect(r.active).toBe(1);
+    expect(r.rows).toEqual([]);
+  });
 });

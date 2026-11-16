@@ -21,9 +21,10 @@ export default async function Orders({ searchParams }: { searchParams: Promise<{
   const { status } = await searchParams;
   const showAll = status === "all";
   const db = createAdminClient();
-  const [regs, profiles] = await Promise.all([
+  const [regs, profiles, { count: duplicates }] = await Promise.all([
     fetchAll<Reg>((a, b) => db.from("registrations").select("profile_id, fit, colour, size, payment_status, amount_cents, paid_at").order("profile_id").range(a, b)),
     fetchAll<P>((a, b) => db.from("profiles").select("id, email, first_name, last_name, mobile").order("id").range(a, b)),
+    db.from("square_payments").select("*", { count: "exact", head: true }).eq("duplicate", true),
   ]);
   const byId = new Map(profiles.map((p) => [p.id, p]));
 
@@ -49,6 +50,7 @@ export default async function Orders({ searchParams }: { searchParams: Promise<{
             <a className="mini" href="/admin/singlets.csv">Download supplier CSV</a>
           </div>
         </div>
+        {(duplicates ?? 0) > 0 && <p className="notice" role="alert">{duplicates} paid twice — refund in Square.</p>}
         <div className="card" style={{ marginBottom: 12 }}>
           <b>Paid singlets by size</b>
           <p className="sm" style={{ marginTop: 6 }}>{perSize.length ? perSize.map((x) => `${x.size}: ${x.n}`).join(" · ") : "No paid orders yet."}</p>

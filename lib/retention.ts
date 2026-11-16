@@ -1,6 +1,8 @@
 // Who has gone quiet? Pure logic (no database) so it can be tested. Days are Albury dates, YYYY-MM-DD.
 import { alburyDay } from "@/lib/series";
 
+export const SERIES_START_DAY = "2026-12-07"; // Albury date the Series begins
+
 export const QUIET_AFTER_DAYS = 7; // quiet = last session was MORE than 7 days ago
 export const NEW_MEMBER_GRACE_DAYS = 3; // a brand-new member isn't flagged for "never logged" until after this many days
 
@@ -36,7 +38,9 @@ export function buildRetention(profiles: RetentionProfile[], sessions: SessionDa
     if (p.holiday_until && p.holiday_until >= today) continue;
     if (daysAgo !== null) { rows.push({ id: p.id, name: memberName(p), lastSession: lastDay, daysAgo, quietDays: daysAgo }); continue; }
     const named = Boolean(p.first_name?.trim());
-    const sinceJoined = daysBetween(alburyDay(new Date(p.created_at)), today);
+    // Quiet time starts from the later of joining and the Series start, so nobody is flagged on day one.
+    const from = alburyDay(new Date(p.created_at)) > SERIES_START_DAY ? alburyDay(new Date(p.created_at)) : SERIES_START_DAY;
+    const sinceJoined = daysBetween(from, today);
     if (named && sinceJoined > NEW_MEMBER_GRACE_DAYS) rows.push({ id: p.id, name: memberName(p), lastSession: null, daysAgo: null, quietDays: sinceJoined });
   }
   rows.sort((a, b) => b.quietDays - a.quietDays || a.name.localeCompare(b.name));

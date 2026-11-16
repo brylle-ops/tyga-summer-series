@@ -13,6 +13,8 @@ import { weekScores } from "@/lib/rewards-data";
 const lastSeen = (d: string | null) => (d ? new Date(`${d}T12:00:00+11:00`).toLocaleDateString("en-AU", { day: "numeric", month: "short" }) : "—");
 const textHref = (m: string) => `sms:${m.replace(/[^\d+]/g, "")}`;
 
+export const maxDuration = 30;
+
 // Amy's dashboard: who is on top, who is consistent, and who has earned (or nearly earned) a perk. Staff only.
 export default async function Leaderboard({ searchParams }: { searchParams: Promise<{ tv?: string; w?: string }> }) {
   if (!supabaseReady()) return <p style={{ padding: 24 }}>Connect Supabase to see live data.</p>;
