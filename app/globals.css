@@ -689,3 +689,30 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .rart{overflow:hidden}
 .rart img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
 .rart i{z-index:1}
+
+/* ---- Task 5: UI/UX pass (touch targets, contrast, focus, motion) ---- */
+/* Sand theme: darker muted text so it holds 4.5:1 across the whole gradient (#efe3cf to #d9bf9b) */
+.app.sand{--mute:#54463b;--ink-mute:#54463b;--sand:#54463b}
+.app.sand .ptag{color:#85490f}
+.app.sand .ptag.go,.app.sand .srow .tick.on{background:#a9651f;color:#fff}
+.app.sand .btn:not(.ghost):not(.dark){background:linear-gradient(180deg,#b5732a,#9a5a17);color:#fff}
+.tabs a{font-size:11px}
+.hbtn{width:44px;height:44px}
+.mini,.ptag.go,.btn,.seg button,.srow{min-height:44px}
+.mini,.ptag.go{display:inline-flex;align-items:center;justify-content:center}
+.mini{padding:10px 14px}
+.ptag.go{padding:10px 16px}
+.chips{gap:8px}
+.welcome .wfeat li{font-size:11px}
+.welcome .wfeat b{font-size:11px}
+.welcome .wfeat span{opacity:1;color:#d8d4cd}
+.move{min-height:48px}
+/* The Log screen checkboxes are visually hidden: show focus on the whole row */
+.move:has(input:focus-visible){outline:2px solid var(--sun-2);outline-offset:2px}
+/* Keyboard focus on every theme: dark halo on light surfaces, light on dark */
+.app.sand a:focus-visible,.app.sand button:focus-visible,.app.sand input:focus-visible,.app.sand select:focus-visible,.app.sand summary:focus-visible{outline:2px solid #85490f;outline-offset:2px}
+.app.sand .tabs a:focus-visible,.app.sand .nav a:focus-visible{outline-color:#f4f1ec}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .switch,.switch i{transition:none!important}
+}

@@ -137,8 +137,8 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <input name="points" type="number" min={0} max={100} defaultValue={10} aria-label="Points" style={{ width: 70 }} className="mini ghost" />
               <label className="xs li" style={{ gap: 4 }}><input type="checkbox" name="double" /> 2× points</label>
             </div>
-            <input name="title" required maxLength={80} placeholder="Mission title" className="mini ghost" style={{ textAlign: "left" }} />
-            <input name="detail" maxLength={140} placeholder="Short detail (optional)" className="mini ghost" style={{ textAlign: "left" }} />
+            <input name="title" required maxLength={80} placeholder="Mission title" aria-label="Mission title" className="mini ghost" style={{ textAlign: "left" }} />
+            <input name="detail" maxLength={140} placeholder="Short detail (optional)" aria-label="Mission detail" className="mini ghost" style={{ textAlign: "left" }} />
             <button className="mini" type="submit">Add mission</button>
           </form>
         </div>

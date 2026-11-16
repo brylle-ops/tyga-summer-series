@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
   // Reward image uploads are capped at 2 MB (checked again in the action); the default body limit is 1 MB.
   experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async headers() {
-    return [{
+    return [
+    {
       source: "/:path*",
       headers: [
         { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
@@ -16,7 +17,13 @@ const nextConfig: NextConfig = {
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
       ],
-    }];
+    },
+    // Static assets never change in place (new files get new names), so cache them for a year.
+    ...["/img/:path*", "/icons/:path*"].map((source) => ({
+      source,
+      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+    })),
+    ];
   },
 };
 
