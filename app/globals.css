@@ -676,7 +676,41 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .admin-nav{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;background:#1b1511;position:sticky;top:0;z-index:20}
 .admin-nav a{font-size:13px;font-weight:600;color:#cdbca6;text-decoration:none;padding:7px 12px;border-radius:99px}
 .admin-nav a.on{background:#e08a35;color:#fff}
-.admin-nav a:last-child{margin-left:auto;color:#e3cba4}
+.admin-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#1b1511;position:sticky;top:0;z-index:20;padding-right:16px}
+.admin-bar .admin-nav{position:static;flex:1 1 auto}
+.admin-nav a{min-height:44px;display:inline-flex;align-items:center}
+.admin-nav a.on{color:#14100c}
+.viewswitch{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;background:#2a2420;border:1px solid #4a4038;border-radius:99px;padding:3px;margin:6px 16px}
+.viewswitch a{min-height:44px;min-width:110px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;border-radius:99px;font-size:14px;font-weight:700;color:#e8dcc8;text-decoration:none}
+.viewswitch a.on{background:#e3cba4;color:#14100c}
+.viewswitch.member-top{display:grid;margin:10px 16px}
+/* Owner POS tiles */
+.pos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px}
+.pos-tile{display:flex;flex-direction:column;justify-content:space-between;gap:6px;min-height:96px;padding:16px;border-radius:20px;background:#1d1b19;border:1px solid #3a3631;color:#fff;text-decoration:none}
+.pos-tile:hover,.pos-tile:focus-visible{border-color:#e3cba4}
+.pos-tile .t{font-size:19px;font-weight:700}
+.pos-tile .n{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:#e3cba4}
+.pos-tile .d{font-size:13px;color:#d2cbc0}
+.pos-tile.big{min-height:140px}
+.pos-tile.small{background:#161514}
+.pos-tile.small .n{font-size:24px}
+@media (min-width:900px){.pos-grid{grid-template-columns:repeat(4,1fr)}}
+/* Check-in desk */
+.ck-search{display:flex;gap:8px}
+.ck-search input{flex:1;min-height:48px;padding:0 14px;border-radius:14px;border:1px solid #4a4540;background:#121110;color:#fff;font-size:16px}
+.ck-search button,.ck-kinds button{min-height:44px;padding:0 16px;border-radius:12px;font-weight:700;font-size:14px;background:#e3cba4;color:#14100c}
+.ck-kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ck-kinds button.alt{background:#2a2622;color:#fff;border:1px solid #4a4540}
+/* Big screen leaderboard */
+.tv{position:fixed;inset:0;z-index:100;background:#000;color:#fff;overflow:auto;padding:3vw}
+.tv h1{font-size:clamp(28px,4vw,56px);font-weight:800;margin:0 0 2vw}
+.tv ol{list-style:none;margin:0;padding:0;display:grid;gap:.6vw}
+.tv li{display:grid;grid-template-columns:5vw 1fr auto;align-items:center;gap:2vw;font-size:clamp(20px,3vw,44px);font-weight:700;padding:.5vw 1.5vw;border-radius:16px;background:#141414}
+.tv li:nth-child(-n+3){background:#2b2418;color:#e3cba4}
+.tv .pts{font-variant-numeric:tabular-nums}
+.tv .bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:2vw}
+.tv .bar a{min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:12px;border:1px solid #6a645c;color:#fff;font-size:16px;text-decoration:none}
+.tv .bar a.on{background:#e3cba4;color:#000}
 
 .stats a{display:block;background:var(--char-2);border:1px solid var(--line);border-radius:18px;padding:11px 12px;color:inherit;text-decoration:none}
 .stats a b{display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}

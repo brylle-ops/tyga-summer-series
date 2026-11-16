@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Icon, type IconName } from "@/components/Icons";
 import { Screen, TopNav } from "@/components/ui";
+import ViewSwitch from "@/components/ViewSwitch";
 import { signOut } from "@/app/join/sign-in/actions";
 import { getCurrentMember, supabaseReady } from "@/lib/session";
 
@@ -25,6 +26,7 @@ export default async function More() {
   return (
     <Screen tabs>
       <TopNav title="More" />
+      {account?.profile.role === "staff" && <ViewSwitch current="member" top />}
       <div className="more-hero">
         <div><b className="disp">Maintain the standard</b><small>TYGA · SUMMER SERIES 2026</small></div>
       </div>

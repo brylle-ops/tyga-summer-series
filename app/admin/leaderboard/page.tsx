@@ -6,15 +6,19 @@ import { buildDashboard, type DashRow } from "@/lib/dashboard";
 import { loadEveryone, seriesWeekNow } from "@/lib/series-data";
 import { isStaff, supabaseReady } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { rankWeek } from "@/lib/rewards";
+import { weekScores } from "@/lib/rewards-data";
 
 const lastSeen = (d: string | null) => (d ? new Date(`${d}T12:00:00+11:00`).toLocaleDateString("en-AU", { day: "numeric", month: "short" }) : "—");
 const textHref = (m: string) => `sms:${m.replace(/[^\d+]/g, "")}`;
 
 // Amy's dashboard: who is on top, who is consistent, and who has earned (or nearly earned) a perk. Staff only.
-export default async function Leaderboard() {
+export default async function Leaderboard({ searchParams }: { searchParams: Promise<{ tv?: string; w?: string }> }) {
   if (!supabaseReady()) return <p style={{ padding: 24 }}>Connect Supabase to see live data.</p>;
   if (!(await isStaff())) redirect("/login");
   const week = seriesWeekNow();
+  const { tv, w } = await searchParams;
+  if (tv === "1") return <BigScreen week={week} w={w} />;
   const [{ everyone, missions }, { data: reds }] = await Promise.all([
     loadEveryone(),
     createAdminClient().from("perk_redemptions").select("profile_id, perk_key"),
@@ -34,6 +38,7 @@ export default async function Leaderboard() {
           <div className="li" style={{ gap: 8, flexWrap: "wrap" }}>
             <Pill>{week >= 1 ? `Week ${week}` : "Starts Mon 7 Dec"}</Pill>
             <Link className="mini ghost" href="/admin">‹ Admin</Link>
+            <Link className="mini" href="/admin/leaderboard?tv=1">Open big screen</Link>
             <a className="mini" href="/admin/leaderboard.csv">Download CSV</a>
           </div>
         </div>
@@ -99,6 +104,38 @@ function PerkList({ title, rows, perk, redeemable = false, empty, showGap = fals
             </tr>
           ))}
         </tbody></table></div>
+      )}
+    </div>
+  );
+}
+
+// "Big screen" for the gym TV: large type, top 20, refreshes itself every 30 seconds. Shows first name + last initial only.
+async function BigScreen({ week, w }: { week: number; w?: string }) {
+  const sel = Number(w);
+  const picked = Number.isInteger(sel) && sel >= 1 && sel <= 7 ? sel : 0; // 0 = whole series
+  const short = (n: string) => { const [f, ...r] = n.split(" "); return r.length ? `${f} ${r[r.length - 1][0]}.` : f; };
+  let rows: { rank: number; name: string; points: number }[];
+  if (picked) {
+    rows = rankWeek(await weekScores(picked), 20).rows.slice(0, 20).map((r) => ({ rank: r.rank, name: short(r.name), points: r.points }));
+  } else {
+    const { everyone, missions } = await loadEveryone();
+    rows = buildDashboard(everyone, missions, week, new Set()).rows.slice(0, 20).map((r) => ({ rank: r.rank, name: short(r.name), points: r.points }));
+  }
+  const weeks = [0, 1, 2, 3, 4, 5, 6, 7];
+  return (
+    <div className="tv">
+      <meta httpEquiv="refresh" content="30" />
+      <div className="bar">
+        <Link href="/admin/leaderboard">‹ Exit big screen</Link>
+        {weeks.map((n) => (
+          <Link key={n} href={`/admin/leaderboard?tv=1${n ? `&w=${n}` : ""}`} className={n === picked ? "on" : ""} aria-current={n === picked ? "true" : undefined}>
+            {n === 0 ? "Series" : `Week ${n}`}
+          </Link>
+        ))}
+      </div>
+      <h1>{picked ? `Week ${picked} leaderboard` : "Summer Series leaderboard"}</h1>
+      {rows.length === 0 ? <p style={{ fontSize: "3vw" }}>No points yet.</p> : (
+        <ol>{rows.map((r, i) => <li key={i}><span>{r.rank}</span><span>{r.name}</span><span className="pts">{r.points} pts</span></li>)}</ol>
       )}
     </div>
   );

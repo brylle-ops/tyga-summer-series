@@ -1,7 +1,7 @@
 import MemberUpload from "@/components/MemberUpload";
 import { Pill, Wordmark } from "@/components/ui";
 import { addMission, reviewCheckin } from "../series/actions";
-import { loadAdminData, loadSeriesAdmin } from "./data";
+import { loadAdminData, loadSeriesAdmin, loadRewardsToCollect } from "./data";
 import {
   adminKpis as k, followUps, holidayWorkouts, missions, nextPerks, resources, seriesWeeks,
 } from "@/lib/mock-data";
@@ -12,6 +12,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   const s = await loadSeriesAdmin();
   const { followUps } = s;
   const { mission } = await searchParams;
+  const toCollect = await loadRewardsToCollect();
   const { payments, sizes: singletSizes, order: singletOrder } = d;
   return (
     <div className="admin-page">
@@ -29,17 +30,16 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           </div>
         </div>
 
+        <div className="pos-grid" aria-label="Owner tools">
+          <a href="/admin/orders" className="pos-tile big"><span className="t">Orders &amp; shirts</span><span className="n">{d.registeredPaid}</span><span className="d">shirts ordered · {d.startedUnpaid} unpaid</span></a>
+          <a href="/admin/leaderboard" className="pos-tile big"><span className="t">Leaderboard</span><span className="n">{s.real ? s.hit3Last : "–"}</span><span className="d">hit 3/3 last week · big screen</span></a>
+          <a href="/admin/checkin" className="pos-tile big"><span className="t">Check-in</span><span className="n">{s.real ? s.pending.length : k.toApprove}</span><span className="d">Yard check-ins to approve</span></a>
+          <a href="/admin/rewards" className="pos-tile big"><span className="t">Rewards</span><span className="n">{toCollect ?? "–"}</span><span className="d">awaiting collection</span></a>
+          <a href="/admin/missions" className="pos-tile small"><span className="t">Missions</span><span className="d">Add and review</span></a>
+          <a href="/admin/members" className="pos-tile small"><span className="t">Members</span><span className="n">{d.real ? d.signedUp : d.registeredPaid}</span><span className="d">signed up</span></a>
+        </div>
+
         <div className="desk-grid">
-          {[
-            { href: "/admin/orders", t: "Orders", d: "Who ordered singlets, sizes and payments." },
-            { href: "/admin/members", t: "Members", d: "Everyone signed up, with progress." },
-            { href: "/admin/leaderboard", t: "Leaderboard", d: "Points and weekly rankings." },
-            { href: "/admin/rewards", t: "Rewards", d: "Perks and prizes for members." },
-          ].map((q) => (
-            <a key={q.href} href={q.href} className="card" style={{ display: "grid", gap: 4, textDecoration: "none", color: "inherit" }}>
-              <b>{q.t} ›</b><span className="xs mute">{q.d}</span>
-            </a>
-          ))}
           <div className="card kpi"><small>Signed up</small><b>{d.real ? d.signedUp : d.registeredPaid}</b><small>{d.registeredPaid} singlets paid{d.duplicates ? ` · ${d.duplicates} paid twice — refund in Square` : ""}</small></div>
           <div className="card kpi"><small>Hit 3/3 last week</small><b>{s.hit3Last}</b><small>{s.pctHit}% of participants</small></div>
           <div className="card kpi"><small>Check-ins to approve</small><b style={{ color: "var(--sun-2)" }}>{s.real ? s.pending.length : k.toApprove}</b><small>Yard sessions vs roster</small></div>

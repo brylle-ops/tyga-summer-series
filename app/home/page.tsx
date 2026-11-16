@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { Pill, Screen } from "@/components/ui";
+import ViewSwitch from "@/components/ViewSwitch";
 import WeekStrip from "@/components/WeekStrip";
 import { isFresh } from "@/lib/announcements";
 import { loadAnnouncements } from "@/lib/announcements-data";
@@ -37,6 +38,7 @@ export default async function Home() {
   const ringPct = Math.round((thisWeek.sessionsDone / 3) * 100);
   return (
     <Screen tabs className="dark">
+      {profile?.role === "staff" && <ViewSwitch current="member" top />}
       <div className="htop">
         <Link href="/more" className="hbtn" aria-label="Menu"><span className="burger" aria-hidden="true" /></Link>
         <b className="htitle">TYGA</b>

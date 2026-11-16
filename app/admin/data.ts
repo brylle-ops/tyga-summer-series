@@ -74,3 +74,13 @@ export async function loadSeriesAdmin() {
     ? new Date(sync[0].uploaded_at).toLocaleString("en-AU", { weekday: "short", hour: "numeric", minute: "2-digit", timeZone: "Australia/Sydney" }) : "never";
   return { real: true, week, hit3Last, pctHit: everyone.length ? Math.round((hit3Last / everyone.length) * 100) : 0, pending, followUps, lastSync };
 }
+
+/** Prizes announced to winners that staff haven't marked as collected yet (null before Supabase is set up). */
+export async function loadRewardsToCollect(): Promise<number | null> {
+  if (!supabaseReady()) return null;
+  if (!(await isStaff())) redirect("/login");
+  const { count, error } = await createAdminClient().from("reward_winners")
+    .select("*", { count: "exact", head: true }).eq("announced", true).is("collected_at", null);
+  if (error) { console.error("[admin collect count]", error.message); return null; }
+  return count ?? 0;
+}
