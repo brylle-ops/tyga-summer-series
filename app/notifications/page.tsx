@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { Screen, TopNav } from "@/components/ui";
 import { unlockLabel } from "@/lib/activity";
+import { isFresh } from "@/lib/announcements";
+import { loadAnnouncements } from "@/lib/announcements-data";
 import { isReleased } from "@/lib/rewards";
 import { loadMemberRewards } from "@/lib/rewards-data";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
@@ -11,8 +13,9 @@ type Item = { icon: IconName; title: string; text: string; href: string; hot?: b
 // Notifications: everything new for this member, built from live data (no separate inbox to manage).
 export default async function Notifications() {
   const profile = await requireSeriesMember();
-  const [v, rv] = await Promise.all([loadMemberView(profile), profile ? loadMemberRewards(profile.id) : null]);
-  const items: Item[] = [];
+  const [v, rv, news] = await Promise.all([loadMemberView(profile), profile ? loadMemberRewards(profile.id) : null, loadAnnouncements(5)]);
+  const now = new Date();
+  const items: Item[] = news.map((a) => ({ icon: "bell" as IconName, title: a.title, text: a.body, href: "/notifications", hot: isFresh(a.created_at, now) }));
   if (rv) {
     for (const r of rv.rewards) {
       const w = rv.ctx.won.get(r.id);
@@ -40,7 +43,7 @@ export default async function Notifications() {
       <TopNav title="Notifications" back="/home" />
       <div className="sheet">
         {items.map((n) => (
-          <Link key={n.title} href={n.href} className="srow">
+          <Link key={`${n.title}-${n.text}`} href={n.href} className="srow">
             <span className="ico"><Icon name={n.icon} /></span>
             <span className="grow"><b>{n.title}</b><small>{n.text}</small></span>
             {n.hot && <span className="ptag">NEW</span>}

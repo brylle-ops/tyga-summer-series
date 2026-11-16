@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { Pill, Screen } from "@/components/ui";
 import WeekStrip from "@/components/WeekStrip";
+import { isFresh } from "@/lib/announcements";
+import { loadAnnouncements } from "@/lib/announcements-data";
 import { isReleased } from "@/lib/rewards";
 import { loadMemberRewards } from "@/lib/rewards-data";
 import { LEVELS } from "@/lib/series";
@@ -25,7 +27,8 @@ const PILLARS: { href: string; label: string; icon: IconName }[] = [
 // Home dashboard
 export default async function Home() {
   const profile = await requireSeriesMember();
-  const [v, rv] = await Promise.all([loadMemberView(profile), profile ? loadMemberRewards(profile.id) : null]);
+  const [v, rv, news] = await Promise.all([loadMemberView(profile), profile ? loadMemberRewards(profile.id) : null, loadAnnouncements(5)]);
+  const newNews = news.some((a) => isFresh(a.created_at));
   // Rewards banners: a win beats "new reward", and both go straight to the Rewards page.
   const won = rv ? rv.rewards.filter((r) => { const w = rv.ctx.won.get(r.id); return w?.announced && !w.collected; }) : [];
   const fresh = rv ? rv.rewards.filter((r) => isReleased(r, rv.ctx.week) && r.week === rv.ctx.week) : [];
@@ -37,7 +40,7 @@ export default async function Home() {
       <div className="htop">
         <Link href="/more" className="hbtn" aria-label="Menu"><span className="burger" aria-hidden="true" /></Link>
         <b className="htitle">TYGA</b>
-        <Link href="/notifications" className={`hbtn ${won.length + fresh.length > 0 ? "dot" : ""}`} aria-label="Notifications"><Icon name="bell" /></Link>
+        <Link href="/notifications" className={`hbtn ${won.length + fresh.length > 0 || newNews ? "dot" : ""}`} aria-label="Notifications"><Icon name="bell" /></Link>
       </div>
       <div className="hhero">
         {/* eslint-disable-next-line @next/next/no-img-element */}

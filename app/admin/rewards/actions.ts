@@ -1,6 +1,6 @@
 "use server";
 
-import { randomInt } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { rankWeek, type Reward, type RewardKind } from "@/lib/rewards";
@@ -37,10 +37,58 @@ export async function saveReward(formData: FormData) {
   const id = Number(formData.get("id"));
   const data = fields(formData);
   if (!Number.isInteger(id) || !data || !data.title) return back("invalid", Number.isInteger(id) ? id : undefined);
+  const file = formData.get("image_file");
+  if (file instanceof File && file.size > 0) {
+    const url = await uploadRewardImage(file);
+    if (url === "invalid") return back("badimage", id);
+    if (!url) return back("uploaderror", id);
+    data.image_url = url;
+  }
   const { error } = await createAdminClient().from("rewards").update(data).eq("id", id);
   if (error) { console.error("[reward save]", error.message); return back("error", id); }
   revalidatePath("/admin/rewards"); revalidatePath("/perks");
   return back("saved", id);
+}
+
+const IMAGE_TYPES: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+const MAX_IMAGE = 2 * 1024 * 1024;
+
+/** Validates and uploads to the public "rewards" bucket (created on first use). Returns the public URL, "invalid", or null on failure. */
+async function uploadRewardImage(file: File): Promise<string | "invalid" | null> {
+  const ext = IMAGE_TYPES[file.type];
+  if (!ext || file.size > MAX_IMAGE) return "invalid";
+  const storage = createAdminClient().storage;
+  const path = `${randomUUID()}.${ext}`;
+  const bytes = Buffer.from(await file.arrayBuffer());
+  let { error } = await storage.from("rewards").upload(path, bytes, { contentType: file.type, upsert: false });
+  if (error) {
+    const made = await storage.createBucket("rewards", { public: true });
+    if (made.error && !/already exists/i.test(made.error.message)) { console.error("[reward image bucket]", made.error.message); return null; }
+    ({ error } = await storage.from("rewards").upload(path, bytes, { contentType: file.type, upsert: false }));
+  }
+  if (error) { console.error("[reward image upload]", error.message); return null; }
+  return storage.from("rewards").getPublicUrl(path).data.publicUrl;
+}
+
+export async function postAnnouncement(formData: FormData) {
+  await staffOnly();
+  const title = text(formData, "title", 80);
+  const body = text(formData, "body", 300);
+  if (!title || !body) return back("invalid");
+  const { error } = await createAdminClient().from("announcements").insert({ title, body });
+  if (error) { console.error("[announcement post]", error.message); return back("annerror"); }
+  revalidatePath("/admin/rewards"); revalidatePath("/notifications"); revalidatePath("/home");
+  return back("posted");
+}
+
+export async function deleteAnnouncement(formData: FormData) {
+  await staffOnly();
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) return back("invalid");
+  const { error } = await createAdminClient().from("announcements").delete().eq("id", id);
+  if (error) { console.error("[announcement delete]", error.message); return back("annerror"); }
+  revalidatePath("/admin/rewards"); revalidatePath("/notifications"); revalidatePath("/home");
+  return back("deleted");
 }
 
 export async function addReward(formData: FormData) {

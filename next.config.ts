@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 // Basic hardening headers: no framing (clickjacking), no MIME sniffing, limited referrer, no unused device access.
 const nextConfig: NextConfig = {
+  // Reward image uploads are capped at 2 MB (checked again in the action); the default body limit is 1 MB.
+  experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async headers() {
     return [{
       source: "/:path*",
