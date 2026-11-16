@@ -50,7 +50,7 @@ export function buildRetention(profiles: RetentionProfile[], sessions: SessionDa
     members++;
     const joined = alburyDay(new Date(p.created_at));
     if (!started) {
-      if (p.first_name?.trim() && !(p.holiday_until && p.holiday_until >= today)) {
+      if (!(p.holiday_until && p.holiday_until >= today)) {
         waiting.push({ id: p.id, name: memberName(p), lastSession: null, daysAgo: null, quietDays: 0, joined });
       }
       continue;

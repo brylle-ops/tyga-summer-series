@@ -65,13 +65,15 @@ describe("buildRetention", () => {
     expect(r.rows).toEqual([]);
   });
 
-  it("before the series starts, lists named sign-ups as waiting, newest first, with no alarms", () => {
+  it("before the series starts, lists sign-ups (named or not) as waiting, newest first, with no alarms", () => {
     const r = buildRetention(
       [p("a", { created_at: "2026-11-01T00:00:00Z" }), p("b", { created_at: "2026-11-10T00:00:00Z" }), p("u", { first_name: null }),
         p("st", { role: "staff" }), p("h", { holiday_until: "2026-12-01" })], [], "2026-11-17");
     expect(r.started).toBe(false);
-    expect(r.waiting.map((x) => x.id)).toEqual(["b", "a"]);
-    expect(r.waiting[0].joined).toBe("2026-11-10");
+    expect(r.waiting.map((x) => x.id).sort()).toEqual(["a", "b", "u"]);
+    expect(r.waiting.find((x) => x.id === "u")?.name).toBe("X");
+    expect(r.waiting[0].joined >= r.waiting[1].joined).toBe(true);
+    expect(r.waiting.find((x) => x.id === "b")?.joined).toBe("2026-11-10");
     expect(r.needAttention).toBe(0);
     expect(r.rows).toEqual([]);
   });
