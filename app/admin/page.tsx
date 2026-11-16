@@ -30,6 +30,16 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         </div>
 
         <div className="desk-grid">
+          {[
+            { href: "/admin/orders", t: "Orders", d: "Who ordered singlets, sizes and payments." },
+            { href: "/admin/members", t: "Members", d: "Everyone signed up, with progress." },
+            { href: "/admin/leaderboard", t: "Leaderboard", d: "Points and weekly rankings." },
+            { href: "/admin/rewards", t: "Rewards", d: "Perks and prizes for members." },
+          ].map((q) => (
+            <a key={q.href} href={q.href} className="card" style={{ display: "grid", gap: 4, textDecoration: "none", color: "inherit" }}>
+              <b>{q.t} ›</b><span className="xs mute">{q.d}</span>
+            </a>
+          ))}
           <div className="card kpi"><small>Signed up</small><b>{d.real ? d.signedUp : d.registeredPaid}</b><small>{d.registeredPaid} singlets paid{d.duplicates ? ` · ${d.duplicates} paid twice — refund in Square` : ""}</small></div>
           <div className="card kpi"><small>Hit 3/3 last week</small><b>{s.hit3Last}</b><small>{s.pctHit}% of participants</small></div>
           <div className="card kpi"><small>Check-ins to approve</small><b style={{ color: "var(--sun-2)" }}>{s.real ? s.pending.length : k.toApprove}</b><small>Yard sessions vs roster</small></div>

@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isStaffEmail } from "@/lib/staff";
 
 import type { Profile, Registration } from "@/lib/types";
 export type { Profile, Registration };
@@ -22,7 +23,9 @@ export const getCurrentMember = cache(async function getCurrentMember(): Promise
     supabase.from("registrations").select("*").eq("profile_id", user.id).maybeSingle<Registration>(),
   ]);
   if (!profile) return null;
-  return { profile, registration: registration ?? null };
+  // Listed staff emails count as staff even if the database role is still "member" (in memory only).
+  const effective: Profile = isStaffEmail(profile.email) ? { ...profile, role: "staff" } : profile;
+  return { profile: effective, registration: registration ?? null };
 });
 
 /** Staff check for admin actions and pages. */
