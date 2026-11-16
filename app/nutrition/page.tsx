@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import { Screen, TopNav } from "@/components/ui";
+import { recipePhoto } from "@/lib/recipe-photos";
 import { BEFORE_TRAINING, LINEUP, MEAL_LABEL, PLAN_NOTE, QUICK_FOOD, RECIPES, byCode, type Meal, type Recipe } from "@/lib/nutrition";
 
 export const metadata = { title: "Yard Fuel · TYGA Summer Series" };
@@ -25,13 +26,19 @@ export default async function Nutrition({ searchParams }: { searchParams: Promis
         {CHIPS.map((c) => <Link key={c.key} href={c.key === "all" ? "/nutrition" : `/nutrition?meal=${c.key}`} className={`chip ${(meal ?? "all") === c.key ? "on" : ""}`}>{c.label}</Link>)}
       </div>
       <div className="rgrid">
-        {shown.map((r) => (
+        {shown.map((r, idx) => {
+          const photo = recipePhoto(r.code);
+          return (
           <Link key={r.code} href={`/nutrition/${r.code}`} className={`rtile ${r.meal}`}>
-            <span className="rart"><Icon name={r.icon} /><i>{r.code}</i></span>
+            <span className="rart">
+              {photo ? <img src={photo} alt={r.title} width={640} height={640} loading={idx < 4 ? "eager" : "lazy"} /> : <Icon name={r.icon} />}
+              <i>{r.code}</i>
+            </span>
             <b>{r.title}</b>
             <small>{MEAL_LABEL[r.meal]} · {r.cook}</small>
           </Link>
-        ))}
+          );
+        })}
       </div>
 
       <section aria-labelledby="nu-week">

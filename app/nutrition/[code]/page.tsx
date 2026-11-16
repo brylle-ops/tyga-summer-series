@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { Screen, TopNav } from "@/components/ui";
+import { recipePhoto } from "@/lib/recipe-photos";
 import { LINEUP, MEAL_LABEL, RECIPES } from "@/lib/nutrition";
 
 // One recipe: ingredients, method, and where it sits in the seven-day plan.
@@ -11,13 +12,17 @@ export default async function RecipePage({ params }: { params: Promise<{ code: s
   if (i < 0) notFound();
   const r = RECIPES[i];
   const days = LINEUP.filter((d) => d.b === code || d.l === code || d.d === code).map((d) => d.day);
+  const photo = recipePhoto(r.code);
   const prev = RECIPES[i - 1];
   const next = RECIPES[i + 1];
   return (
     <Screen tabs className="sand">
       <TopNav title="Recipe" back="/nutrition" />
       <div className={`rtile ${r.meal}`} style={{ padding: 0, border: 0, background: "none" }}>
-        <span className="rart" style={{ aspectRatio: "16/9" }}><Icon name={r.icon} /><i>{r.code}</i></span>
+        <span className="rart" style={{ aspectRatio: "16/9" }}>
+          {photo ? <img src={photo} alt={r.title} width={640} height={360} loading="eager" /> : <Icon name={r.icon} />}
+          <i>{r.code}</i>
+        </span>
       </div>
       <div>
         <div className="xs mute" style={{ letterSpacing: 1.2 }}>{MEAL_LABEL[r.meal].toUpperCase()} · {r.yields} · PREP {r.prep} · {r.cook.toUpperCase()}</div>
