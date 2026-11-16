@@ -32,8 +32,8 @@ Vitest + PGlite (real Postgres in-memory for RLS tests). `npm test` (75 tests), 
 
 ## Design (approved by Amy — do not restyle)
 "Design v3" screens/wording + Amy's tweaks: Inter font, near-black `#0e0e0e` / off-white `#f4f1ec` / tan `#e3cba4`,
-roomy spacing. Running 3D character (Three.js bundle in `public/runner`) on Welcome (Women's/Men's switch) and singlet
-screen. Styles in `app/globals.css`; shared UI in `components/ui.tsx`. Weekly content unlocks Monday 12am Albury time.
+roomy spacing. (3D runner removed 16 Nov 2026; Welcome shows the Summer Series logo.)
+Styles in `app/globals.css`; shared UI in `components/ui.tsx`. Weekly content unlocks Monday 12am Albury time.
 
 ## Code map
 - `app/page.tsx` Welcome → "Join · $15" (`/join/sign-in`) or "I've already joined" (`/login`)

@@ -502,3 +502,16 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .reward-banner{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:#e3cba4;color:#3b2c14;text-decoration:none;font-size:13px;line-height:1.35}
 .reward-banner.win{background:#2f6b3f;color:#fff}
 .reward-banner svg{flex:none;width:26px;height:26px}
+
+/* Welcome (Summer Series logo version) */
+.welcome{background:radial-gradient(ellipse at 50% 28%,#3b2d22 0%,#171412 62%,#0e0e0e 100%)}
+.welcome .wlogo{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:calc(18px + env(safe-area-inset-top,0px)) 28px 0}
+.welcome .wlogo img{width:auto;height:auto;max-width:min(100%,360px);max-height:100%;object-fit:contain;mix-blend-mode:lighten}
+.welcome .wdates{text-align:center;font-size:13px;letter-spacing:3px;font-weight:600;color:var(--cream);padding:6px 20px 14px}
+.welcome .wfeat{list-style:none;margin:0 20px;padding:12px 0;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(250,250,250,.14);border-bottom:1px solid rgba(250,250,250,.14)}
+.welcome .wfeat li{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--cream);font-size:9.5px;letter-spacing:1px;text-align:center;border-left:1px solid rgba(250,250,250,.1)}
+.welcome .wfeat li:first-child{border-left:0}
+.welcome .wfeat svg{width:22px;height:22px;margin-bottom:4px}
+.welcome .wfeat b{font-weight:700}
+.welcome .wfeat span{opacity:.8}
+.welcome .foot .btn:not(.ghost){background:linear-gradient(180deg,#c98a45,#a9651f);color:#fff}

@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { saveSinglet } from "@/app/join/actions";
-import Runner, { type Colour, type Fit } from "./Runner";
-import { Sky } from "./ui";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"] as const;
 type Size = (typeof SIZES)[number];
 const PRICE = "$15";
+type Fit = "womens" | "mens";
+type Colour = "cream" | "charcoal";
 
 const COLOURS: { value: Colour; label: string; swatch: string }[] = [
   { value: "cream", label: "Cream", swatch: "#e9dfcf" },
   { value: "charcoal", label: "Charcoal wash", swatch: "#2b2b2b" },
 ];
 
-// Photos change with the colour; the last slide is the 3D runner wearing the singlet.
+// Photos change with the colour.
 const SLIDES = (c: Colour) => [
   { key: "front", label: "Front", src: `/img/shop-${c}-front.webp`, alt: `${c === "cream" ? "Cream" : "Charcoal wash"} singlet, worn` },
   { key: "back", label: "Back print", src: "/img/shop-backs.webp", alt: "Singlet back print: TYGA 2026 Summer Series, Maintain the standard" },
@@ -42,16 +42,9 @@ export default function SingletProduct({ initial, paid = false }: { initial?: In
       <input type="hidden" name="colour" value={colour} />
       <input type="hidden" name="size" value={size ?? ""} />
 
-      <div className={current ? "pp-view" : "pp-view picker-stage"}>
-        {current ? (
-          <img src={current.src} alt={current.alt} data-s={current.key} />
-        ) : (
-          <>
-            <Sky />
-            <Runner fit={fit} colour={colour} yaw={200} />
-            <span className="drag">Drag to turn ↻</span>
-          </>
-        )}
+      <div className="pp-view">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {current && <img src={current.src} alt={current.alt} data-s={current.key} />}
       </div>
       <div className="pp-thumbs" role="group" aria-label="Photos">
         {slides.map((s) => (
@@ -59,9 +52,6 @@ export default function SingletProduct({ initial, paid = false }: { initial?: In
             <img src={s.src} alt="" /><span>{s.label}</span>
           </button>
         ))}
-        <button type="button" className="pp-model" aria-pressed={slide === "model"} onClick={() => setSlide("model")}>
-          <span className="pp-run" aria-hidden="true">▶</span><span>On the run</span>
-        </button>
       </div>
 
       <div className="pp-title">

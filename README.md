@@ -81,7 +81,7 @@ different week, change `currentWeekNo` in `lib/mock-data.ts`.
 - `components/` — shared pieces: icons, wordmark, tab bar, join steps, locked teaser, 3D runner, singlet picker
 - `lib/mock-data.ts` — the example data (gets swapped for Supabase later)
 - `public/img` — singlet photos
-- `public/runner` — the running 3D character (Three.js, Microsoft Rocketbox avatars, MIT)
+- (the 3D runner character was removed on 2026-11-16; Welcome now uses the Summer Series logo in `public/img`)
 - `docs/superpowers/specs/` — the design spec
 
 ## Next
