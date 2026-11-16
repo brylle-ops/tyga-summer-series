@@ -18,10 +18,10 @@ const nextConfig: NextConfig = {
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
       ],
     },
-    // Static assets never change in place (new files get new names), so cache them for a year.
+    // Static assets: a week of caching with background revalidation (files may be replaced under the same name, so not immutable).
     ...["/img/:path*", "/icons/:path*"].map((source) => ({
       source,
-      headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
     })),
     ];
   },

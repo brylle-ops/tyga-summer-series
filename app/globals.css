@@ -613,7 +613,7 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 /* Home (dark, as the mockup's main screen) */
 .htop{display:flex;align-items:center;justify-content:space-between;padding-top:calc(4px + env(safe-area-inset-top,0px))}
 .htop .htitle{font-size:22px;letter-spacing:6px;font-weight:600;color:var(--cream)}
-.hbtn{width:40px;height:40px;display:grid;place-items:center;color:var(--cream);border-radius:12px}
+.hbtn{width:44px;height:44px;display:grid;place-items:center;color:var(--cream);border-radius:12px}
 .hbtn svg{width:22px;height:22px}
 .burger,.burger::before,.burger::after{display:block;width:22px;height:2px;background:var(--cream);border-radius:2px;position:relative}
 .burger::before,.burger::after{content:"";position:absolute;left:0}
@@ -693,11 +693,10 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 /* ---- Task 5: UI/UX pass (touch targets, contrast, focus, motion) ---- */
 /* Sand theme: darker muted text so it holds 4.5:1 across the whole gradient (#efe3cf to #d9bf9b) */
 .app.sand{--mute:#54463b;--ink-mute:#54463b;--sand:#54463b}
-.app.sand .ptag{color:#85490f}
+.app.sand .ptag{color:#76400b}
 .app.sand .ptag.go,.app.sand .srow .tick.on{background:#a9651f;color:#fff}
-.app.sand .btn:not(.ghost):not(.dark){background:linear-gradient(180deg,#b5732a,#9a5a17);color:#fff}
+.app.sand .btn:not(.ghost):not(.dark){background:linear-gradient(180deg,#a5661c,#9a5a17);color:#fff}
 .tabs a{font-size:11px}
-.hbtn{width:44px;height:44px}
 .mini,.ptag.go,.btn,.seg button,.srow{min-height:44px}
 .mini,.ptag.go{display:inline-flex;align-items:center;justify-content:center}
 .mini{padding:10px 14px}
