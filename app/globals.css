@@ -515,3 +515,63 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .welcome .wfeat b{font-weight:700}
 .welcome .wfeat span{opacity:.8}
 .welcome .foot .btn:not(.ghost){background:linear-gradient(180deg,#c98a45,#a9651f);color:#fff}
+
+/* ===== Summer Series look (Amy's mockups): italic condensed headings, cream sheets on warm dark ===== */
+.disp,.nav,.h1{font-family:"Barlow Condensed","Inter",sans-serif;font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
+.disp{font-size:26px;line-height:1.05;margin:0}
+.disp.sm-d{font-size:18px}
+.nav{font-size:22px}
+.h1{font-size:30px;letter-spacing:.2px}
+.app{background:linear-gradient(180deg,#241c17 0%,#17130f 55%,#0e0e0e 100%)}
+.sheet{background:var(--cream);color:var(--ink);border-radius:20px;overflow:hidden}
+.sheet.pad{padding:16px}
+.srow{display:flex;align-items:center;gap:12px;padding:13px 14px;color:var(--ink);text-decoration:none;border-top:1px solid rgba(29,27,24,.09)}
+.srow:first-child{border-top:0}
+.srow .ico{width:34px;height:34px;border-radius:10px;background:rgba(29,27,24,.07);color:var(--ink);flex:none;display:grid;place-items:center}
+.srow b{display:block;font-size:14px;font-weight:600;line-height:1.25}
+.srow small{display:block;font-size:12px;color:var(--ink-mute);line-height:1.3;margin-top:1px}
+.srow .tick{border-color:rgba(29,27,24,.3)}
+.srow .tick.on{background:#a9651f;border-color:#a9651f;color:#fff}
+.srow.locked{opacity:.65}
+.srow .plain{background:none;border:0;padding:0;cursor:pointer}
+.ptag{flex:none;font-size:12px;font-weight:800;color:#a9651f;background:none;border:0;white-space:nowrap}
+.ptag.go{background:#a9651f;color:#fff;border-radius:99px;padding:6px 11px;cursor:pointer}
+.ico.big{width:44px;height:44px;border-radius:12px;background:rgba(29,27,24,.07);display:grid;place-items:center;flex:none;color:var(--ink)}
+.mix{display:flex;align-items:stretch;gap:8px;margin:14px 0 10px}
+.mix>div{flex:1;background:#eadcc4;border-radius:12px;padding:10px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px}
+.mix>div b{font-family:"Barlow Condensed","Inter",sans-serif;font-style:italic;font-size:18px;text-transform:uppercase}
+.mix>div span{color:var(--ink-mute);line-height:1.2}
+.mix .plus{align-self:center;font-weight:700;font-size:20px;flex:none}
+.ticks{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.ticks li{display:flex;gap:8px;font-size:13px;line-height:1.35;align-items:flex-start}
+.ticks svg{flex:none;width:16px;height:16px;color:#a9651f;margin-top:1px}
+.win{border-top:1px solid rgba(29,27,24,.12);margin-top:14px;padding-top:12px;text-align:center}
+.win small{letter-spacing:3px;font-size:10px;font-weight:700;color:var(--ink-mute)}
+.mweek{display:grid;gap:2px}
+.tabs .dots{font-size:15px;line-height:1;letter-spacing:1px;height:22px;display:grid;place-items:center}
+.tabs a{font-size:10px}
+.info-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--cream);color:var(--ink);text-decoration:none}
+.welcome .wdates{display:flex;align-items:center;justify-content:center;gap:12px;text-align:left}
+.welcome .wdates svg{width:30px;height:30px}
+.welcome .wdates small{letter-spacing:3px;font-size:11px;opacity:.8}
+.welcome .wfeat b{font-size:11px;letter-spacing:2px}
+.quick{grid-template-columns:repeat(5,1fr)}
+
+/* ===== Images inside the app: palm silhouettes, beach hero, badge ===== */
+.app:not(.welcome){position:relative;isolation:isolate}
+.app:not(.welcome)::before,.app:not(.welcome)::after{content:"";position:absolute;bottom:0;width:190px;height:210px;background:url(/img/palm.webp) no-repeat bottom/contain;opacity:.13;pointer-events:none;z-index:-1}
+.app.has-tabs:not(.welcome)::before,.app.has-tabs:not(.welcome)::after{bottom:64px}
+.app:not(.welcome)::before{left:-34px}
+.app:not(.welcome)::after{right:-34px;transform:scaleX(-1)}
+.hero{position:relative;border-radius:20px;overflow:hidden;min-height:150px;display:flex;align-items:flex-end;padding:16px;color:#fff;
+  background:linear-gradient(180deg,rgba(14,14,14,.1) 0%,rgba(14,14,14,.78) 100%),url(/img/beach-sunset.webp) center 38%/cover}
+.hero .disp{font-size:27px;max-width:16ch;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.hdr{display:flex;align-items:center;gap:12px}
+.hdr-mark{width:56px;height:auto;mix-blend-mode:lighten;flex:none}
+.more-hero{display:flex;align-items:center;gap:14px}
+.more-hero img{width:84px;height:auto;mix-blend-mode:lighten;flex:none}
+.more-hero b{display:block;font-size:22px}
+.more-hero small{letter-spacing:2.5px;font-size:10px;color:var(--mute)}
+
+.mix svg{width:26px;height:26px}
+.ticks svg{width:16px;height:16px}

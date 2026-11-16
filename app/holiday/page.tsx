@@ -14,8 +14,9 @@ export default async function Holiday({ searchParams }: { searchParams: Promise<
   const match = (w: (typeof holidayWorkouts)[number]) => filter === "All" || (filter === "Run" ? w.icon === "run" : filter === "Hotel room" ? /hotel|room/i.test(w.title) : /bodyweight|no equipment/i.test(w.detail));
   const away = v.holidayUntil;
   return (
-    <Screen>
-      <TopNav title="Holiday Mode" back="/home" />
+    <Screen tabs>
+      <TopNav title="Holiday Mode" back="/more" />
+      <div className="hero"><h2 className="disp">Stay in the Series wherever you are.</h2></div>
       <form action={setHoliday} className="cream-card" style={{ display: "grid", gap: 10 }}>
         <div className="li">
           <span className="ico"><Icon name="plane" /></span>
@@ -33,6 +34,11 @@ export default async function Holiday({ searchParams }: { searchParams: Promise<
           </div>
         )}
       </form>
+      <ul className="ticks sheet pad">
+        <li><Icon name="check" />Swap your Yard sessions for approved app workouts.</li>
+        <li><Icon name="check" />Complete 3 qualifying sessions across the week.</li>
+        <li><Icon name="check" />Keep your points, keep your streak and stay on the leaderboard.</li>
+      </ul>
       <div className="h2" style={{ marginTop: 4 }}>Workouts that count anywhere</div>
       <div className="chips">
         {holidayFilters.map((x) => <Link key={x} href={x === "All" ? "/holiday" : `/holiday?f=${encodeURIComponent(x)}`} className={`chip ${x === filter ? "on" : ""}`}>{x}</Link>)}

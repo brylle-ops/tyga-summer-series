@@ -4,8 +4,8 @@ export const SERIES_START = new Date("2026-12-07T00:00:00+11:00"); // Monday wee
 export const SERIES_WEEKS = 7;
 const WEEK_MS = 7 * 86_400_000;
 
-// Simplified points (Amy's table): 3 weekly sessions 30 · featured mission 15 · tag us 5 · surprise bonus 10 (missions carry their own points).
-export const POINTS = { session: 0, threeOfThree: 30, featuredMission: 15, tag: 5, surpriseBonus: 10 } as const;
+// Simplified points (Amy's table): 3 weekly sessions 30 · featured mission 15 · tag us 5 · surprise bonus 10 · all 7 weekly commitments 50 (missions carry their own points).
+export const POINTS = { session: 0, threeOfThree: 30, featuredMission: 15, tag: 5, surpriseBonus: 10, fullSeries: 50 } as const;
 
 export type CheckinKind = "yard" | "run" | "workout" | "recovery" | "rest";
 export const COUNTED: CheckinKind[] = ["yard", "run", "workout"];
@@ -72,12 +72,20 @@ export function levelFor(points: number) {
   return { level: level.no, name: level.name, pointsToNext: next ? next.at - points : 0, pct };
 }
 
+/** True when the member hit 3 counted sessions in every one of the 7 weeks. */
+export function completedAllWeeks(checkins: Checkin[]): boolean {
+  const byWeek = sessionDaysByWeek(checkins);
+  for (let w = 1; w <= SERIES_WEEKS; w++) if ((byWeek.get(w)?.length ?? 0) < 3) return false;
+  return true;
+}
+
 /** Points earned in each series week: 30 for completing 3 sessions, plus the missions completed from that week. */
 export function pointsByWeek(checkins: Checkin[], completedMissions: Mission[]): Map<number, number> {
   const out = new Map<number, number>();
   const add = (w: number, p: number) => out.set(w, (out.get(w) ?? 0) + p);
   for (const [w, days] of sessionDaysByWeek(checkins)) if (days.length >= 3) add(w, POINTS.threeOfThree);
   for (const m of completedMissions) add(m.week, m.points * (m.double ? 2 : 1));
+  if (completedAllWeeks(checkins)) add(SERIES_WEEKS, POINTS.fullSeries); // earned in week 7, once all seven commitments are done
   return out;
 }
 

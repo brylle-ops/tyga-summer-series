@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import * as mock from "@/lib/mock-data";
 import { getCurrentMember, supabaseReady, type Profile } from "@/lib/session";
 import {
-  COUNTED, alburyDay, currentWeek, seriesToday, memberStats, rankEntries, sessionDaysByWeek, shortName, weekOfDay,
+  COUNTED, alburyDay, currentWeek, seriesToday, memberStats, pointsByWeek, rankEntries, sessionDaysByWeek, shortName, weekOfDay,
   type Checkin, type CheckinKind, type Mission,
 } from "@/lib/series";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -90,7 +90,7 @@ export async function loadMemberView(profile: Profile | null) {
     return { real: false, week, weekInfo: { ...mock.thisWeek, unlocks: "" }, nextWeek: mock.nextWeek ? weekInfo(mock.nextWeek.no) : null,
       me: mock.me, missions: mock.missions.map((m, i) => ({ id: i, week: m.week, title: m.title, detail: m.detail, points: Number(m.points.replace(/\D/g, "")) || 0,
         secret: Boolean(m.secret), done: Boolean(m.done), double: false })),
-      strip: weekStrip([], 1, "2000-01-01"), todays: [] as CheckinKind[], podium: mock.podium, leaderboard: mock.leaderboard, club: mock.clubThisWeek, holidayUntil: null as string | null };
+      strip: weekStrip([], 1, "2000-01-01"), todays: [] as CheckinKind[], podium: mock.podium, leaderboard: mock.leaderboard, weekBoard: [] as ReturnType<typeof rankEntries>, club: mock.clubThisWeek, holidayUntil: null as string | null };
   }
   const { everyone, missions } = await loadEveryone();
   const byId = new Map(missions.map((m) => [Number(m.id), m]));
@@ -104,6 +104,11 @@ export async function loadMemberView(profile: Profile | null) {
   const mine: Everyone[number] = { profile, checkins: (ownCheckins ?? []) as Checkin[], done: (ownDone ?? []).map((d) => Number(d.mission_id)) };
   const ranked = rankEntries(everyone.map((e) => (e.profile.id === profile.id ? mine : e)).map((e) => ({ id: e.profile.id, ...shortName(e.profile.first_name, e.profile.last_name), points: statsFor(e).points })));
   const s = statsFor(mine);
+  // This week's board: points earned in the current series week only.
+  const weekBoard = rankEntries(everyone.map((e) => (e.profile.id === profile.id ? mine : e)).map((e) => ({
+    id: e.profile.id, ...shortName(e.profile.first_name, e.profile.last_name),
+    points: pointsByWeek(e.checkins, e.done.map((id) => byId.get(id)).filter(Boolean) as Mission[]).get(week) ?? 0,
+  })).filter((x) => x.points > 0)).slice(0, 10);
   const meRank = ranked.find((r) => r.id === profile.id);
   const days = sessionDaysByWeek(mine.checkins).get(week) ?? [];
   const pips = days.slice(0, 3).map((d) => KIND_LABEL[mine!.checkins.find((c) => c.day === d && COUNTED.includes(c.kind) && c.status === "confirmed")!.kind]);
@@ -113,7 +118,7 @@ export async function loadMemberView(profile: Profile | null) {
   return {
     real: true, week, weekInfo: { ...weekInfo(week), sessionsDone: s.sessionsThisWeek, pips, pending: mine.checkins.filter((c) => c.kind === "yard" && c.status === "pending" && weekOfDay(c.day) === week).length }, nextWeek: week < 7 ? weekInfo(week + 1) : null,
     me: {
-      firstName: profile.first_name || "there", ...shortName(profile.first_name, profile.last_name),
+      id: profile.id, firstName: profile.first_name || "there", ...shortName(profile.first_name, profile.last_name),
       shortName: shortName(profile.first_name, profile.last_name).name, points: s.points, rank: meRank?.rank ?? 0,
       participants: everyone.length, streakWeeks: s.streak, level: s.level, pointsToNext: s.pointsToNext, levelProgressPct: s.pct,
     },
@@ -126,6 +131,7 @@ export async function loadMemberView(profile: Profile | null) {
     todays: mine.checkins.filter((c) => c.day === today).map((c) => c.kind),
     podium: [ranked[1], ranked[0], ranked[2]].filter(Boolean),
     leaderboard: ranked.slice(3, 10),
+    weekBoard,
     club: everyone.filter((e) => (sessionDaysByWeek(e.checkins).get(week)?.length ?? 0) >= 3).length,
     holidayUntil: (profile as Profile & { holiday_until?: string | null }).holiday_until ?? null,
   };

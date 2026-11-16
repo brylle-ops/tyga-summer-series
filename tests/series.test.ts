@@ -64,3 +64,12 @@ describe("follow-ups", () => {
     expect(followUpFlags([c("2026-12-10")], "2026-12-24", null, 3)).toEqual(["No session in 7 days", "Behind this week"]));
   it("quiet before the series", () => expect(followUpFlags([], "2026-11-20", null, 0)).toEqual([]));
 });
+
+describe("full series bonus", () => {
+  const week = (n: number) => [0, 1, 2].map((d) => c(new Date(Date.UTC(2026, 11, 6 + (n - 1) * 7 + d, 14)).toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" }), "run"));
+  it("adds 50 once all 7 weeks have 3 sessions", () => {
+    const all = [1, 2, 3, 4, 5, 6, 7].flatMap(week);
+    expect(memberStats(all, [], 7).points).toBe(7 * 30 + 50);
+    expect(memberStats([1, 2, 3, 4, 5, 6].flatMap(week), [], 7).points).toBe(6 * 30);
+  });
+});

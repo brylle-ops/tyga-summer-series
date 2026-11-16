@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { saveSinglet } from "@/app/join/actions";
 
@@ -87,6 +88,10 @@ export default function SingletProduct({ initial, paid = false }: { initial?: In
       </div>
 
       <p className="xs mute">Secure checkout by Square. Collect your singlet at The Yard from launch week.</p>
+      <Link href="/overview" className="info-link">
+        <span className="grow"><b className="disp sm-d">The details</b><small style={{ display: "block", color: "var(--ink-mute)", fontSize: 12 }}>Dates, rules &amp; how it works</small></span>
+        <span aria-hidden="true">›</span>
+      </Link>
       <div style={{ flex: 1 }} />
       <button type="submit" className="btn" disabled={!size}>{label}</button>
     </form>

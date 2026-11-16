@@ -34,6 +34,7 @@ export default async function Perks({ searchParams }: { searchParams: Promise<{ 
   return (
     <Screen tabs>
       <TopNav title="Rewards & Perks" />
+      <div className="hero"><h2 className="disp">Exclusive perks for our Summer Series community.</h2></div>
       <p className="sm mute" style={{ margin: 0 }}>A new reward unlocks every Monday. You don&apos;t spend points on these. Points just help you climb the leaderboard.</p>
       {q.done && MESSAGES[q.done] && <p className="notice" role="status">{MESSAGES[q.done]}</p>}
       {q.error && ERRORS[q.error] && <p className="notice" role="alert">{ERRORS[q.error]}</p>}

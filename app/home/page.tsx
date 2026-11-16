@@ -2,8 +2,6 @@ import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { Pill, Screen } from "@/components/ui";
 import WeekStrip from "@/components/WeekStrip";
-import { signOut } from "@/app/join/sign-in/actions";
-import { getCurrentMember } from "@/lib/session";
 import { isReleased } from "@/lib/rewards";
 import { loadMemberRewards } from "@/lib/rewards-data";
 import { LEVELS } from "@/lib/series";
@@ -14,12 +12,13 @@ const QUICK: { href: string; label: string; icon: IconName }[] = [
   { href: "/perks", label: "Rewards", icon: "gift" },
   { href: "/nutrition", label: "Nutrition", icon: "bowl" },
   { href: "/holiday", label: "Holiday", icon: "plane" },
+  { href: "/points", label: "Points", icon: "star" },
 ];
 
 // Home dashboard
 export default async function Home() {
   const profile = await requireSeriesMember();
-  const [v, account, rv] = await Promise.all([loadMemberView(profile), getCurrentMember(), profile ? loadMemberRewards(profile.id) : null]);
+  const [v, rv] = await Promise.all([loadMemberView(profile), profile ? loadMemberRewards(profile.id) : null]);
   // Rewards banners: a win beats "new reward", and both go straight to the Rewards page.
   const won = rv ? rv.rewards.filter((r) => { const w = rv.ctx.won.get(r.id); return w?.announced && !w.collected; }) : [];
   const fresh = rv ? rv.rewards.filter((r) => isReleased(r, rv.ctx.week) && r.week === rv.ctx.week) : [];
@@ -29,6 +28,8 @@ export default async function Home() {
   return (
     <Screen tabs>
       <div className="hdr">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="hdr-mark" src="/img/summer-mark.webp" width={64} height={51} alt="" />
         <div>
           <div className="sm mute">Hey, {me.firstName}</div>
           <div className="h2">{v.week >= 1 ? <>Week {thisWeek.no} · <span className="script" style={{ fontSize: 22 }}>{thisWeek.theme}</span></> : "Series starts Mon 7 Dec"}</div>
@@ -63,6 +64,8 @@ export default async function Home() {
           </div>
         </div>
       </div>
+
+      {v.week >= 1 && <Link href="/log" className="btn">Log today&apos;s movement</Link>}
 
       <div className="strip-card">
         <div className="eyebrow">Your week</div>
@@ -107,12 +110,6 @@ export default async function Home() {
         <div className="grow"><b className="sm">Summer resources</b><div className="xs mute">Holiday workouts, recovery, more</div></div>
         <span className="mute">›</span>
       </Link>
-      {account && (
-        <div className="account">
-          <span className="xs mute">Signed in as {account.profile.email}</span>
-          <form action={signOut}><button type="submit" className="mini ghost">Log out</button></form>
-        </div>
-      )}
     </Screen>
   );
 }

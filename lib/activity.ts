@@ -1,4 +1,4 @@
-import { COUNTED, POINTS, SERIES_START, weekOfDay, type Checkin, type CheckinKind } from "@/lib/series";
+import { COUNTED, POINTS, completedAllWeeks, SERIES_START, weekOfDay, type Checkin, type CheckinKind } from "@/lib/series";
 
 // The member's own history, Strava-style: a week strip plus a feed of everything they logged, newest first.
 
@@ -54,6 +54,11 @@ export function buildActivity(checkins: Checkin[], missions: CompletedMission[])
       }
     }
   }
+  if (completedAllWeeks(checkins)) {
+    const f = feed(7);
+    f.points += POINTS.fullSeries;
+    f.items.push({ id: "series-bonus", day: "2027-01-24", kind: "bonus", title: "All 7 weekly commitments", detail: "Full series complete", points: POINTS.fullSeries, state: "bonus" });
+  }
   for (const m of missions) {
     const f = feed(m.week);
     const pts = m.points * (m.double ? 2 : 1);
@@ -75,4 +80,10 @@ export function weekStrip(checkins: Checkin[], week: number, today: string): Str
       : here.some((c) => COUNTED.includes(c.kind)) ? "pending" : here.length ? "logged" : "none";
     return { label, day, state, today: day === today, future: day > today };
   });
+}
+
+/** "Mon 14 Dec" — the Monday a series week unlocks. */
+export function unlockLabel(week: number): string {
+  return new Date(SERIES_START.getTime() + (week - 1) * 7 * 86_400_000 + 12 * 3_600_000)
+    .toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", timeZone: ZONE });
 }
