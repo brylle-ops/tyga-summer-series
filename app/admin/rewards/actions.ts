@@ -3,6 +3,7 @@
 import { randomInt, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { IMAGE_CONTENT_TYPE, sniffImageType } from "@/lib/image-sniff";
 import { rankWeek, type Reward, type RewardKind } from "@/lib/rewards";
 import { loadRewards, weekScores } from "@/lib/rewards-data";
 import { isStaff } from "@/lib/session";
@@ -55,16 +56,18 @@ const MAX_IMAGE = 2 * 1024 * 1024;
 
 /** Validates and uploads to the public "rewards" bucket (created on first use). Returns the public URL, "invalid", or null on failure. */
 async function uploadRewardImage(file: File): Promise<string | "invalid" | null> {
-  const ext = IMAGE_TYPES[file.type];
-  if (!ext || file.size > MAX_IMAGE) return "invalid";
+  if (!IMAGE_TYPES[file.type] || file.size > MAX_IMAGE) return "invalid";
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const ext = sniffImageType(bytes);
+  if (!ext || ext !== IMAGE_TYPES[file.type]) return "invalid";
+  const contentType = IMAGE_CONTENT_TYPE[ext];
   const storage = createAdminClient().storage;
   const path = `${randomUUID()}.${ext}`;
-  const bytes = Buffer.from(await file.arrayBuffer());
-  let { error } = await storage.from("rewards").upload(path, bytes, { contentType: file.type, upsert: false });
-  if (error) {
+  let { error } = await storage.from("rewards").upload(path, bytes, { contentType, upsert: false });
+  if (error && /not found|bucket/i.test(error.message)) {
     const made = await storage.createBucket("rewards", { public: true });
     if (made.error && !/already exists/i.test(made.error.message)) { console.error("[reward image bucket]", made.error.message); return null; }
-    ({ error } = await storage.from("rewards").upload(path, bytes, { contentType: file.type, upsert: false }));
+    ({ error } = await storage.from("rewards").upload(path, bytes, { contentType, upsert: false }));
   }
   if (error) { console.error("[reward image upload]", error.message); return null; }
   return storage.from("rewards").getPublicUrl(path).data.publicUrl;
