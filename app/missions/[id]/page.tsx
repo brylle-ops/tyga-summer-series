@@ -3,12 +3,14 @@ import { notFound } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { Screen, TopNav } from "@/components/ui";
 import { unlockLabel, weekRange } from "@/lib/activity";
+import { wantsPhoto } from "@/lib/proof";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
 import { completeMission } from "../../series/actions";
 
 // One mission: what to do, how many points, and the Done button when it's open.
-export default async function Mission({ params }: { params: Promise<{ id: string }> }) {
+export default async function Mission({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
   const id = Number((await params).id);
+  const { error } = await searchParams;
   if (!Number.isInteger(id)) notFound();
   const v = await loadMemberView(await requireSeriesMember());
   const m = v.missions.find((x) => x.id === id);
@@ -35,8 +37,14 @@ export default async function Mission({ params }: { params: Promise<{ id: string
           <dt>Closes</dt><dd>Sunday 11:59 pm</dd>
         </dl>
         {open && (
-          <form action={completeMission} style={{ marginTop: 14 }}>
+          <form action={completeMission} encType="multipart/form-data" style={{ marginTop: 14 }}>
             <input type="hidden" name="mission" value={m.id} />
+            {error === "photo" && <p className="notice" role="alert">That photo could not be used. Please attach a PNG, JPG or WebP under 2.5 MB.</p>}
+            <label className="sm" style={{ display: "block", marginBottom: 10 }}>
+              Add a photo or screenshot (optional, PNG/JPG/WebP, max 2.5 MB)
+              <input type="file" name="proof" accept="image/png,image/jpeg,image/webp" style={{ display: "block", marginTop: 6 }} />
+              {wantsPhoto(m.title) && <span className="xs mute" style={{ display: "block", marginTop: 4 }}>A photo helps staff verify this one.</span>}
+            </label>
             <button className="btn" type="submit">I&apos;ve done it · +{pts} pts</button>
           </form>
         )}

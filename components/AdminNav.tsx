@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/members", label: "Members" },
+  { href: "/admin/missions", label: "Missions" },
   { href: "/admin/leaderboard", label: "Leaderboard" },
   { href: "/admin/rewards", label: "Rewards" },
   { href: "/home", label: "Member app ›" },

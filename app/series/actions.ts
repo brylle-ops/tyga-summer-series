@@ -1,6 +1,9 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { IMAGE_CONTENT_TYPE } from "@/lib/image-sniff";
+import { validateProof, verifiedProofType } from "@/lib/proof";
 import { redirect } from "next/navigation";
 import { requireSeriesMember, seriesDayNow, seriesWeekNow } from "@/lib/series-data";
 import type { CheckinKind } from "@/lib/series";
@@ -29,6 +32,19 @@ export async function logCheckin(formData: FormData) {
   redirect(`/log?done=${kinds.join(",")}`);
 }
 
+/** Uploads to the PRIVATE "proofs" bucket (created on first use). Returns the path, or null on failure (completion still goes ahead). */
+async function uploadProof(db: ReturnType<typeof createAdminClient>, path: string, bytes: Buffer, contentType: string): Promise<string | null> {
+  const storage = db.storage;
+  let { error } = await storage.from("proofs").upload(path, bytes, { contentType, upsert: false });
+  if (error && /not found|bucket/i.test(error.message)) {
+    const made = await storage.createBucket("proofs", { public: false });
+    if (made.error && !/already exists/i.test(made.error.message)) { console.error("[proof bucket]", made.error.message); return null; }
+    ({ error } = await storage.from("proofs").upload(path, bytes, { contentType, upsert: false }));
+  }
+  if (error) { console.error("[proof upload]", error.message); return null; }
+  return path;
+}
+
 export async function completeMission(formData: FormData) {
   const me = await requireSeriesMember();
   if (!me) redirect("/missions");
@@ -39,10 +55,48 @@ export async function completeMission(formData: FormData) {
   const revealed = !m?.is_secret || (m.reveal_at && Date.parse(m.reveal_at) <= Date.now());
   // Only this week's missions can be ticked off — no catching up on old weeks, no peeking ahead.
   if (!m || m.week !== seriesWeekNow() || !revealed) redirect("/missions?error=closed");
-  const { error } = await db.from("mission_completions").upsert({ profile_id: me.id, mission_id: id }, { ignoreDuplicates: true });
+  // Optional proof photo: validated by declared type/size, then by the real file bytes.
+  const file = formData.get("proof");
+  let proofPath: string | null = null;
+  if (file instanceof File && file.size > 0) {
+    const bad = validateProof(file);
+    if (bad) redirect(`/missions/${id}?error=photo`);
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const ext = verifiedProofType(file.type, bytes);
+    if (!ext) redirect(`/missions/${id}?error=photo`);
+    const { data: already } = await db.from("mission_completions").select("mission_id").eq("profile_id", me.id).eq("mission_id", id).maybeSingle();
+    if (!already) proofPath = await uploadProof(db, `${me.id}/${id}-${randomUUID()}.${ext}`, bytes, IMAGE_CONTENT_TYPE[ext]);
+  }
+  let { error } = await db.from("mission_completions").upsert(
+    { profile_id: me.id, mission_id: id, ...(proofPath ? { proof_path: proofPath } : {}) }, { ignoreDuplicates: true });
+  if (error && proofPath) {
+    // The proof_path column may not exist yet (migration 0007 not run): complete without the photo.
+    console.error("[mission proof]", error.message);
+    await db.storage.from("proofs").remove([proofPath]);
+    ({ error } = await db.from("mission_completions").upsert({ profile_id: me.id, mission_id: id }, { ignoreDuplicates: true }));
+  }
   if (error) { console.error("[mission]", error.message); redirect("/missions?error=closed"); }
   revalidatePath("/missions"); revalidatePath("/home");
   redirect("/missions");
+}
+
+// Staff: remove a wrong or fake completion (and its photo) so it stops counting.
+export async function revokeCompletion(formData: FormData) {
+  if (!(await isStaff())) redirect("/home");
+  const profile = String(formData.get("profile") ?? "");
+  const mission = Number(formData.get("mission"));
+  if (!/^[0-9a-f-]{36}$/i.test(profile) || !Number.isInteger(mission)) return;
+  const db = createAdminClient();
+  const { data: row, error: readErr } = await db.from("mission_completions").select("proof_path").eq("profile_id", profile).eq("mission_id", mission).maybeSingle();
+  if (readErr) console.error("[revoke read]", readErr.message);
+  const { error } = await db.from("mission_completions").delete().eq("profile_id", profile).eq("mission_id", mission);
+  if (error) { console.error("[revoke]", error.message); return; }
+  const path = (row as { proof_path?: string | null } | null)?.proof_path;
+  if (path) {
+    const rm = await db.storage.from("proofs").remove([path]);
+    if (rm.error) console.error("[revoke file]", rm.error.message);
+  }
+  revalidatePath("/admin/missions"); revalidatePath("/missions"); revalidatePath("/home");
 }
 
 export async function setHoliday(formData: FormData) {
