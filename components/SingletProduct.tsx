@@ -15,11 +15,9 @@ const COLOURS: { value: Colour; label: string; swatch: string }[] = [
   { value: "charcoal", label: "Charcoal wash", swatch: "#2b2b2b" },
 ];
 
-// Photos change with the colour.
+// Full-body front photos change with the selected fit and colour.
 const FRONT = (c: Colour, fit: Fit) =>
-  fit === "womens"
-    ? (c === "cream" ? "/img/shop-cream-front.webp" : "/img/shop-charcoal-front-women-v2.webp")
-    : (c === "cream" ? "/img/shop-cream-front-men-v2.webp" : "/img/shop-charcoal-front.webp");
+  `/img/shop-${fit === "womens" ? "women" : "men"}-${c}-full.webp`;
 const SLIDES = (c: Colour, fit: Fit) => [
   { key: "front", label: "Front", src: FRONT(c, fit), alt: `${c === "cream" ? "Cream" : "Charcoal wash"} singlet, worn` },
   { key: "back", label: "Back print", src: "/img/shop-backs.webp", alt: "Singlet back print: TYGA 2026 Summer Series, Maintain the standard" },

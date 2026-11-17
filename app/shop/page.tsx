@@ -5,7 +5,7 @@ type Product = { slug: string; name: string; blurb: string; price: string; href?
 
 // Skeleton: swap in real names, prices and photos (drop images in /public/img and set `image`).
 const PRODUCTS: Product[] = [
-  { slug: "singlet", name: "Summer Series singlet", blurb: "Limited edition · Women's & Men's · Cream or Charcoal wash", price: "$15", href: "/join/singlet", image: "/img/singlet-cream-front.jpg" },
+  { slug: "singlet", name: "Summer Series singlet", blurb: "Limited edition · Women's & Men's · Cream or Charcoal wash", price: "$15", href: "/join/singlet", image: "/img/shop-women-cream-full.webp" },
   { slug: "product-2", name: "Product name", blurb: "Short description goes here", price: "$—" },
   { slug: "product-3", name: "Product name", blurb: "Short description goes here", price: "$—" },
   { slug: "product-4", name: "Product name", blurb: "Short description goes here", price: "$—" },
