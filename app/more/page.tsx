@@ -8,8 +8,7 @@ import { getCurrentMember, supabaseReady } from "@/lib/session";
 import { setAvatar } from "@/app/series/actions";
 import { avatarUrls } from "@/lib/avatars";
 import Avatar from "@/components/Avatar";
-import ProofInput from "@/components/ProofInput";
-import { MAX_PROOF_BYTES } from "@/lib/proof";
+import AvatarInput from "@/components/AvatarInput";
 
 const ROWS: { href: string; icon: IconName; title: string; note: string }[] = [
   { href: "/series", icon: "sun", title: "Summer Series", note: "The singlet, details and rules" },
@@ -48,8 +47,7 @@ export default async function More({ searchParams }: { searchParams: Promise<{ p
           {photo === "saved" && <p className="notice" role="status">Photo saved.</p>}
           {photo === "bad" && <p className="notice" role="alert">Please pick a PNG, JPG or WebP photo under 3.5 MB.</p>}
           {photo === "error" && <p className="notice" role="alert">Could not save your photo. Please try again.</p>}
-          <ProofInput name="photo" maxBytes={MAX_PROOF_BYTES} maxLabel="3.5 MB" />
-          <button type="submit" className="mini">{myPhoto ? "Change photo" : "Upload photo"}</button>
+          <AvatarInput hasPhoto={Boolean(myPhoto)} />
         </form>
       )}
       <div className="sheet">
