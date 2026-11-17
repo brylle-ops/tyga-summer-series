@@ -59,7 +59,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <ul>
             <li><Link prefetch={false} href="/admin/checkin">Yard approvals{d.pending > 0 && <span className="badge">{d.pending}</span>}</Link></li>
             <li><Link prefetch={false} href="/admin/rewards">Rewards</Link></li>
-            <li><Link prefetch={false} href="/admin/missions">Missions</Link></li>
+            <li><Link prefetch={false} href="/admin/missions">Mission approvals{d.missionsPending > 0 && <span className="badge">{d.missionsPending}</span>}</Link></li>
             <li><Link prefetch={false} href="/admin/members">Members</Link></li>
           </ul>
         </section>

@@ -58,6 +58,9 @@ export default async function Home() {
           <div className="h2">{v.week >= 1 ? <>Week {thisWeek.no} · <span className="script" style={{ fontSize: 22 }}>{thisWeek.theme}</span></> : "Series starts Mon 7 Dec"}</div>
         </div>
       </div>
+      {profile && !(profile as { avatar_path?: string | null }).avatar_path && (
+        <Link href="/more" className="info-link"><span className="grow"><b className="disp sm-d">Add your photo</b><small style={{ display: "block", fontSize: 12 }}>Optional · shows on the leaderboard</small></span><span aria-hidden="true">›</span></Link>
+      )}
 
       {won.length > 0 && (
         <Link href="/perks" className="reward-banner win">

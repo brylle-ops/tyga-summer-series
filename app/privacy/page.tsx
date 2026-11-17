@@ -26,7 +26,8 @@ export default function Privacy() {
           <li><b>Your payment record:</b> whether you&apos;ve paid for a singlet, the amount, the date and Square&apos;s payment reference. <b>We never see or store your card details</b> — payment is handled entirely by Square.</li>
           <li><b>Sign-in records:</b> when you sign in, and sign-in attempts, to keep accounts secure.</li>
           <li><b>Member list:</b> if your email is on the gym&apos;s member list (from our booking system), we use it only to fill in your name and mobile number. Anyone can use the app.</li>
-          <li><b>During the series:</b> the sessions and workouts you log, points, missions, perks and Holiday Mode dates you set.</li>
+          <li><b>During the series:</b> the sessions and workouts you log, points, missions (and any proof photos you attach), perks and Holiday Mode dates you set.</li>
+          <li><b>Your profile photo (optional):</b> only if you add one. You can change it anytime.</li>
         </ul>
 
         <h2>Why we use it</h2>
@@ -41,7 +42,7 @@ export default function Privacy() {
         <h2>Who can see it</h2>
         <ul>
           <li><b>You</b> can see your own details. Other members can&apos;t.</li>
-          <li><b>The leaderboard</b> shows only your first name and last initial, and your points.</li>
+          <li><b>The leaderboard</b> shows only your first name and last initial, your points, and your profile photo if you added one.</li>
           <li><b>Yard staff</b> running the series can see registrations, payments, singlet orders and your mobile number (to contact you about the series).</li>
           <li><b>Service providers</b> who run the app for us: Supabase (database and sign-in), Vercel (hosting), Square (payments) and our email provider (sign-in emails). Some of them may store data outside Australia. They only process it to provide their service.</li>
           <li>Our singlet supplier receives size totals only, never names.</li>

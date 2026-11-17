@@ -5,6 +5,11 @@ import { Screen, TopNav } from "@/components/ui";
 import ViewSwitch from "@/components/ViewSwitch";
 import { signOut } from "@/app/join/sign-in/actions";
 import { getCurrentMember, supabaseReady } from "@/lib/session";
+import { setAvatar } from "@/app/series/actions";
+import { avatarUrls } from "@/lib/avatars";
+import Avatar from "@/components/Avatar";
+import ProofInput from "@/components/ProofInput";
+import { MAX_PROOF_BYTES } from "@/lib/proof";
 
 const ROWS: { href: string; icon: IconName; title: string; note: string }[] = [
   { href: "/series", icon: "sun", title: "Summer Series", note: "The singlet, details and rules" },
@@ -20,9 +25,13 @@ const ROWS: { href: string; icon: IconName; title: string; note: string }[] = [
 ];
 
 // More: everything that isn't on the tab bar, plus the account and log out.
-export default async function More() {
+export default async function More({ searchParams }: { searchParams: Promise<{ photo?: string }> }) {
+  const { photo } = await searchParams;
   const account = supabaseReady() ? await getCurrentMember() : null;
   if (supabaseReady() && !account) redirect("/login");
+  const p = account?.profile;
+  const myPhoto = p ? (await avatarUrls([p.id])).get(p.id) : undefined;
+  const initials = `${p?.first_name?.[0] ?? ""}${p?.last_name?.[0] ?? ""}`.toUpperCase() || "?";
   return (
     <Screen tabs>
       <TopNav title="More" />
@@ -30,6 +39,19 @@ export default async function More() {
       <div className="more-hero">
         <div><b className="disp">Maintain the standard</b><small>TYGA · SUMMER SERIES 2026</small></div>
       </div>
+      {p && (
+        <form action={setAvatar} encType="multipart/form-data" className="sheet" style={{ display: "grid", gap: 10 }}>
+          <div className="li" style={{ gap: 12 }}>
+            <Avatar url={myPhoto} initials={initials} className="av av-lg" />
+            <span className="grow"><b>Your photo</b><small style={{ display: "block" }}>{myPhoto ? "Shows on the leaderboard. Change it anytime." : "Optional. Add one so the team can cheer you on."}</small></span>
+          </div>
+          {photo === "saved" && <p className="notice" role="status">Photo saved.</p>}
+          {photo === "bad" && <p className="notice" role="alert">Please pick a PNG, JPG or WebP photo under 3.5 MB.</p>}
+          {photo === "error" && <p className="notice" role="alert">Could not save your photo. Please try again.</p>}
+          <ProofInput name="photo" maxBytes={MAX_PROOF_BYTES} maxLabel="3.5 MB" />
+          <button type="submit" className="mini">{myPhoto ? "Change photo" : "Upload photo"}</button>
+        </form>
+      )}
       <div className="sheet">
         {ROWS.map((r) => (
           <Link key={r.href} href={r.href} className="srow">

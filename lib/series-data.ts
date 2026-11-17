@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import * as mock from "@/lib/mock-data";
 import { getCurrentMember, supabaseReady, type Profile } from "@/lib/session";
 import {
-  COUNTED, alburyDay, currentWeek, seriesToday, memberStats, pointsByWeek, rankEntries, sessionDaysByWeek, shortName, weekOfDay,
+  COUNTED, alburyDay, approved, currentWeek, seriesToday, memberStats, pointsByWeek, rankEntries, sessionDaysByWeek, shortName, weekOfDay,
   type Checkin, type CheckinKind, type Mission,
 } from "@/lib/series";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -36,6 +36,7 @@ export function seriesWeekNow() {
 }
 
 /** For series screens: any signed-in member (no payment needed). New members add their name and goal first. Null = example mode. */
+
 export async function requireSeriesMember(): Promise<Profile | null> {
   if (!supabaseReady()) return null;
   const me = await getCurrentMember();
@@ -67,12 +68,12 @@ async function fetchEveryone(): Promise<EveryoneData> {
     fetchAll<Checkin & { profile_id: string }>((a, b) =>
       db.from("checkins").select("profile_id, day, kind, status").in("kind", ["yard", "run", "workout"])
         .gte("day", "2026-12-07").order("id").range(a, b)),
-    fetchAll<{ profile_id: string; mission_id: number }>((a, b) =>
-      db.from("mission_completions").select("profile_id, mission_id").order("created_at").range(a, b)),
+    fetchAll<{ profile_id: string; mission_id: number; status?: string }>((a, b) =>
+      db.from("mission_completions").select("*").order("created_at").range(a, b)),
     db.from("missions").select("*").order("week").order("id"),
   ]);
   const checkinsBy = groupBy(checkins, (c) => c.profile_id);
-  const doneBy = groupBy(done, (d) => d.profile_id);
+  const doneBy = groupBy(done.filter(approved), (d) => d.profile_id);
   const everyone: Everyone = regs.filter((r) => {
     const p = r.profiles as unknown as (Profile | null);
     return p && p.role !== "staff" && Boolean(p.first_name); // only named, non-staff members are ranked
@@ -89,7 +90,7 @@ export async function loadMemberView(profile: Profile | null) {
   if (!profile) {
     return { real: false, week, weekInfo: { ...mock.thisWeek, unlocks: "" }, nextWeek: mock.nextWeek ? weekInfo(mock.nextWeek.no) : null,
       me: mock.me, missions: mock.missions.map((m, i) => ({ id: i, week: m.week, title: m.title, detail: m.detail, points: Number(m.points.replace(/\D/g, "")) || 0,
-        secret: Boolean(m.secret), done: Boolean(m.done), double: false })),
+        secret: Boolean(m.secret), done: Boolean(m.done), pending: false, double: false })),
       strip: weekStrip([], 1, "2000-01-01"), todays: [] as CheckinKind[], podium: mock.podium, leaderboard: mock.leaderboard, weekBoard: [] as ReturnType<typeof rankEntries>, club: mock.clubThisWeek, holidayUntil: null as string | null };
   }
   const { everyone, missions } = await loadEveryone();
@@ -99,9 +100,11 @@ export async function loadMemberView(profile: Profile | null) {
   const db = createAdminClient();
   const [{ data: ownCheckins }, { data: ownDone }] = await Promise.all([
     db.from("checkins").select("day, kind, status").eq("profile_id", profile.id).gte("day", "2026-12-07"),
-    db.from("mission_completions").select("mission_id").eq("profile_id", profile.id),
+    db.from("mission_completions").select("*").eq("profile_id", profile.id),
   ]);
-  const mine: Everyone[number] = { profile, checkins: (ownCheckins ?? []) as Checkin[], done: (ownDone ?? []).map((d) => Number(d.mission_id)) };
+  const ownRows = (ownDone ?? []) as { mission_id: number; status?: string }[];
+  const pendingIds = new Set(ownRows.filter((d) => !approved(d)).map((d) => Number(d.mission_id)));
+  const mine: Everyone[number] = { profile, checkins: (ownCheckins ?? []) as Checkin[], done: ownRows.filter(approved).map((d) => Number(d.mission_id)) };
   const ranked = rankEntries(everyone.map((e) => (e.profile.id === profile.id ? mine : e)).map((e) => ({ id: e.profile.id, ...shortName(e.profile.first_name, e.profile.last_name), points: statsFor(e).points })));
   const s = statsFor(mine);
   // This week's board: points earned in the current series week only.
@@ -125,7 +128,7 @@ export async function loadMemberView(profile: Profile | null) {
     missions: missions.filter((m) => m.week <= week).map((m) => {
       const hidden = m.is_secret && (!m.reveal_at || Date.parse(m.reveal_at) > now);
       return { id: Number(m.id), week: m.week, title: hidden ? "Secret mission" : m.title, detail: hidden ? "Drops sometime this week" : m.detail,
-        points: m.points, secret: hidden, done: mine!.done.includes(Number(m.id)), double: m.double };
+        points: m.points, secret: hidden, done: mine!.done.includes(Number(m.id)), pending: pendingIds.has(Number(m.id)), double: m.double };
     }),
     strip: weekStrip(mine.checkins, Math.max(week, 1), today),
     todays: mine.checkins.filter((c) => c.day === today).map((c) => c.kind),
@@ -145,11 +148,11 @@ export async function loadActivity(profile: Profile | null) {
   const db = createAdminClient();
   const [{ data: rows }, { data: done }, { missions }] = await Promise.all([
     db.from("checkins").select("day, kind, status").eq("profile_id", profile.id).order("day"),
-    db.from("mission_completions").select("mission_id, created_at").eq("profile_id", profile.id),
+    db.from("mission_completions").select("*").eq("profile_id", profile.id),
     loadEveryone(),
   ]);
   const byId = new Map(missions.map((m) => [Number(m.id), m]));
-  const completed: CompletedMission[] = (done ?? []).flatMap((d) => {
+  const completed: CompletedMission[] = ((done ?? []) as { mission_id: number; created_at: string; status?: string }[]).filter(approved).flatMap((d) => {
     const m = byId.get(Number(d.mission_id));
     return m ? [{ id: m.id, week: m.week, title: m.title, points: m.points, double: m.double, at: alburyDay(new Date(d.created_at as string)) }] : [];
   });

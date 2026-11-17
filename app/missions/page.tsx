@@ -43,11 +43,11 @@ export default async function Missions({ searchParams }: { searchParams: Promise
                     <Link href={`/missions/${m.id}`} className="grow rlink"><b>{m.title}</b><small>{m.detail}</small></Link>
                     <span className="ptag">???</span>
                   </div>
-                ) : m.done || !live || !v.real ? (
+                ) : m.done || m.pending || !live || !v.real ? (
                   <div key={m.id} className="srow">
                     <Tick on={m.done} />
-                    <Link href={`/missions/${m.id}`} className="grow rlink"><b>{m.title}</b><small>{m.detail}</small></Link>
-                    <span className="ptag">+{m.points * (m.double ? 2 : 1)} pts</span>
+                    <Link href={`/missions/${m.id}`} className="grow rlink"><b>{m.title}</b><small>{m.pending ? "Waiting for staff to approve" : m.detail}</small></Link>
+                    <span className="ptag">{m.pending ? "Pending" : `+${m.points * (m.double ? 2 : 1)} pts`}</span>
                   </div>
                 ) : (
                   <form key={m.id} action={completeMission} className="srow">

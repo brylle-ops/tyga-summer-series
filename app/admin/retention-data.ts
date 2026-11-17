@@ -11,7 +11,7 @@ export async function loadRetention() {
   if (!supabaseReady()) return null;
   if (!(await isStaff())) redirect("/login");
   const db = createAdminClient();
-  const [profiles, sessions, { count }] = await Promise.all([
+  const [profiles, sessions, { count }, missionsWaiting] = await Promise.all([
     fetchAll<RetentionProfile>((a, b) =>
       db.from("profiles").select("id, first_name, last_name, role, holiday_until, created_at").order("id").range(a, b)),
     // Confirmed sessions and pending Yard sessions both count as activity.
@@ -19,6 +19,8 @@ export async function loadRetention() {
       db.from("checkins").select("profile_id, day").in("kind", ["yard", "run", "workout"]).in("status", ["confirmed", "pending"])
         .gte("day", "2026-12-07").order("id").range(a, b)),
     db.from("checkins").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    db.from("mission_completions").select("*", { count: "exact", head: true }).eq("status", "pending"),
   ]);
-  return { ...buildRetention(profiles, sessions, seriesDayNow()), week: seriesWeekNow(), pending: count ?? 0 };
+  return { ...buildRetention(profiles, sessions, seriesDayNow()), week: seriesWeekNow(), pending: count ?? 0,
+    missionsPending: missionsWaiting.error ? 0 : missionsWaiting.count ?? 0 };
 }

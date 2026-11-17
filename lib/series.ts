@@ -133,3 +133,6 @@ export function followUpFlags(checkins: Checkin[], today: string, holidayUntil: 
   if (thisWeek === 0 && (dow >= 4 || dow === 0)) flags.push("Behind this week");
   return flags;
 }
+
+/** A mission tick counts once staff approve it. Rows from before migration 0008 have no status and count. */
+export const approved = (d: { status?: string }) => d.status !== "pending";

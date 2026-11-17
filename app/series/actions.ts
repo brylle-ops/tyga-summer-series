@@ -32,14 +32,14 @@ export async function logCheckin(formData: FormData) {
   redirect(`/log?done=${kinds.join(",")}`);
 }
 
-/** Uploads to the PRIVATE "proofs" bucket (created on first use). Returns the path, or null on failure (completion still goes ahead). */
-async function uploadProof(db: ReturnType<typeof createAdminClient>, path: string, bytes: Buffer, contentType: string): Promise<string | null> {
+/** Uploads to a PRIVATE bucket ("proofs" or "avatars", created on first use). Returns the path, or null on failure. */
+async function uploadProof(db: ReturnType<typeof createAdminClient>, path: string, bytes: Buffer, contentType: string, bucket = "proofs"): Promise<string | null> {
   const storage = db.storage;
-  let { error } = await storage.from("proofs").upload(path, bytes, { contentType, upsert: false });
+  let { error } = await storage.from(bucket).upload(path, bytes, { contentType, upsert: false });
   if (error && /not found|bucket/i.test(error.message)) {
-    const made = await storage.createBucket("proofs", { public: false });
+    const made = await storage.createBucket(bucket, { public: false });
     if (made.error && !/already exists/i.test(made.error.message)) { console.error("[proof bucket]", made.error.message); return null; }
-    ({ error } = await storage.from("proofs").upload(path, bytes, { contentType, upsert: false }));
+    ({ error } = await storage.from(bucket).upload(path, bytes, { contentType, upsert: false }));
   }
   if (error) { console.error("[proof upload]", error.message); return null; }
   return path;
@@ -67,8 +67,15 @@ export async function completeMission(formData: FormData) {
     const { data: already } = await db.from("mission_completions").select("mission_id").eq("profile_id", me.id).eq("mission_id", id).maybeSingle();
     if (!already) proofPath = await uploadProof(db, `${me.id}/${id}-${randomUUID()}.${ext}`, bytes, IMAGE_CONTENT_TYPE[ext]);
   }
+  // New ticks wait for staff approval before their points count.
   let { error } = await db.from("mission_completions").upsert(
-    { profile_id: me.id, mission_id: id, ...(proofPath ? { proof_path: proofPath } : {}) }, { ignoreDuplicates: true });
+    { profile_id: me.id, mission_id: id, status: "pending", ...(proofPath ? { proof_path: proofPath } : {}) }, { ignoreDuplicates: true });
+  if (error && /status/i.test(error.message)) {
+    // Migration 0008 not run yet: fall back to the old behaviour (counts straight away).
+    console.error("[mission status]", error.message);
+    ({ error } = await db.from("mission_completions").upsert(
+      { profile_id: me.id, mission_id: id, ...(proofPath ? { proof_path: proofPath } : {}) }, { ignoreDuplicates: true }));
+  }
   if (error && proofPath) {
     // The proof_path column may not exist yet (migration 0007 not run): complete without the photo.
     console.error("[mission proof]", error.message);
@@ -96,8 +103,52 @@ export async function revokeCompletion(formData: FormData) {
     const rm = await db.storage.from("proofs").remove([path]);
     if (rm.error) console.error("[revoke file]", rm.error.message);
   }
-  revalidatePath("/admin/missions"); revalidatePath("/missions"); revalidatePath("/home");
+  revalidatePath("/admin/missions"); revalidatePath("/admin"); revalidatePath("/missions"); revalidatePath("/home");
   redirect("/admin/missions?m=revoked");
+}
+
+// Staff: approve one pending mission tick so its points count.
+export async function approveCompletion(formData: FormData) {
+  if (!(await isStaff())) redirect("/home");
+  const profile = String(formData.get("profile") ?? "");
+  const mission = Number(formData.get("mission"));
+  if (!/^[0-9a-f-]{36}$/i.test(profile) || !Number.isInteger(mission)) redirect("/admin/missions?m=error");
+  const { error } = await createAdminClient().from("mission_completions").update({ status: "confirmed" })
+    .eq("profile_id", profile).eq("mission_id", mission).eq("status", "pending");
+  if (error) { console.error("[approve]", error.message); redirect("/admin/missions?m=error"); }
+  revalidatePath("/admin/missions"); revalidatePath("/admin"); revalidatePath("/missions"); revalidatePath("/home");
+  redirect("/admin/missions?m=approved");
+}
+
+// Staff: approve every pending mission tick at once (busy days).
+export async function approveAllCompletions() {
+  if (!(await isStaff())) redirect("/home");
+  const { error } = await createAdminClient().from("mission_completions").update({ status: "confirmed" }).eq("status", "pending");
+  if (error) { console.error("[approve all]", error.message); redirect("/admin/missions?m=error"); }
+  revalidatePath("/admin/missions"); revalidatePath("/admin"); revalidatePath("/missions"); revalidatePath("/home");
+  redirect("/admin/missions?m=approved");
+}
+
+// Member: add or replace their own optional profile photo (private "avatars" bucket).
+export async function setAvatar(formData: FormData) {
+  const me = await requireSeriesMember();
+  const back = "/more";
+  if (!me) redirect("/login");
+  const file = formData.get("photo");
+  if (!(file instanceof File) || file.size === 0 || validateProof(file)) redirect(`${back}?photo=bad`);
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const ext = verifiedProofType(file.type, bytes);
+  if (!ext) redirect(`${back}?photo=bad`);
+  const db = createAdminClient();
+  const path = await uploadProof(db, `${me.id}/${randomUUID()}.${ext}`, bytes, IMAGE_CONTENT_TYPE[ext], "avatars");
+  if (!path) redirect(`${back}?photo=error`);
+  const { data: old } = await db.from("profiles").select("avatar_path").eq("id", me.id).maybeSingle();
+  const { error } = await db.from("profiles").update({ avatar_path: path }).eq("id", me.id);
+  if (error) { console.error("[avatar]", error.message); await db.storage.from("avatars").remove([path]); redirect(`${back}?photo=error`); }
+  const prev = (old as { avatar_path?: string | null } | null)?.avatar_path;
+  if (prev) await db.storage.from("avatars").remove([prev]);
+  revalidatePath("/more"); revalidatePath("/home"); revalidatePath("/ranks");
+  redirect("/more?photo=saved");
 }
 
 export async function setHoliday(formData: FormData) {

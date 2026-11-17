@@ -1,5 +1,7 @@
 import { Screen, SegLinks, TopNav } from "@/components/ui";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
+import { avatarUrls } from "@/lib/avatars";
+import Avatar from "@/components/Avatar";
 
 type Entry = { id?: string; name: string; initials: string; points: number; rank: number };
 
@@ -12,6 +14,7 @@ export default async function Ranks({ searchParams }: { searchParams: Promise<{ 
   const myId = (me as { id?: string }).id;
   // Overall comes as podium order [2nd, 1st, 3rd] plus the rest; put it back into one ranked list.
   const rows: Entry[] = week ? (v.weekBoard as Entry[]) : [v.podium[1], v.podium[0], v.podium[2], ...v.leaderboard].filter(Boolean) as Entry[];
+  const photos = v.real ? await avatarUrls([...rows.slice(0, 10).map((r) => r.id ?? ""), myId ?? ""]) : new Map<string, string>();
   return (
     <Screen tabs>
       <TopNav title="Leaderboard" />
@@ -22,7 +25,7 @@ export default async function Ranks({ searchParams }: { searchParams: Promise<{ 
           {rows.slice(0, 10).map((r, i) => (
             <div key={`${r.name}-${i}`} className={`lbrow ${r.id && r.id === myId ? "me" : ""}`}>
               <span className={`medal m${(r.rank ?? i + 1) <= 3 ? (r.rank ?? i + 1) : 0}`}>{r.rank ?? i + 1}</span>
-              <span className="av">{r.initials}</span>
+              <Avatar url={r.id ? photos.get(r.id) : undefined} initials={r.initials} />
               <span className="grow"><b>{r.name}</b>{r.id && r.id === myId ? <small> · you</small> : null}</span>
               <span className="pts">{r.points} pts</span>
             </div>
@@ -30,7 +33,7 @@ export default async function Ranks({ searchParams }: { searchParams: Promise<{ 
         </div>
       )}
       {!week && me.rank > 10 && (
-        <div className="lbl"><div className="lbrow me"><span className="medal m0">{me.rank}</span><span className="av">{me.initials}</span><span className="grow"><b>{me.shortName}</b><small> · you</small></span><span className="pts">{me.points} pts</span></div></div>
+        <div className="lbl"><div className="lbrow me"><span className="medal m0">{me.rank}</span><Avatar url={myId ? photos.get(myId) : undefined} initials={me.initials} /><span className="grow"><b>{me.shortName}</b><small> · you</small></span><span className="pts">{me.points} pts</span></div></div>
       )}
     </Screen>
   );

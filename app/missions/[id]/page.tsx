@@ -17,8 +17,8 @@ export default async function Mission({ params, searchParams }: { params: Promis
   const m = v.missions.find((x) => x.id === id);
   if (!m) notFound(); // future weeks aren't in the list yet, so they stay hidden until Monday
   const pts = m.points * (m.double ? 2 : 1);
-  const open = v.real && m.week === v.week && !m.done && !m.secret;
-  const status = m.done ? "Done" : m.secret ? "Secret" : m.week < v.week ? "Closed" : "Open";
+  const open = v.real && m.week === v.week && !m.done && !m.pending && !m.secret;
+  const status = m.done ? "Done" : m.pending ? "Waiting for approval" : m.secret ? "Secret" : m.week < v.week ? "Closed" : "Open";
   return (
     <Screen tabs className="sand">
       <TopNav title="Mission" back="/missions" />
@@ -50,6 +50,7 @@ export default async function Mission({ params, searchParams }: { params: Promis
           </form>
         )}
         {m.done && <p className="notice" role="status" style={{ marginTop: 14 }}>Nice one. This mission is complete.</p>}
+        {m.pending && <p className="notice" role="status" style={{ marginTop: 14 }}>Sent! Your points will show once staff approve it.</p>}
       </div>
       <Link href="/missions" className="info-link"><span className="grow"><b className="disp sm-d">All missions</b></span><span aria-hidden="true">›</span></Link>
     </Screen>

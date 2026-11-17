@@ -2,11 +2,11 @@
 import { useState } from "react";
 
 // Photo input that rejects files over the cap before submit, so phones never hit the server's body limit.
-export default function ProofInput({ maxBytes, maxLabel }: { maxBytes: number; maxLabel: string }) {
+export default function ProofInput({ maxBytes, maxLabel, name = "proof" }: { maxBytes: number; maxLabel: string; name?: string }) {
   const [msg, setMsg] = useState("");
   return (
     <>
-      <input type="file" name="proof" accept="image/png,image/jpeg,image/webp" style={{ display: "block", marginTop: 6 }}
+      <input type="file" name={name} accept="image/png,image/jpeg,image/webp" style={{ display: "block", marginTop: 6 }}
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f && f.size > maxBytes) { e.target.value = ""; setMsg(`That photo is too big (max ${maxLabel}). Pick a smaller one.`); }
