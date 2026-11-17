@@ -20,7 +20,7 @@ const FRONT = (c: Colour, fit: Fit) =>
   `/img/shop-${fit === "womens" ? "women" : "men"}-${c}-full.webp`;
 const SLIDES = (c: Colour, fit: Fit) => [
   { key: "front", label: "Front", src: FRONT(c, fit), alt: `${c === "cream" ? "Cream" : "Charcoal wash"} singlet, worn` },
-  { key: "back", label: "Back print", src: "/img/shop-backs.webp", alt: "Singlet back print: TYGA 2026 Summer Series, Maintain the standard" },
+  { key: "back", label: "Back print", src: `/img/singlet-${c}-back.jpg`, alt: `${c === "cream" ? "Cream" : "Charcoal wash"} singlet back print: TYGA 2026 Summer Series, Maintain the standard` },
   { key: "detail", label: "Detail", src: `/img/shop-${c}-detail.webp`, alt: "Close-up of the back print" },
 ] as const;
 
