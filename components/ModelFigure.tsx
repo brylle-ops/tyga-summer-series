@@ -8,6 +8,8 @@ export default function ModelFigure({ fit, colour, className }: Props) {
   const w = fit === "womens";
   const shirt = colour === "cream" ? "#e9dfcf" : "#2b2b2b";
   const shirtShade = colour === "cream" ? "#d6c9b3" : "#1d1d1d";
+  const edge = colour === "cream" ? "#bfb299" : "#8a8a8a";
+  const shortsEdge = colour === "cream" ? "#000" : "#6a6a6a";
   const ink = colour === "cream" ? "#1a1a1a" : "#f4f1ec";
 
   const singlet = w
@@ -53,12 +55,12 @@ export default function ModelFigure({ fit, colour, className }: Props) {
       <circle cx="140" cy="62" r="2" fill="#2a1b12" />
       <circle cx="160" cy="62" r="2" fill="#2a1b12" />
       {/* singlet */}
-      <path d={singlet} fill={shirt} />
+      <path d={singlet} fill={shirt} stroke={edge} strokeWidth="1.6" strokeLinejoin="round" />
       <path d={`M${w ? 150 : 150},126 L${w ? 150 : 150},300`} stroke={shirtShade} strokeWidth="1.5" opacity=".35" />
       <text x={logoX} y="158" textAnchor="middle" fontFamily="Inter, Arial, sans-serif" fontWeight="900" fontStyle="italic" fontSize="14" fill={ink}>TYGA</text>
       <text x={logoX} y="168" textAnchor="middle" fontFamily="Inter, Arial, sans-serif" fontWeight="700" fontSize="7" letterSpacing="1" fill={ink}>— 2026 —</text>
       {/* shorts */}
-      <path d={`M${hipL},296 L${hipR},296 L${hipR + 2},${shortsEnd} L154,${shortsEnd - 4} L150,326 L146,${shortsEnd - 4} L${hipL - 2},${shortsEnd} Z`} fill="#141414" />
+      <path d={`M${hipL},296 L${hipR},296 L${hipR + 2},${shortsEnd} L154,${shortsEnd - 4} L150,326 L146,${shortsEnd - 4} L${hipL - 2},${shortsEnd} Z`} fill="#141414" stroke={shortsEdge} strokeWidth="1.6" strokeLinejoin="round" />
     </svg>
   );
 }
