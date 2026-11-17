@@ -20,7 +20,7 @@ const FRONT = (c: Colour, fit: Fit) =>
   `/img/shop-${fit === "womens" ? "women" : "men"}-${c}-full.webp`;
 const SLIDES = (c: Colour, fit: Fit) => [
   { key: "front", label: "Front", src: FRONT(c, fit), alt: `${c === "cream" ? "Cream" : "Charcoal wash"} singlet, worn` },
-  { key: "back", label: "Back print", src: "/img/shop-backs.webp", alt: "Both models side by side, showing the cream and charcoal singlet back prints" },
+  { key: "back", label: "Back print", src: `/img/shop-backs-${c}-v2.webp`, alt: `Both models side by side in ${c === "cream" ? "cream" : "charcoal wash"} singlets, showing the back prints` },
   { key: "detail", label: "Detail", src: `/img/shop-${c}-detail.webp`, alt: "Close-up of the back print" },
 ] as const;
 
@@ -52,7 +52,7 @@ export default function SingletProduct({ initial, paid = false }: { initial?: In
       <div className="pp-thumbs" role="group" aria-label="Photos">
         {slides.map((s) => (
           <button key={s.key} type="button" aria-pressed={slide === s.key} onClick={() => setSlide(s.key)}>
-            <img src={s.src} alt="" /><span>{s.label}</span>
+            <img src={s.src} alt="" data-s={s.key} /><span>{s.label}</span>
           </button>
         ))}
       </div>

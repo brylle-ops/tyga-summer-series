@@ -386,6 +386,7 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .pp-view img[data-s="front"]{object-fit:contain;object-position:50% 50%}
 .pp-view img[data-s="back"],.pp-view img[data-s="detail"]{object-fit:contain;background:#0e0e0e}
 .pp-thumbs img{object-position:50% 12%}
+.pp-thumbs img[data-s="back"]{object-fit:contain;object-position:center;background:#0e0e0e}
 
 /* Week strip (Home + Activity) */
 .strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
