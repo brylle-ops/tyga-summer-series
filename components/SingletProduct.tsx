@@ -19,8 +19,8 @@ const COLOURS: { value: Colour; label: string; swatch: string }[] = [
 // Photos change with the colour.
 const FRONT = (c: Colour, fit: Fit) =>
   fit === "womens"
-    ? (c === "cream" ? "/img/shop-cream-front.webp" : "/img/shop-charcoal-front-women.webp")
-    : (c === "cream" ? "/img/shop-cream-front-men.webp" : "/img/shop-charcoal-front.webp");
+    ? (c === "cream" ? "/img/shop-cream-front.webp" : "/img/shop-charcoal-front-women-v2.webp")
+    : (c === "cream" ? "/img/shop-cream-front-men-v2.webp" : "/img/shop-charcoal-front.webp");
 const SLIDES = (c: Colour, fit: Fit) => [
   { key: "front", label: "Front", src: FRONT(c, fit), alt: `${c === "cream" ? "Cream" : "Charcoal wash"} singlet, worn` },
   { key: "body", label: "Full body", src: "", alt: "Full body, front view" },
