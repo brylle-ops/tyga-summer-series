@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { saveSinglet } from "@/app/join/actions";
+import ModelFigure from "@/components/ModelFigure";
 
 const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"] as const;
 type Size = (typeof SIZES)[number];
@@ -22,6 +23,7 @@ const FRONT = (c: Colour, fit: Fit) =>
     : (c === "cream" ? "/img/shop-cream-front-men.webp" : "/img/shop-charcoal-front.webp");
 const SLIDES = (c: Colour, fit: Fit) => [
   { key: "front", label: "Front", src: FRONT(c, fit), alt: `${c === "cream" ? "Cream" : "Charcoal wash"} singlet, worn` },
+  { key: "body", label: "Full body", src: "", alt: "Full body, front view" },
   { key: "back", label: "Back print", src: "/img/shop-backs.webp", alt: "Singlet back print: TYGA 2026 Summer Series, Maintain the standard" },
   { key: "detail", label: "Detail", src: `/img/shop-${c}-detail.webp`, alt: "Close-up of the back print" },
 ] as const;
@@ -49,12 +51,14 @@ export default function SingletProduct({ initial, paid = false }: { initial?: In
 
       <div className="pp-view">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {current && <img src={current.src} alt={current.alt} data-s={current.key} />}
+        {current && (current.key === "body"
+          ? <ModelFigure fit={fit} colour={colour} />
+          : <img src={current.src} alt={current.alt} data-s={current.key} />)}
       </div>
       <div className="pp-thumbs" role="group" aria-label="Photos">
         {slides.map((s) => (
           <button key={s.key} type="button" aria-pressed={slide === s.key} onClick={() => setSlide(s.key)}>
-            <img src={s.src} alt="" /><span>{s.label}</span>
+            {s.key === "body" ? <ModelFigure fit={fit} colour={colour} /> : <img src={s.src} alt="" />}<span>{s.label}</span>
           </button>
         ))}
       </div>
