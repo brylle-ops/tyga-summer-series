@@ -3,6 +3,8 @@ import { Pill, Wordmark } from "@/components/ui";
 import { isStaff, supabaseReady } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import ConfirmButton from "@/components/ConfirmButton";
+import { WithPhoto } from "@/components/Avatar";
+import { avatarUrls } from "@/lib/avatars";
 import { addMission, approveAllCompletions, approveCompletion, revokeCompletion } from "../../series/actions";
 import { seriesWeekNow } from "@/lib/series-data";
 import { seriesWeeks } from "@/lib/mock-data";
@@ -31,6 +33,7 @@ export default async function MissionCheck({ searchParams }: { searchParams: Pro
     pids.length ? db.from("profiles").select("id, first_name, last_name, email").in("id", pids) : Promise.resolve({ data: [] }),
     mids.length ? db.from("missions").select("id, title, week, points, double").in("id", mids) : Promise.resolve({ data: [] }),
   ]);
+  const photos = await avatarUrls(pending.map((r) => r.profile_id));
   const pById = new Map((profiles ?? []).map((p) => [p.id as string, p]));
   const mById = new Map((missions ?? []).map((m) => [Number(m.id), m]));
   const urls = new Map<string, string>();
@@ -69,7 +72,7 @@ export default async function MissionCheck({ searchParams }: { searchParams: Pro
                   const url = r.proof_path ? urls.get(r.proof_path) : undefined;
                   return (
                     <tr key={`p-${r.profile_id}-${r.mission_id}`}>
-                      <td>{name}<br /><span className="xs mute">{when(r.created_at)}</span></td>
+                      <td><WithPhoto url={photos.get(r.profile_id)} name={name} /><br /><span className="xs mute">{when(r.created_at)}</span></td>
                       <td>{m?.title ?? `#${r.mission_id}`}</td>
                       <td className="n">{m ? m.points * (m.double ? 2 : 1) : "—"}</td>
                       <td>{url ? <a href={url} target="_blank" rel="noopener noreferrer">View photo</a> : "No photo"}</td>

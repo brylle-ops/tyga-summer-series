@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { WithPhoto } from "@/components/Avatar";
+import { avatarUrls } from "@/lib/avatars";
 import { reviewCheckin } from "@/app/series/actions";
 import { seriesDayNow } from "@/lib/series-data";
 import { isStaff, supabaseReady } from "@/lib/session";
@@ -20,16 +22,17 @@ export default async function AdminCheckin({ searchParams }: { searchParams: Pro
   const today = seriesDayNow();
   const db = createAdminClient();
   const [{ data: pendingRows }, matches] = await Promise.all([
-    db.from("checkins").select("id, day, profiles(first_name, last_name, email)").eq("status", "pending").eq("kind", "yard").order("day").order("id"),
+    db.from("checkins").select("id, day, profile_id, profiles(first_name, last_name, email)").eq("status", "pending").eq("kind", "yard").order("day").order("id"),
     filter
       ? db.from("profiles").select("id, first_name, last_name, email").or(filter).order("first_name").limit(20)
       : Promise.resolve({ data: [] as { id: string; first_name: string | null; last_name: string | null; email: string }[] }),
   ]);
   const pending = (pendingRows ?? []).map((r) => {
     const p = r.profiles as unknown as { first_name: string | null; last_name: string | null; email: string } | null;
-    return { id: Number(r.id), day: r.day as string, email: p?.email ?? "", name: nameOf(p?.first_name ?? null, p?.last_name ?? null, p?.email ?? "Member") };
+    return { id: Number(r.id), pid: r.profile_id as string, day: r.day as string, email: p?.email ?? "", name: nameOf(p?.first_name ?? null, p?.last_name ?? null, p?.email ?? "Member") };
   });
   const people = matches.data ?? [];
+  const photos = await avatarUrls([...pending.map((p) => p.pid), ...people.map((p) => p.id)]);
 
   return (
     <div className="admin-page">
@@ -43,7 +46,7 @@ export default async function AdminCheckin({ searchParams }: { searchParams: Pro
             {pending.length === 0 ? <p className="sm mute" style={{ marginTop: 6 }}>Nothing waiting.</p> : (
               <div className="tablewrap"><table><tbody>
                 {pending.map((p) => (
-                  <tr key={p.id}><td>{p.name}<div className="xs mute">{p.email} · {p.day}</div></td><td>
+                  <tr key={p.id}><td><WithPhoto url={photos.get(p.pid)} name={p.name} /><div className="xs mute">{p.email} · {p.day}</div></td><td>
                     <form action={reviewCheckin} className="li" style={{ gap: 8, justifyContent: "flex-end" }}>
                       <input type="hidden" name="id" value={p.id} />
                       <button className="mini" style={{ minHeight: 44 }} name="decision" value="approve" type="submit">Approve</button>
@@ -66,7 +69,7 @@ export default async function AdminCheckin({ searchParams }: { searchParams: Pro
               <form key={p.id} action={staffLogCheckin} className="card" style={{ background: "#121110" }}>
                 <input type="hidden" name="profile_id" value={p.id} />
                 <input type="hidden" name="q" value={q} />
-                <b>{nameOf(p.first_name, p.last_name, p.email)}</b>
+                <WithPhoto url={photos.get(p.id)} name={nameOf(p.first_name, p.last_name, p.email)}><b>{nameOf(p.first_name, p.last_name, p.email)}</b></WithPhoto>
                 <div className="xs mute">{p.email}</div>
                 <div className="ck-kinds">
                   {STAFF_KINDS.map((k) => (

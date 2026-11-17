@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { WithPhoto } from "@/components/Avatar";
+import { avatarUrls } from "@/lib/avatars";
 import { redirect } from "next/navigation";
 import { Pill, Wordmark } from "@/components/ui";
 import { fetchAll } from "@/lib/paging";
@@ -31,6 +33,7 @@ export default async function Members({ searchParams }: { searchParams: Promise<
   const reg = new Map(regs.map((r) => [r.profile_id, r]));
   const needle = (q ?? "").trim().toLowerCase();
   const rows = profiles.filter((p) => !needle || `${p.first_name ?? ""} ${p.last_name ?? ""} ${p.email}`.toLowerCase().includes(needle));
+  const photos = await avatarUrls(rows.slice(0, 500).map((p) => p.id));
 
   return (
     <div className="admin-page">
@@ -56,7 +59,7 @@ export default async function Members({ searchParams }: { searchParams: Promise<
                 const r = reg.get(p.id);
                 return (
                   <tr key={p.id}>
-                    <td><Link prefetch={false} href={`/admin/members/${p.id}`}>{`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "(no name yet)"}</Link>{p.role === "staff" ? " · staff" : ""}</td>
+                    <td><WithPhoto url={photos.get(p.id)} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "?"}><Link prefetch={false} href={`/admin/members/${p.id}`}>{`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "(no name yet)"}</Link></WithPhoto>{p.role === "staff" ? " · staff" : ""}</td>
                     <td>{p.email}</td><td>{p.mobile ?? "—"}</td><td>{p.goal ?? "—"}</td>
                     <td className="n"><b>{s?.points ?? 0}</b></td><td className="n">{s ? `${s.thisWeek}/3` : "—"}</td>
                     <td>{day(s?.last ?? null)}</td>

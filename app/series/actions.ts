@@ -147,7 +147,7 @@ export async function setAvatar(formData: FormData) {
   if (error) { console.error("[avatar]", error.message); await db.storage.from("avatars").remove([path]); redirect(`${back}?photo=error`); }
   const prev = (old as { avatar_path?: string | null } | null)?.avatar_path;
   if (prev) await db.storage.from("avatars").remove([prev]);
-  revalidatePath("/more"); revalidatePath("/home"); revalidatePath("/ranks");
+  revalidatePath("/more"); revalidatePath("/home"); revalidatePath("/ranks"); revalidatePath("/admin", "layout");
   redirect("/more?photo=saved");
 }
 

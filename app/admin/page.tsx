@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Pill, Wordmark } from "@/components/ui";
 import { joinedLabel, lastSessionLabel } from "@/lib/retention";
 import { loadRetention } from "./retention-data";
+import { WithPhoto } from "@/components/Avatar";
+import { avatarUrls } from "@/lib/avatars";
 
 const SHOW = 25;
 
@@ -12,6 +14,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
   if (!d) return <p style={{ padding: 24 }}>Connect Supabase to see live data.</p>;
   const started = d.week >= 1;
   const rows = all === "1" ? d.rows : d.rows.slice(0, SHOW);
+  const photos = await avatarUrls([...rows.map((r) => r.id), ...d.waiting.slice(0, SHOW).map((r) => r.id)]);
   return (
     <div className="admin-page">
       <div className="desk">
@@ -34,7 +37,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <p className="summary">{d.members} members · {d.waiting.length} signed up, waiting for 7 Dec</p>
               {d.waiting.length === 0 ? <p className="note">No sign-ups yet.</p> : (
                 <ul className="quiet">
-                  {d.waiting.slice(0, SHOW).map((r) => <li key={r.id}><b>{r.name}</b><span>{joinedLabel(r.joined)}</span></li>)}
+                  {d.waiting.slice(0, SHOW).map((r) => <li key={r.id}><WithPhoto url={photos.get(r.id)} name={r.name}><b>{r.name}</b></WithPhoto><span>{joinedLabel(r.joined)}</span></li>)}
                 </ul>
               )}
               <Link prefetch={false} className="mini ghost" href="/admin/retention">Open Retention</Link>
@@ -45,7 +48,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               {d.rows.length === 0 ? <p className="note">Everyone has logged a session in the last 7 days. Nice work.</p> : (
                 <ul className="quiet">
                   {rows.map((r) => (
-                    <li key={r.id}><b>{r.name}</b><span>{lastSessionLabel(r)}</span></li>
+                    <li key={r.id}><WithPhoto url={photos.get(r.id)} name={r.name}><b>{r.name}</b></WithPhoto><span>{lastSessionLabel(r)}</span></li>
                   ))}
                 </ul>
               )}
