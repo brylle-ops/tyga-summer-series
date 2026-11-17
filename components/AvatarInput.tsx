@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 const SIZE = 512; // profile photos never need more than this
@@ -17,40 +17,39 @@ async function shrink(file: File): Promise<File> {
   return new File([blob], "photo.jpg", { type: "image/jpeg" });
 }
 
-function Submit({ ready, hasPhoto }: { ready: boolean; hasPhoto: boolean }) {
+function Busy({ hasPhoto, onPick }: { hasPhoto: boolean; onPick: () => void }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className="mini" disabled={!ready || pending} aria-busy={pending}>
+    <button type="button" className="mini" disabled={pending} aria-busy={pending} onClick={onPick}>
       {pending ? "Uploading…" : hasPhoto ? "Change photo" : "Upload photo"}
     </button>
   );
 }
 
-// Photo picker + upload button for the More page.
+// One tap: pick a photo, it is shrunk on the phone and uploaded straight away.
 export default function AvatarInput({ hasPhoto }: { hasPhoto: boolean }) {
-  const [ready, setReady] = useState(false);
+  const ref = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState("");
   return (
     <>
-      <input type="file" name="photo" accept="image/png,image/jpeg,image/webp" style={{ display: "block" }}
+      <input ref={ref} type="file" name="photo" accept="image/png,image/jpeg,image/webp" hidden
         onChange={async (e) => {
           const input = e.target;
           const f = input.files?.[0];
-          setReady(false); setMsg("");
+          setMsg("");
           if (!f) return;
           try {
             const small = await shrink(f);
             const dt = new DataTransfer();
             dt.items.add(small);
             input.files = dt.files;
-            setReady(true);
           } catch {
-            if (f.size > 3.5 * 1024 * 1024) { input.value = ""; setMsg("That photo is too big (max 3.5 MB). Pick a smaller one."); }
-            else setReady(true);
+            if (f.size > 3.5 * 1024 * 1024) { input.value = ""; setMsg("That photo is too big (max 3.5 MB). Pick a smaller one."); return; }
           }
+          input.form?.requestSubmit();
         }} />
       {msg && <span className="notice" role="alert" style={{ display: "block" }}>{msg}</span>}
-      <Submit ready={ready} hasPhoto={hasPhoto} />
+      <Busy hasPhoto={hasPhoto} onPick={() => { if (ref.current) { ref.current.value = ""; ref.current.click(); } }} />
     </>
   );
 }
