@@ -9,6 +9,8 @@ import { isReleased } from "@/lib/rewards";
 import { loadMemberRewards } from "@/lib/rewards-data";
 import { LEVELS } from "@/lib/series";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
+import { avatarUrls } from "@/lib/avatars";
+import Avatar from "@/components/Avatar";
 
 const QUICK: { href: string; label: string; icon: IconName }[] = [
   { href: "/activity", label: "Activity", icon: "run" },
@@ -28,7 +30,8 @@ const PILLARS: { href: string; label: string; icon: IconName }[] = [
 // Home dashboard
 export default async function Home() {
   const profile = await requireSeriesMember();
-  const [v, rv, news] = await Promise.all([loadMemberView(profile), profile ? loadMemberRewards(profile.id) : null, loadAnnouncements(5)]);
+  const [v, rv, news, photos] = await Promise.all([loadMemberView(profile), profile ? loadMemberRewards(profile.id) : null, loadAnnouncements(5), profile ? avatarUrls([profile.id]) : Promise.resolve(new Map<string, string>())]);
+  const myPhoto = profile ? photos.get(profile.id) : undefined;
   const newNews = news.some((a) => isFresh(a.created_at));
   // Rewards banners: a win beats "new reward", and both go straight to the Rewards page.
   const won = rv ? rv.rewards.filter((r) => { const w = rv.ctx.won.get(r.id); return w?.announced && !w.collected; }) : [];
@@ -52,13 +55,14 @@ export default async function Home() {
       <ul className="pillars" aria-label="The Series">
         {PILLARS.map((p) => (<li key={p.label}><Link href={p.href}><Icon name={p.icon} /><b>{p.label}</b></Link></li>))}
       </ul>
-      <div className="hdr">
+      <div className="hdr" style={{ justifyContent: "flex-start" }}>
+        <Link href="/more" aria-label="Your photo"><Avatar url={myPhoto} initials={`${profile?.first_name?.[0] ?? ""}${profile?.last_name?.[0] ?? ""}`.toUpperCase() || "?"} className="av av-lg" /></Link>
         <div>
           <div className="sm mute">Hey, {me.firstName}</div>
           <div className="h2">{v.week >= 1 ? <>Week {thisWeek.no} · <span className="script" style={{ fontSize: 22 }}>{thisWeek.theme}</span></> : "Series starts Mon 7 Dec"}</div>
         </div>
       </div>
-      {profile && !(profile as { avatar_path?: string | null }).avatar_path && (
+      {profile && !myPhoto && (
         <Link href="/more" className="info-link"><span className="grow"><b className="disp sm-d">Add your photo</b><small style={{ display: "block", fontSize: 12 }}>Optional · shows on the leaderboard</small></span><span aria-hidden="true">›</span></Link>
       )}
 
