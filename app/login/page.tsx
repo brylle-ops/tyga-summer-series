@@ -14,10 +14,10 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
       <div style={{ marginTop: 6 }}>
         <div className="eyebrow">TYGA Summer Series</div>
         <div className="h1" style={{ marginTop: 6 }}>
-          No passwords.<br /><span className="script" style={{ fontSize: 34 }}>just a code</span>
+          Sign in.<br /><span className="script" style={{ fontSize: 34 }}>no password needed</span>
         </div>
       </div>
-      <p className="sm mute">Enter your email and we&apos;ll email you a code. New here? Same code, it sets you up.</p>
+      <p className="sm mute">Enter your email and we&apos;ll send you a one-time sign-in code. New to the Summer Series? The same code creates your account.</p>
       <LoginForm next={next} />
       <p className="xs mute" style={{ textAlign: "center" }}>
         See how we use your info: <a href="/privacy" className="link">Privacy</a>

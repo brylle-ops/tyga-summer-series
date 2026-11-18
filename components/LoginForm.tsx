@@ -39,7 +39,7 @@ function CodeStep({ email, note, next, onBack }: { email: string; note?: string;
     <form action={action} style={{ display: "contents" }}>
       <input type="hidden" name="email" value={email} />
       <input type="hidden" name="next" value={next} />
-      <p className="sm mute">We emailed a code to <b>{email}</b>. It works once and expires in an hour.</p>
+      <p className="sm mute">Check your inbox. We&apos;ve sent a sign-in code to <b>{email}</b>. It can be used once and expires in one hour.</p>
       <label className="field">
         <span className="eyebrow">Code</span>
         <input name="code" inputMode="numeric" pattern="[0-9 ]*" autoFocus autoComplete="one-time-code" required maxLength={12}
