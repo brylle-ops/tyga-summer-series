@@ -6,7 +6,7 @@ import { IMAGE_CONTENT_TYPE } from "@/lib/image-sniff";
 import { validateProof, verifiedProofType } from "@/lib/proof";
 import { redirect } from "next/navigation";
 import { requireSeriesMember, seriesDayNow, seriesWeekNow } from "@/lib/series-data";
-import type { CheckinKind } from "@/lib/series";
+import { alburyDay, type CheckinKind } from "@/lib/series";
 import { PERKS } from "@/lib/perks";
 import { isStaff } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -155,13 +155,13 @@ export async function setHoliday(formData: FormData) {
   const me = await requireSeriesMember();
   if (!me) redirect("/holiday");
   const until = String(formData.get("until") ?? "");
-  const today = seriesDayNow();
+  const today = alburyDay(new Date()); // the real date (the date picker uses it too), not the preview-week date
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(until) && until >= today && until <= "2027-01-31";
   if (until && !valid) redirect("/holiday?error=date");
   const { error } = await createAdminClient().from("profiles").update({ holiday_until: until || null }).eq("id", me.id);
   if (error) { console.error("[holiday]", error.message); redirect("/holiday?error=date"); }
-  revalidatePath("/holiday");
-  redirect("/holiday");
+  revalidatePath("/holiday"); revalidatePath("/home"); revalidatePath("/admin", "layout");
+  redirect(until ? "/holiday?on=1" : "/holiday?off=1");
 }
 
 // ---- staff ----

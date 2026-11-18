@@ -655,6 +655,8 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .switch{width:50px;height:30px;border-radius:99px;background:rgba(36,28,22,.25);position:relative;flex:none;transition:background .2s}
 .switch i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .2s}
 .switch.on{background:#e08a35}.switch.on i{left:23px}
+button.switch{border:0;padding:0;cursor:pointer;font:inherit}
+button.switch:focus-visible{outline:2px solid #e08a35;outline-offset:2px}
 
 .srow.sel{background:rgba(169,101,31,.12)}
 
