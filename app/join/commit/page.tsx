@@ -3,6 +3,7 @@ import { Screen, TopNav } from "@/components/ui";
 import { getCurrentMember, supabaseReady } from "@/lib/session";
 import { GOALS } from "@/lib/singlet";
 import { saveGoal } from "../actions";
+import { signOut } from "../sign-in/actions";
 
 const ERRORS: Record<string, string> = {
   goal: "Pick the goal that fits you best.",
@@ -19,7 +20,15 @@ export default async function Commit({ searchParams }: { searchParams: Promise<{
 
   return (
     <Screen>
-      <TopNav title="Your summer" back="/" />
+      {me && (!me.profile.goal || !me.profile.first_name || !me.profile.last_name) ? (
+        // Not set up yet: every other page sends them back here, so "back" signs out and returns to Welcome.
+        <form action={signOut} className="nav">
+          <button type="submit" className="back" aria-label="Back to Welcome (signs you out)" style={{ background: "none", border: 0, cursor: "pointer" }}>‹</button>
+          Your summer
+        </form>
+      ) : (
+        <TopNav title="Your summer" back={me ? "/home" : "/"} />
+      )}
       <div style={{ marginTop: 6 }}>
         <div className="eyebrow">{me?.profile.first_name ? `Welcome, ${me.profile.first_name}` : "Your summer commitment"}</div>
         <div className="h1" style={{ marginTop: 6 }}>
