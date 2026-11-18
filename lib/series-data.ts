@@ -63,7 +63,7 @@ async function fetchEveryone(): Promise<EveryoneData> {
   const db = createAdminClient();
   const [regs, checkins, done, { data: missions }] = await Promise.all([
     fetchAll<{ profile_id: string; profiles: unknown }>((a, b) =>
-      db.from("registrations").select("profile_id, profiles(id, first_name, last_name, mobile, holiday_until, role)").order("profile_id").range(a, b)),
+      db.from("registrations").select("profile_id, profiles(*)").order("profile_id").range(a, b)),
     // Only sessions that can count, from the series start — keeps the load small.
     fetchAll<Checkin & { profile_id: string }>((a, b) =>
       db.from("checkins").select("profile_id, day, kind, status").in("kind", ["yard", "run", "workout"])
@@ -76,7 +76,7 @@ async function fetchEveryone(): Promise<EveryoneData> {
   const doneBy = groupBy(done.filter(approved), (d) => d.profile_id);
   const everyone: Everyone = regs.filter((r) => {
     const p = r.profiles as unknown as (Profile | null);
-    return p && p.role !== "staff" && Boolean(p.first_name); // only named, non-staff members are ranked
+    return p && p.role !== "staff" && !p.blocked_at && Boolean(p.first_name); // only named, non-staff, not blocked
   }).map((r) => {
     const p = r.profiles as unknown as Profile;
     return { profile: p, checkins: checkinsBy.get(p.id) ?? [], done: (doneBy.get(p.id) ?? []).map((d) => Number(d.mission_id)) };

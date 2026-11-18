@@ -7,16 +7,19 @@ import { approved, memberStats, pointsByWeek, sessionDaysByWeek, type Checkin, t
 import { loadEveryone, seriesWeekNow } from "@/lib/series-data";
 import { isStaff, supabaseReady } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isStaffEmail } from "@/lib/staff";
+import { setBlocked } from "../actions";
 
 const KIND: Record<string, string> = { yard: "Yard session", run: "Run", workout: "Workout", recovery: "Recovery", rest: "Rest day" };
 const STATUS: Record<string, string> = { confirmed: "Counted", pending: "Waiting for approval", rejected: "Rejected" };
 const day = (d: string) => new Date(`${d}T12:00:00+11:00`).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", timeZone: "Australia/Sydney" });
 
 // Backend: one member's results — photo, points, sessions and missions (approved and waiting). Staff only.
-export default async function MemberDetail({ params }: { params: Promise<{ id: string }> }) {
+export default async function MemberDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ b?: string }> }) {
   if (!supabaseReady()) return <p style={{ padding: 24 }}>Connect Supabase to see members.</p>;
   if (!(await isStaff())) redirect("/login");
   const { id } = await params;
+  const { b: notice } = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const db = createAdminClient();
   const [{ data: p }, { data: checkins }, { data: done }, { missions }, photos] = await Promise.all([
@@ -57,6 +60,10 @@ export default async function MemberDetail({ params }: { params: Promise<{ id: s
             <Pill>{rows.filter((r) => !approved(r)).length} waiting</Pill>
           </div>
         </div>
+        {notice === "blocked" && <p className="notice" role="status">Blocked. They can't sign in and are off the leaderboard.</p>}
+        {notice === "unblocked" && <p className="notice" role="status">Unblocked. They can sign in again and their points are back.</p>}
+        {notice === "staff" && <p className="notice" role="alert">Staff accounts can't be blocked.</p>}
+        {notice === "error" && <p className="notice" role="alert">That didn't save. Has the 0009 SQL been run in Supabase?</p>}
 
         <div className="card">
           <b>Week by week</b>
@@ -104,6 +111,22 @@ export default async function MemberDetail({ params }: { params: Promise<{ id: s
             </table></div>
           )}
         </div>
+
+        {p.role !== "staff" && !isStaffEmail(p.email) && (
+          <div className="card li" style={{ gap: 12 }}>
+            <div className="grow">
+              <b>{p.blocked_at ? "This member is blocked" : "Block this member"}</b>
+              <div className="xs mute">{p.blocked_at
+                ? "They can't sign in and are hidden from the leaderboard. Unblock to restore everything."
+                : "They won't be able to sign in or rejoin with this email, and they leave the leaderboard. Their history is kept."}</div>
+            </div>
+            <form action={setBlocked}>
+              <input type="hidden" name="profile" value={id} />
+              <input type="hidden" name="block" value={p.blocked_at ? "0" : "1"} />
+              <button type="submit" className={p.blocked_at ? "mini" : "mini ghost"}>{p.blocked_at ? "Unblock" : "Block member"}</button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

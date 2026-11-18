@@ -9,7 +9,7 @@ import { loadEveryone, seriesWeekNow } from "@/lib/series-data";
 import { isStaff, supabaseReady } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-type P = { id: string; email: string; first_name: string | null; last_name: string | null; mobile: string | null; goal: string | null; role: string; created_at: string; holiday_until: string | null };
+type P = { id: string; email: string; first_name: string | null; last_name: string | null; mobile: string | null; goal: string | null; role: string; created_at: string; holiday_until: string | null; blocked_at?: string | null };
 const day = (d: string | null) => (d ? new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "short", timeZone: "Australia/Sydney" }) : "—");
 
 // Backend: everyone who has signed up, with their progress. Staff only; shows full names, emails and mobiles.
@@ -20,7 +20,7 @@ export default async function Members({ searchParams }: { searchParams: Promise<
   const week = seriesWeekNow();
   const db = createAdminClient();
   const [profiles, regs, { everyone, missions }] = await Promise.all([
-    fetchAll<P>((a, b) => db.from("profiles").select("id, email, first_name, last_name, mobile, goal, role, created_at, holiday_until").order("created_at", { ascending: false }).range(a, b)),
+    fetchAll<P>((a, b) => db.from("profiles").select("*").order("created_at", { ascending: false }).range(a, b)),
     fetchAll<{ profile_id: string; payment_status: string; size: string | null }>((a, b) => db.from("registrations").select("profile_id, payment_status, size").order("profile_id").range(a, b)),
     loadEveryone(),
   ]);
@@ -59,7 +59,7 @@ export default async function Members({ searchParams }: { searchParams: Promise<
                 const r = reg.get(p.id);
                 return (
                   <tr key={p.id}>
-                    <td><WithPhoto url={photos.get(p.id)} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "?"}><Link prefetch={false} href={`/admin/members/${p.id}`}>{`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "(no name yet)"}</Link></WithPhoto>{p.role === "staff" ? " · staff" : ""}</td>
+                    <td><WithPhoto url={photos.get(p.id)} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "?"}><Link prefetch={false} href={`/admin/members/${p.id}`}>{`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "(no name yet)"}</Link></WithPhoto>{p.role === "staff" ? " · staff" : ""}{p.blocked_at ? " · blocked" : ""}</td>
                     <td>{p.email}</td><td>{p.mobile ?? "—"}</td><td>{p.goal ?? "—"}</td>
                     <td className="n"><b>{s?.points ?? 0}</b></td><td className="n">{s ? `${s.thisWeek}/3` : "—"}</td>
                     <td>{day(s?.last ?? null)}</td>

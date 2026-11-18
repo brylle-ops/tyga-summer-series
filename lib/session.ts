@@ -23,6 +23,8 @@ export const getCurrentMember = cache(async function getCurrentMember(): Promise
     supabase.from("registrations").select("*").eq("profile_id", user.id).maybeSingle<Registration>(),
   ]);
   if (!profile) return null;
+  // Blocked by staff: treated as signed out everywhere (staff emails can't be blocked).
+  if (profile.blocked_at && !isStaffEmail(profile.email)) return null;
   // Listed staff emails count as staff even if the database role is still "member" (in memory only).
   const effective: Profile = isStaffEmail(profile.email) ? { ...profile, role: "staff" } : profile;
   return { profile: effective, registration: registration ?? null };
@@ -36,11 +38,12 @@ export async function isStaff(): Promise<boolean> {
 
 /** After a magic-link sign-in: create the profile (members can't insert it themselves). Open to any email;
  *  if the email is on the old gym member list we pre-fill their name and mobile. */
-export async function ensureProfile(userId: string, email: string): Promise<boolean> {
+export async function ensureProfile(userId: string, email: string): Promise<boolean | "blocked"> {
   const admin = createAdminClient();
   const e = email.trim().toLowerCase();
-  const { data: existing } = await admin.from("profiles").select("id").eq("id", userId).maybeSingle();
+  const { data: existing } = await admin.from("profiles").select("*").eq("id", userId).maybeSingle();
   if (existing) {
+    if (existing.blocked_at && !isStaffEmail(existing.email)) return "blocked";
     await admin.from("profiles").update({ last_seen_at: new Date().toISOString() }).eq("id", userId);
     return true;
   }

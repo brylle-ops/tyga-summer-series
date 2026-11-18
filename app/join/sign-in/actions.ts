@@ -45,7 +45,12 @@ export async function verifyLoginCode(_prev: LoginState, formData: FormData): Pr
     await recordLoginEvent(email, false);
     return { email, sent: true, message: "That code didn't work. It may have expired — check for the newest email, or go back and send a new one." };
   }
-  if (!(await ensureProfile(data.user.id, email))) {
+  const ok = await ensureProfile(data.user.id, email);
+  if (ok === "blocked") {
+    await supabase.auth.signOut();
+    return { email, message: "This account can't use the Summer Series app. Please talk to the team at The Yard." };
+  }
+  if (!ok) {
     return { email, sent: true, message: "We couldn't set up your account just now. Please try again." };
   }
   redirect(safeNext(String(formData.get("next") ?? ""), "/home"));
