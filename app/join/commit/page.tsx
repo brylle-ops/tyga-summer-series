@@ -35,7 +35,7 @@ export default async function Commit({ searchParams }: { searchParams: Promise<{
       <form action={saveGoal} style={{ display: "contents" }}>
         <fieldset style={{ border: 0, padding: 0, margin: 0, display: "contents" }}>
           {me && (!me.profile.first_name || !me.profile.last_name) && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 10 }}>
               <label className="field"><span className="eyebrow">First name</span>
                 <input name="first_name" required maxLength={60} autoComplete="given-name" defaultValue={me.profile.first_name ?? ""} /></label>
               <label className="field"><span className="eyebrow">Last name</span>

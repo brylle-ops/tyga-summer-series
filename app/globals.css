@@ -280,8 +280,8 @@ a.btn,a.chip,a.mini{text-decoration:none}
 .admin-page .sec span{font-size:13px;color:var(--mute)}
 
 /* form field */
-.field{display:flex;flex-direction:column;gap:8px}
-.field input{font:inherit;font-size:16px;height:50px;padding:0 16px;border-radius:16px;border:1px solid rgba(255,255,255,.25);background:var(--char-2);color:var(--text)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.field input{width:100%;min-width:0;box-sizing:border-box;font:inherit;font-size:16px;height:50px;padding:0 16px;border-radius:16px;border:1px solid rgba(255,255,255,.25);background:var(--char-2);color:var(--text)}
 .field input::placeholder{color:var(--mute)}
 .field input:focus{outline:2px solid var(--sun-2);outline-offset:1px}
 
