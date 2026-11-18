@@ -455,7 +455,7 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .nu-ico{width:22px;height:22px;color:var(--tone,#e3cba4);flex:none}
 .nu-body{padding:2px 16px 16px}
 .nu-body ul{margin:8px 0 0;padding-left:18px;display:grid;gap:4px;font-size:14px}
-.nu-card[open]{background:linear-gradient(180deg,var(--char-2),#1d1b19)}
+.nu-card[open]{background:var(--char-2)}
 .nu-card summary:focus-visible{outline:2px solid var(--sun-2);outline-offset:-2px}
 .nu-card:target{outline:2px solid var(--tone);outline-offset:2px}
 .nu-quick .chip{cursor:default}
