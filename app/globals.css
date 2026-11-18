@@ -439,7 +439,7 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .nu-days{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;margin:0 -16px;padding-inline:16px}
 .nu-day{flex:none;width:190px;scroll-snap-align:start;background:var(--char-2);border:1px solid var(--line);border-radius:20px;padding:12px;display:grid;gap:7px}
 .nu-day>b{font-size:13px;letter-spacing:.3px}
-.nu-chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 10px;border-radius:14px;font-size:13px;font-weight:600;color:var(--cream);text-decoration:none;background:var(--char-3);border-left:4px solid var(--tone,#e3cba4)}
+.nu-chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 10px;border-radius:14px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;background:var(--char-3);border-left:4px solid var(--tone,#e3cba4)}
 .nu-chip span{font-size:11px;font-weight:800;opacity:.75;min-width:20px}
 .nu-chip.breakfast,.nu-card.breakfast{--tone:#e8c98a}
 .nu-chip.lunch,.nu-card.lunch{--tone:#d9a46a}
