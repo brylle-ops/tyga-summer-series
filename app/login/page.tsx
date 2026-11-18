@@ -14,7 +14,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
       <div style={{ marginTop: 6 }}>
         <div className="eyebrow">TYGA Summer Series</div>
         <div className="h1" style={{ marginTop: 6 }}>
-          Sign in.<br /><span className="script" style={{ fontSize: 34 }}>no password needed</span>
+          Sign in<br /><span className="script" style={{ fontSize: 34 }}>Wait for the code to sign in</span>
         </div>
       </div>
       <p className="sm mute">Enter your email and we&apos;ll send you a one-time sign-in code. New to the Summer Series? The same code creates your account.</p>
