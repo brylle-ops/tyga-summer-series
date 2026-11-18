@@ -1,6 +1,6 @@
 import { Icon } from "@/components/Icons";
 import { Pill, Screen, TopNav } from "@/components/ui";
-import HolidaySwitch from "@/components/HolidaySwitch";
+import HolidaySwitch, { HolidayDate } from "@/components/HolidaySwitch";
 import Link from "next/link";
 import { holidayFilters, holidayWorkouts } from "@/lib/mock-data";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
@@ -34,7 +34,8 @@ export default async function Holiday({ searchParams }: { searchParams: Promise<
           <li><Icon name="check" />Keep your points, keep your streak and stay on the leaderboard.</li>
         </ul>
         <div style={{ marginTop: 14, display: "grid", gap: 8 }}>
-          {error && <p className="xs" role="alert">Pick a date between today and 31 Jan.</p>}
+          {error === "pick" && <p className="xs" role="alert">Pick the date you&apos;ll be back first.</p>}
+          {error === "date" && <p className="xs" role="alert">Pick a date between today and 31 Jan.</p>}
           {on && away && <p className="xs" role="status">Holiday Mode is on. Enjoy the trip!</p>}
           {off && !away && <p className="xs" role="status">Welcome back. Holiday Mode is off.</p>}
           {away ? (
@@ -42,11 +43,7 @@ export default async function Holiday({ searchParams }: { searchParams: Promise<
           ) : (
             <>
               <label className="xs mute" htmlFor="until">I&apos;m away until</label>
-              <div className="li" style={{ gap: 8 }}>
-                <input id="until" type="date" name="until" required min={new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" })} max="2027-01-31" className="grow"
-                  style={{ height: 44, borderRadius: 12, border: "1px solid rgba(0,0,0,.2)", padding: "0 10px", font: "inherit", background: "#fff", color: "#241c16" }} />
-                <button className="mini" type="submit" style={{ height: 44 }}>Turn on</button>
-              </div>
+              <HolidayDate min={new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" })} />
             </>
           )}
         </div>

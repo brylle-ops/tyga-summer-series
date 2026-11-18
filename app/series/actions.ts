@@ -157,6 +157,7 @@ export async function setHoliday(formData: FormData) {
   const until = String(formData.get("until") ?? "");
   const today = alburyDay(new Date()); // the real date (the date picker uses it too), not the preview-week date
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(until) && until >= today && until <= "2027-01-31";
+  if (!until && formData.get("turn") === "on") redirect("/holiday?error=pick");
   if (until && !valid) redirect("/holiday?error=date");
   const { error } = await createAdminClient().from("profiles").update({ holiday_until: until || null }).eq("id", me.id);
   if (error) { console.error("[holiday]", error.message); redirect("/holiday?error=date"); }
