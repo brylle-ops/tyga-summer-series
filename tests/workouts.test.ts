@@ -1,5 +1,7 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { findWorkout, WORKOUT_FILTERS, workoutsFor, WORKOUTS } from "@/lib/workouts";
+import { findWorkout, WORKOUT_FILTERS, workoutPoster, workoutsFor, WORKOUTS } from "@/lib/workouts";
 
 describe("holiday workouts", () => {
   it("lists the five routines in order, each reachable by its number", () => {
@@ -15,6 +17,12 @@ describe("holiday workouts", () => {
     expect(ids("nonsense")).toHaveLength(5);
     expect(ids()).toHaveLength(5);
     expect(WORKOUT_FILTERS).toEqual(["All", "Bodyweight", "Dumbbells", "Cardio"]);
+  });
+  it("has a poster image file for every workout", () => {
+    for (const w of WORKOUTS) {
+      expect(workoutPoster(w.id)).toBe(`/img/workouts/${w.id}.webp`);
+      expect(existsSync(join(process.cwd(), "public", workoutPoster(w.id)))).toBe(true);
+    }
   });
   it("has a cardio table that adds up to its 22 minutes", () => {
     const minutes = findWorkout("05")!.steps.reduce((total, s) => total + parseInt(s.amount, 10), 0);

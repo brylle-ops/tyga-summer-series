@@ -55,6 +55,16 @@ export const WORKOUTS: Workout[] = [
   },
 ];
 
+/** The workout's poster, public/img/workouts/<id>.webp (1080x1350). */
+export const workoutPoster = (id: string) => `/img/workouts/${id}.webp`;
+
+/** Everything written on the poster, for screen readers. */
+export const workoutText = (w: Workout) => [
+  `Workout ${w.id}: ${w.title}. ${w.format}.`,
+  ...w.steps.map((s) => [s.amount, s.name, s.note, s.effort && `${s.effort} effort`].filter(Boolean).join(" ")),
+  w.instructions,
+].filter(Boolean).join(" ");
+
 export const WORKOUT_FILTERS = ["All", "Bodyweight", "Dumbbells", "Cardio"];
 
 export const findWorkout = (id: string) => WORKOUTS.find((w) => w.id === id);

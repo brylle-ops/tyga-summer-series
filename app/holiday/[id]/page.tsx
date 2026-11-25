@@ -2,9 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Screen, TopNav } from "@/components/ui";
 import { requireSeriesMember } from "@/lib/series-data";
-import { findWorkout, WORKOUTS } from "@/lib/workouts";
+import { findWorkout, workoutPoster, workoutText, WORKOUTS } from "@/lib/workouts";
 
-// One holiday workout: the moves, how to run it, and a button to log it.
+// One holiday workout: its poster and a button to log it.
 export default async function WorkoutPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSeriesMember();
   const w = findWorkout((await params).id);
@@ -15,21 +15,8 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
   return (
     <Screen tabs>
       <TopNav title="Workout" back="/holiday" />
-      <div>
-        <div className="xs mute" style={{ letterSpacing: 1.2 }}>HOLIDAY MODE · WORKOUT {w.id}</div>
-        <h1 className="disp" style={{ fontSize: 30 }}>{w.title}</h1>
-        <p className="sm" style={{ margin: "4px 0 0", fontWeight: 600 }}>{w.format}</p>
-      </div>
-      <ol className="wk-steps">
-        {w.steps.map((s, n) => (
-          <li key={n}>
-            <b className="wk-amount">{s.amount}</b>
-            <span className="grow">{s.name}{s.note && <small>{s.note}</small>}</span>
-            {s.effort && <b className="wk-effort" aria-label={`${s.effort} effort`}>{s.effort}</b>}
-          </li>
-        ))}
-      </ol>
-      {w.instructions && <p className="sm mute" style={{ margin: 0 }}>{w.instructions}</p>}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className="wk-poster" src={workoutPoster(w.id)} alt={workoutText(w)} width={1080} height={1350} />
       <Link className="btn" href="/log?kind=workout">Log this workout</Link>
       <div className="li" style={{ justifyContent: "space-between" }}>
         {prev ? <Link className="chip" href={`/holiday/${prev.id}`}>‹ Workout {prev.id}</Link> : <span />}

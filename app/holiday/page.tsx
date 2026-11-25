@@ -3,7 +3,7 @@ import { Pill, Screen, TopNav } from "@/components/ui";
 import HolidaySwitch, { HolidayDate } from "@/components/HolidaySwitch";
 import Link from "next/link";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
-import { WORKOUT_FILTERS, workoutsFor } from "@/lib/workouts";
+import { WORKOUT_FILTERS, workoutPoster, workoutsFor } from "@/lib/workouts";
 import { setHoliday } from "../series/actions";
 
 const auDate = (d: string) => new Date(`${d}T12:00:00+11:00`).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney" });
@@ -54,7 +54,8 @@ export default async function Holiday({ searchParams }: { searchParams: Promise<
       </div>
       {workoutsFor(filter).map((w) => (
         <Link key={w.id} href={`/holiday/${w.id}`} className="li card" style={{ padding: "10px 12px", textDecoration: "none", color: "inherit" }}>
-          <span className="ico"><Icon name={w.icon} /></span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="wk-thumb" src={workoutPoster(w.id)} alt="" width={56} height={70} loading="lazy" />
           <div className="grow"><b className="sm">{w.title}</b><div className="xs mute">{w.format}</div></div>
           <Pill>{w.id}</Pill>
         </Link>
