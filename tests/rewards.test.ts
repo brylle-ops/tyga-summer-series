@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canEnterDraw, canRedeem, isReleased, rankWeek, rewardState, type MemberRewardCtx, type Reward } from "@/lib/rewards";
+import { canEnterDraw, canRedeem, isReleased, rankWeek, rewardState, upcomingTeasers, type MemberRewardCtx, type Reward } from "@/lib/rewards";
 
 const r = (o: Partial<Reward> = {}): Reward => ({
   id: 1, week: 2, kind: "discount", title: "10% off", partner: "", description: "", eligibility: "", how_to: "",
@@ -61,5 +61,22 @@ describe("rankWeek", () => {
   it("flags a tie that straddles the cutoff for staff to decide", () => {
     const w = rankWeek([s("a", 50), s("b", 30), s("c", 30)], 2);
     expect(w.tiedAtCutoff.sort()).toEqual(["b", "c"]);
+  });
+});
+
+describe("upcomingTeasers", () => {
+  it("lists a coming week's other published discounts below its headline reward", () => {
+    const rewards = [
+      r({ week: 1, title: "Bottle" }),
+      r({ week: 2, kind: "draw", title: "Keyring giveaway" }),
+      r({ week: 2, title: "10% off new merchandise" }),
+      r({ week: 2, title: "Hidden draft", published: false }),
+      r({ week: 2, title: "30% off older merchandise" }),
+      r({ week: 3, title: "Secret partner", published: false }),
+    ];
+    expect(upcomingTeasers(rewards, 1)).toEqual([
+      { week: 2, titles: ["30% off older merchandise", "10% off new merchandise"] },
+      { week: 3, titles: ["Reward to be confirmed"] },
+    ]);
   });
 });

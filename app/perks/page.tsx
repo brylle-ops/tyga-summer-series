@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Icon, type IconName } from "@/components/Icons";
 import { LockedTeaser, Screen, TopNav } from "@/components/ui";
 import { weekRange } from "@/lib/activity";
-import { canEnterDraw, canRedeem, isReleased, KIND_LABEL, rewardState, STATE_LABEL, type MemberRewardCtx, type Reward, type RewardKind } from "@/lib/rewards";
+import { canEnterDraw, canRedeem, isReleased, KIND_LABEL, rewardState, STATE_LABEL, upcomingTeasers, type MemberRewardCtx, type Reward, type RewardKind } from "@/lib/rewards";
 import { loadMemberRewards } from "@/lib/rewards-data";
 import { requireSeriesMember } from "@/lib/series-data";
 import { SERIES_START } from "@/lib/series";
@@ -36,7 +36,7 @@ export default async function Perks({ searchParams }: { searchParams: Promise<{ 
   const released = rewards.filter((r) => isReleased(r, ctx.week) && (!group || group.kinds.includes(r.kind)));
   const now = released.filter((r) => r.week === ctx.week);
   const earlier = released.filter((r) => r.week < ctx.week).sort((a, b) => b.week - a.week);
-  const upcoming = [...new Map(rewards.filter((r) => !isReleased(r, ctx.week) && r.week > ctx.week).map((r) => [r.week, r])).values()];
+  const upcoming = upcomingTeasers(rewards, ctx.week);
 
   return (
     <Screen tabs>
@@ -61,7 +61,7 @@ export default async function Perks({ searchParams }: { searchParams: Promise<{ 
 
       {upcoming.length > 0 && <div className="eyebrow" style={{ marginTop: 8 }}>Coming up</div>}
       {upcoming.map((r) => (
-        <LockedTeaser key={r.week} title={`Week ${r.week} · ${r.published ? r.title : "Reward to be confirmed"}`} when={`Unlocks ${unlockLabel(r.week)} · COMING SOON`} />
+        <LockedTeaser key={r.week} title={`Week ${r.week} · ${r.titles[0]}`} extras={r.titles.slice(1)} when={`Unlocks ${unlockLabel(r.week)}`} note="COMING SOON" />
       ))}
 
       {earlier.length > 0 && <div className="eyebrow" style={{ marginTop: 8 }}>Earlier weeks</div>}

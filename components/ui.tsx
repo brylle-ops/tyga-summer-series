@@ -75,11 +75,16 @@ export function Segmented({ options, active }: { options: string[]; active: stri
 }
 
 /** "Unlocks next week" teaser — nothing about the content is shown (week-by-week unlocking). */
-export function LockedTeaser({ title, when }: { title: string; when: string }) {
+export function LockedTeaser({ title, extras = [], when, note }: { title: string; extras?: string[]; when: string; note?: string }) {
   return (
     <div className="locked-teaser">
       <span className="lk"><Icon name="lock" /></span>
-      <div className="grow"><b>{title}</b><small>{when}</small></div>
+      <div className="grow">
+        <b>{title}</b>
+        {extras.map((x) => <b key={x}>{x}</b>)}
+        <small>{when}</small>
+        {note && <small className="note">{note}</small>}
+      </div>
     </div>
   );
 }

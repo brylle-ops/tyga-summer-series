@@ -293,7 +293,9 @@ a.btn,a.chip,a.mini{text-decoration:none}
 .locked-teaser .lk{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--char-3)}
 .locked-teaser .lk svg{width:17px;height:17px}
 .locked-teaser b{display:block;font-size:14px;font-weight:600}
-.locked-teaser small{font-size:12.5px;color:var(--mute)}
+.locked-teaser small{display:block;font-size:12.5px;color:var(--mute);margin-top:6px}
+.locked-teaser b+b{margin-top:4px}
+.locked-teaser small.note{margin-top:2px;letter-spacing:.8px}
 
 /* runner fit switch on Welcome */
 .runner-switch{position:absolute;left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:4px;padding:4px;border-radius:99px;
