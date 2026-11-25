@@ -74,12 +74,13 @@ export function Segmented({ options, active }: { options: string[]; active: stri
   );
 }
 
-/** "Unlocks next week" teaser — nothing about the content is shown (week-by-week unlocking). */
-export function LockedTeaser({ title, extras = [], when, note }: { title: string; extras?: string[]; when: string; note?: string }) {
+/** "Unlocks next week" teaser — shows only what the caller passes in (week-by-week unlocking). */
+export function LockedTeaser({ title, extras = [], when, note, image }: { title: string; extras?: string[]; when: string; note?: string; image?: string | null }) {
   return (
     <div className="locked-teaser">
       <span className="lk"><Icon name="lock" /></span>
       <div className="grow">
+        {image && /* eslint-disable-next-line @next/next/no-img-element */ <img className="reward-img" src={image} alt={title} loading="lazy" />}
         <b>{title}</b>
         {extras.map((x) => <b key={x}>{x}</b>)}
         <small>{when}</small>

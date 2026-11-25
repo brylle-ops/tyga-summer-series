@@ -27,11 +27,12 @@ export type MemberRewardCtx = {
 export const isReleased = (r: Pick<Reward, "published" | "week">, week: number) => r.published && r.week <= week;
 
 /** One "Coming up" card per future week: the headline (newest published reward), then its other discounts. Drafts stay secret. */
-export function upcomingTeasers(rewards: Reward[], week: number): { week: number; titles: string[] }[] {
+export function upcomingTeasers(rewards: Reward[], week: number): { week: number; titles: string[]; image: string | null }[] {
   const weeks = [...new Set(rewards.filter((r) => r.week > week).map((r) => r.week))];
   return weeks.map((w) => {
     const [head, ...rest] = rewards.filter((r) => r.week === w && r.published).reverse();
-    return { week: w, titles: head ? [head, ...rest.filter((r) => r.kind === "discount")].map((r) => r.title) : ["Reward to be confirmed"] };
+    const titles = head ? [head, ...rest.filter((r) => r.kind === "discount")].map((r) => r.title) : ["Reward to be confirmed"];
+    return { week: w, titles, image: head?.image_url ?? null };
   });
 }
 

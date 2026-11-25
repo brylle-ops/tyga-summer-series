@@ -71,12 +71,12 @@ describe("upcomingTeasers", () => {
       r({ week: 2, kind: "draw", title: "Keyring giveaway" }),
       r({ week: 2, title: "10% off new merchandise" }),
       r({ week: 2, title: "Hidden draft", published: false }),
-      r({ week: 2, title: "30% off older merchandise" }),
+      r({ week: 2, title: "30% off older merchandise", image_url: "https://x/y.webp" }),
       r({ week: 3, title: "Secret partner", published: false }),
     ];
     expect(upcomingTeasers(rewards, 1)).toEqual([
-      { week: 2, titles: ["30% off older merchandise", "10% off new merchandise"] },
-      { week: 3, titles: ["Reward to be confirmed"] },
+      { week: 2, titles: ["30% off older merchandise", "10% off new merchandise"], image: "https://x/y.webp" },
+      { week: 3, titles: ["Reward to be confirmed"], image: null },
     ]);
   });
 });

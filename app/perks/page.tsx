@@ -61,7 +61,7 @@ export default async function Perks({ searchParams }: { searchParams: Promise<{ 
 
       {upcoming.length > 0 && <div className="eyebrow" style={{ marginTop: 8 }}>Coming up</div>}
       {upcoming.map((r) => (
-        <LockedTeaser key={r.week} title={`Week ${r.week} · ${r.titles[0]}`} extras={r.titles.slice(1)} when={`Unlocks ${unlockLabel(r.week)}`} note="COMING SOON" />
+        <LockedTeaser key={r.week} title={`Week ${r.week} · ${r.titles[0]}`} extras={r.titles.slice(1)} when={`Unlocks ${unlockLabel(r.week)}`} note="COMING SOON" image={r.image} />
       ))}
 
       {earlier.length > 0 && <div className="eyebrow" style={{ marginTop: 8 }}>Earlier weeks</div>}
