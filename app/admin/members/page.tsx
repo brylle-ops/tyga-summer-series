@@ -3,6 +3,7 @@ import { WithPhoto } from "@/components/Avatar";
 import { avatarUrls } from "@/lib/avatars";
 import { redirect } from "next/navigation";
 import { Pill, Wordmark } from "@/components/ui";
+import { memberList } from "@/lib/member-list";
 import { fetchAll } from "@/lib/paging";
 import { COUNTED, memberStats, sessionDaysByWeek, type Mission } from "@/lib/series";
 import { loadEveryone, seriesWeekNow } from "@/lib/series-data";
@@ -13,10 +14,11 @@ type P = { id: string; email: string; first_name: string | null; last_name: stri
 const day = (d: string | null) => (d ? new Date(d).toLocaleDateString("en-AU", { day: "numeric", month: "short", timeZone: "Australia/Sydney" }) : "—");
 
 // Backend: everyone who has signed up, with their progress. Staff only; shows full names, emails and mobiles.
-export default async function Members({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function Members({ searchParams }: { searchParams: Promise<{ q?: string; view?: string }> }) {
   if (!supabaseReady()) return <p style={{ padding: 24 }}>Connect Supabase to see members.</p>;
   if (!(await isStaff())) redirect("/login");
-  const { q } = await searchParams;
+  const { q, view } = await searchParams;
+  const showBlocked = view === "blocked";
   const week = seriesWeekNow();
   const db = createAdminClient();
   const [profiles, regs, { everyone, missions }] = await Promise.all([
@@ -31,8 +33,9 @@ export default async function Members({ searchParams }: { searchParams: Promise<
     return [e.profile.id, { ...memberStats(e.checkins, done, week), last, thisWeek: sessionDaysByWeek(e.checkins).get(week)?.length ?? 0 }];
   }));
   const reg = new Map(regs.map((r) => [r.profile_id, r]));
-  const needle = (q ?? "").trim().toLowerCase();
-  const rows = profiles.filter((p) => !needle || `${p.first_name ?? ""} ${p.last_name ?? ""} ${p.email}`.toLowerCase().includes(needle));
+  const rows = memberList(profiles, showBlocked, q);
+  const blockedCount = profiles.filter((p) => p.blocked_at).length;
+  const search = q ? `?q=${encodeURIComponent(q)}` : "";
   const photos = await avatarUrls(rows.slice(0, 500).map((p) => p.id));
 
   return (
@@ -47,9 +50,14 @@ export default async function Members({ searchParams }: { searchParams: Promise<
           </div>
         </div>
         <form className="li" style={{ gap: 8, margin: "4px 0 12px" }}>
+          {showBlocked && <input type="hidden" name="view" value="blocked" />}
           <input name="q" defaultValue={q ?? ""} placeholder="Search name or email" aria-label="Search members" style={{ flex: 1, height: 40, borderRadius: 10, border: "1px solid rgba(0,0,0,.2)", padding: "0 12px", font: "inherit" }} />
           <button className="mini" type="submit" style={{ height: 40 }}>Search</button>
         </form>
+        <div className="li" style={{ gap: 8, margin: "0 0 12px" }}>
+          <Link prefetch={false} className={showBlocked ? "mini ghost" : "mini"} href={`/admin/members${search}`}>Members ({profiles.length - blockedCount})</Link>
+          <Link prefetch={false} className={showBlocked ? "mini" : "mini ghost"} href={`/admin/members?view=blocked${q ? `&q=${encodeURIComponent(q)}` : ""}`}>Blocked ({blockedCount})</Link>
+        </div>
         <div className="card">
           <div className="tablewrap"><table>
             <thead><tr><th>Member</th><th>Email</th><th>Mobile</th><th>Goal</th><th className="n">Points</th><th className="n">This week</th><th>Last session</th><th>Singlet</th><th>Joined</th></tr></thead>
@@ -70,7 +78,7 @@ export default async function Members({ searchParams }: { searchParams: Promise<
               })}
             </tbody>
           </table></div>
-          {rows.length === 0 && <p className="sm mute">No members match.</p>}
+          {rows.length === 0 && <p className="sm mute">{showBlocked && !q ? "No blocked members." : "No members match."}</p>}
         </div>
       </div>
     </div>
