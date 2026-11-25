@@ -67,7 +67,7 @@ export default async function Members({ searchParams }: { searchParams: Promise<
                 const r = reg.get(p.id);
                 return (
                   <tr key={p.id}>
-                    <td><WithPhoto url={photos.get(p.id)} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "?"}><Link prefetch={false} href={`/admin/members/${p.id}`}>{`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "(no name yet)"}</Link></WithPhoto>{p.role === "staff" ? " · staff" : ""}{p.blocked_at ? " · blocked" : ""}</td>
+                    <td><WithPhoto url={photos.get(p.id)} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "?"}><Link prefetch={false} href={`/admin/members/${p.id}`}>{`${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "(no name yet)"}</Link>{p.role === "staff" ? " · staff" : ""}{p.blocked_at ? " · blocked" : ""}</WithPhoto></td>
                     <td>{p.email}</td><td>{p.mobile ?? "—"}</td><td>{p.goal ?? "—"}</td>
                     <td className="n"><b>{s?.points ?? 0}</b></td><td className="n">{s ? `${s.thisWeek}/3` : "—"}</td>
                     <td>{day(s?.last ?? null)}</td>
