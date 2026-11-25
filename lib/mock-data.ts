@@ -94,16 +94,6 @@ export const nextPerks: { week: number; icon: IconName; title: string; detail: s
   { week: 3, icon: "bowl", title: "10% off summer dining", detail: "Local partner restaurant · 150 pts", art: "linear-gradient(140deg,#8a5a2e,#2f2b26)", locked: true },
 ];
 
-export const holidayFilters = ["All", "Hotel room", "Run", "Bodyweight"];
-
-export const holidayWorkouts: { week: number; icon: IconName; title: string; detail: string; tag: string; recovery?: boolean }[] = [
-  { week: 3, icon: "bed", title: "20-min hotel room strength", detail: "No equipment · counts to 3/3", tag: "+5" },
-  { week: 3, icon: "run", title: "5 km easy holiday run", detail: "Any route · counts to 3/3", tag: "+5" },
-  { week: 2, icon: "sun", title: "Beach EMOM", detail: "Bodyweight · 24 min", tag: "+5" },
-  { week: 2, icon: "leaf", title: "Mobility flow", detail: "Recovery · 15 min", tag: "recovery", recovery: true },
-  { week: 4, icon: "flame", title: "New Year's Day circuit", detail: "Bodyweight · 20 min · counts to 3/3", tag: "+5" },
-];
-
 export const resources: { week: number; icon: IconName; title: string; detail: string; bg: string }[] = [
   { week: 1, icon: "bowl", title: "High-protein recipes", detail: "Yard Fuel: 10 recipes", bg: "linear-gradient(160deg,#6b5440,#1f1b17)" },
   { week: 1, icon: "plane", title: "Holiday workouts", detail: "Train anywhere", bg: "linear-gradient(160deg,#4a5359,#1b1d1e)" },

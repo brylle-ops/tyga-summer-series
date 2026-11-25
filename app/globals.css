@@ -788,3 +788,11 @@ button.switch:focus-visible{outline:2px solid #e08a35;outline-offset:2px}
 .av.av-lg{width:56px;height:56px;margin:0;font-size:18px;flex:none}
 .av.av-sm{width:32px;height:32px;margin:0;font-size:12px;flex:none}
 .with-photo{display:inline-flex;align-items:center;gap:10px}
+
+/* holiday workout steps */
+.wk-steps{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.wk-steps li{display:flex;align-items:baseline;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.wk-amount{flex:none;width:58px;font-size:16px}
+.wk-steps span{font-size:15px;font-weight:600}
+.wk-steps small{display:block;margin-top:2px;font-size:12px;font-weight:400;color:var(--mute)}
+.wk-effort{flex:none;font-size:16px}

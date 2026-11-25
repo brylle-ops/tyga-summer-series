@@ -16,8 +16,9 @@ export default async function Resources() {
       <div className="res">
         {resources.filter((r) => r.week <= wk).map((r) => {
           const inner = <><Icon name={r.icon} style={{ color: "var(--cream)" }} /><b>{r.title}</b><small>{r.detail}</small></>;
-          return r.title === "High-protein recipes"
-            ? <Link key={r.title} href="/nutrition" style={{ background: r.bg }}>{inner}</Link>
+          const href = r.title === "High-protein recipes" ? "/nutrition" : r.title === "Holiday workouts" ? "/holiday" : null;
+          return href
+            ? <Link key={r.title} href={href} style={{ background: r.bg }}>{inner}</Link>
             : <div key={r.title} style={{ background: r.bg }}>{inner}</div>;
         })}
       </div>

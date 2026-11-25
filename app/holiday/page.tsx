@@ -2,8 +2,8 @@ import { Icon } from "@/components/Icons";
 import { Pill, Screen, TopNav } from "@/components/ui";
 import HolidaySwitch, { HolidayDate } from "@/components/HolidaySwitch";
 import Link from "next/link";
-import { holidayFilters, holidayWorkouts } from "@/lib/mock-data";
 import { loadMemberView, requireSeriesMember } from "@/lib/series-data";
+import { WORKOUT_FILTERS, workoutsFor } from "@/lib/workouts";
 import { setHoliday } from "../series/actions";
 
 const auDate = (d: string) => new Date(`${d}T12:00:00+11:00`).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney" });
@@ -12,8 +12,7 @@ const auDate = (d: string) => new Date(`${d}T12:00:00+11:00`).toLocaleDateString
 export default async function Holiday({ searchParams }: { searchParams: Promise<{ f?: string; error?: string; on?: string; off?: string }> }) {
   const { f, error, on, off } = await searchParams;
   const v = await loadMemberView(await requireSeriesMember());
-  const filter = holidayFilters.includes(f ?? "") ? f! : "All";
-  const match = (w: (typeof holidayWorkouts)[number]) => filter === "All" || (filter === "Run" ? w.icon === "run" : filter === "Hotel room" ? /hotel|room/i.test(w.title) : /bodyweight|no equipment/i.test(w.detail));
+  const filter = WORKOUT_FILTERS.includes(f ?? "") ? f! : "All";
   const away = v.holidayUntil;
   return (
     <Screen tabs>
@@ -51,13 +50,13 @@ export default async function Holiday({ searchParams }: { searchParams: Promise<
 
       <div className="h2" style={{ marginTop: 4 }}>Workouts that count anywhere</div>
       <div className="chips">
-        {holidayFilters.map((x) => <Link key={x} href={x === "All" ? "/holiday" : `/holiday?f=${encodeURIComponent(x)}`} className={`chip ${x === filter ? "on" : ""}`}>{x}</Link>)}
+        {WORKOUT_FILTERS.map((x) => <Link key={x} href={x === "All" ? "/holiday" : `/holiday?f=${encodeURIComponent(x)}`} className={`chip ${x === filter ? "on" : ""}`}>{x}</Link>)}
       </div>
-      {holidayWorkouts.filter(match).map((w) => (
-        <Link key={w.title} href={`/log?kind=${w.recovery ? "recovery" : "workout"}`} className="li card" style={{ padding: "10px 12px", textDecoration: "none", color: "inherit" }}>
+      {workoutsFor(filter).map((w) => (
+        <Link key={w.id} href={`/holiday/${w.id}`} className="li card" style={{ padding: "10px 12px", textDecoration: "none", color: "inherit" }}>
           <span className="ico"><Icon name={w.icon} /></span>
-          <div className="grow"><b className="sm">{w.title}</b><div className="xs mute">{w.detail}</div></div>
-          {w.recovery ? <span className="xs mute">{w.tag}</span> : <Pill>{w.tag}</Pill>}
+          <div className="grow"><b className="sm">{w.title}</b><div className="xs mute">{w.format}</div></div>
+          <Pill>{w.id}</Pill>
         </Link>
       ))}
     </Screen>
