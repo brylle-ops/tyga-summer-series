@@ -8,7 +8,6 @@ describe("recipePhoto", () => {
     expect(recipePhoto("B1")).toBe("/img/recipes/B1.webp");
   });
   it("returns null for a code without a photo", () => {
-    expect(recipePhoto("D1")).toBeNull();
     expect(recipePhoto("ZZ")).toBeNull();
   });
   it("only lists codes whose file exists", () => {

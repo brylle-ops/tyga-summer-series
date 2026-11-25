@@ -1,7 +1,7 @@
 // One-command Square setup. Run it yourself in the terminal:  node scripts/square-setup.mjs
-// Needs only SQUARE_ACCESS_TOKEN in .env.local (and optionally SQUARE_ENVIRONMENT, VERCEL_TOKEN).
+// Needs SQUARE_ACCESS_TOKEN in .env.local (and optionally SQUARE_ENVIRONMENT), plus a Vercel CLI sign-in.
 // It finds the location, creates the webhook subscription, saves the values to .env.local
-// and (if VERCEL_TOKEN is set) to Vercel. It never prints secret values.
+// and to Vercel. It never prints secret values.
 import fs from "node:fs";
 import { spawnSync } from "node:child_process";
 
@@ -50,8 +50,11 @@ if (loc.currency !== "AUD") console.log("  ! This location is not AUD. Checkout 
 // 2. Webhook subscription (reuse if one already points at our URL)
 const subs = (await sq("/v2/webhooks/subscriptions")).subscriptions ?? [];
 let sub = subs.find((s) => s.notification_url === WEBHOOK_URL);
-if (sub) console.log("✓ Webhook already exists, reusing it");
-else {
+if (sub) {
+  // The list leaves out signature_key; fetching the single subscription includes it.
+  sub = (await sq(`/v2/webhooks/subscriptions/${sub.id}`)).subscription;
+  console.log("✓ Webhook already exists, reusing it");
+} else {
   sub = (await sq("/v2/webhooks/subscriptions", {
     idempotency_key: crypto.randomUUID(),
     subscription: { name: "TYGA Summer Series", enabled: true, event_types: EVENTS, notification_url: WEBHOOK_URL, api_version: VERSION },
@@ -65,18 +68,20 @@ save("SQUARE_ENVIRONMENT", env);
 save("NEXT_PUBLIC_SITE_URL", get("NEXT_PUBLIC_SITE_URL") && !get("NEXT_PUBLIC_SITE_URL").includes("localhost") ? get("NEXT_PUBLIC_SITE_URL") : "http://localhost:3000");
 console.log("✓ Saved to .env.local");
 
-// 3. Vercel (optional)
-if (!process.env.VERCEL_TOKEN && !get("VERCEL_TOKEN")) {
-  console.log("\nVercel not updated (no VERCEL_TOKEN). Paste these 5 into Vercel yourself: SQUARE_ENVIRONMENT, SQUARE_ACCESS_TOKEN, SQUARE_LOCATION_ID, SQUARE_WEBHOOK_SIGNATURE_KEY, SQUARE_WEBHOOK_URL");
-  console.log("(they are in .env.local). Or add VERCEL_TOKEN=... to .env.local and run this again.");
-  process.exit(0);
-}
-const childEnv = { ...process.env, VERCEL_TOKEN: process.env.VERCEL_TOKEN || get("VERCEL_TOKEN") };
-const vercel = (args, input) => spawnSync("npx", ["vercel", ...args], { input, env: childEnv, shell: true, encoding: "utf8" });
+// 3. Vercel: uses this computer's Vercel CLI sign-in (run `npx vercel login` if needed)
+const vercel = (args, input) => spawnSync("npx", ["vercel", ...args], { input, shell: true, encoding: "utf8" });
 const push = { SQUARE_ENVIRONMENT: env, SQUARE_ACCESS_TOKEN: token, SQUARE_LOCATION_ID: loc.id, SQUARE_WEBHOOK_SIGNATURE_KEY: sub.signature_key, SQUARE_WEBHOOK_URL: WEBHOOK_URL };
+const SECRET = ["SQUARE_ACCESS_TOKEN", "SQUARE_WEBHOOK_SIGNATURE_KEY"];
+const PROJECT = ["--project", "tyga-summer-series", "--scope", "tatay"]; // folder need not be linked
 for (const [k, v] of Object.entries(push)) {
-  vercel(["env", "rm", k, "production", "-y"]);
-  const r = vercel(["env", "add", k, "production"], v);
-  console.log(r.status === 0 ? `✓ Vercel: ${k}` : `✗ Vercel: ${k} failed (is the project linked? run: npx vercel link)`);
+  const type = SECRET.includes(k) ? "--sensitive" : "--no-sensitive";
+  const r = vercel(["env", "add", k, "--environment", "production", "--force", "--yes", type, ...PROJECT], v);
+  if (r.status === 0) console.log(`✓ Vercel: ${k}`);
+  else {
+    process.exitCode = 1;
+    const why = `${r.stdout ?? ""}${r.stderr ?? ""}`.replaceAll(token, "[hidden]").replaceAll(sub.signature_key, "[hidden]");
+    console.log(`✗ Vercel: ${k} failed\n${why.trim().slice(-600)}`);
+  }
 }
-console.log("\nDone. Redeploy in Vercel (or push any commit), then test /join/singlet with card 4111 1111 1111 1111.");
+const test = env === "sandbox" ? "test /join/singlet with card 4111 1111 1111 1111" : "buy one singlet with a real card, then refund it";
+console.log(process.exitCode ? "\nSome Vercel settings failed. Send this output (no secrets are shown)." : `\nDone. Redeploy in Vercel, then ${test}.`);
