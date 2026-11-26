@@ -464,6 +464,28 @@ a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.
 .nu-card:target{outline:2px solid var(--tone);outline-offset:2px}
 .nu-quick .chip{cursor:default}
 
+.nu-day:has(:focus-visible,.nu-chip:active){border-color:var(--sun-2)}
+.nu-chip:is(:focus-visible,:active){background-color:color-mix(in srgb,var(--char-3),var(--tone) 55%)}
+.nu-card summary:is(:focus-visible,:active),a.rtile:is(:focus-visible,:active){background-color:color-mix(in srgb,var(--char-2),var(--text) 13%)}
+.nu-filters .chip:active{box-shadow:inset 0 0 0 1px currentColor}
+
+@media (any-hover:hover){
+  .nu-day:hover{border-color:var(--sun-2)}
+  .nu-chip:hover{background-color:color-mix(in srgb,var(--char-3),var(--tone) 55%);text-decoration:underline;text-underline-offset:3px}
+  .nu-card summary:hover,a.rtile:hover{background-color:color-mix(in srgb,var(--char-2),var(--text) 13%)}
+  .nu-filters .chip:hover{box-shadow:inset 0 0 0 1px currentColor}
+}
+
+@media (prefers-reduced-motion:no-preference){
+  .nu-day{transition:border-color 150ms ease}
+  .nu-chip,.nu-card summary,a.rtile{transition:background-color 150ms ease,translate 150ms ease}
+  .nu-filters .chip{transition:box-shadow 150ms ease}
+  @media (any-hover:hover){
+    .nu-chip:hover{translate:2px 0}
+    a.rtile:hover{translate:0 -2px}
+  }
+}
+
 .nu-title .script{color:#7a4f22}
 
 /* Tabs made of links: readable active state, 44px tap target */

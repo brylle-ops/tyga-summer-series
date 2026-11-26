@@ -22,7 +22,7 @@ export default async function Nutrition({ searchParams }: { searchParams: Promis
     <Screen tabs bodyStyle={{ gap: 14 }}>
       <TopNav title="Recipes" back="/more" />
 
-      <div className="chips" role="tablist" aria-label="Recipe type">
+      <div className="chips nu-filters" role="tablist" aria-label="Recipe type">
         {CHIPS.map((c) => <Link key={c.key} href={c.key === "all" ? "/nutrition" : `/nutrition?meal=${c.key}`} className={`chip ${(meal ?? "all") === c.key ? "on" : ""}`}>{c.label}</Link>)}
       </div>
       <div className="rgrid">
