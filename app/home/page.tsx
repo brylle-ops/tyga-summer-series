@@ -90,7 +90,7 @@ export default async function Home() {
                 {thisWeek.pending} Yard session{thisWeek.pending > 1 ? "s" : ""} waiting for the class roster. {thisWeek.pending > 1 ? "They count" : "It counts"} once confirmed.
               </div>
             )}
-            <Link href="/activity" className="xs link" style={{ display: "inline-block", marginTop: 6 }}>See all activity ›</Link>
+            <Link href="/activity" className="xs link" style={{ display: "block", width: "fit-content", marginTop: 6 }}>See all activity ›</Link>
           </div>
         </div>
       </div>

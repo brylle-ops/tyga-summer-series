@@ -814,3 +814,14 @@ button.switch:focus-visible{outline:2px solid #e08a35;outline-offset:2px}
 /* holiday workout posters */
 .wk-poster{display:block;width:100%;height:auto;border-radius:var(--r)}
 .wk-thumb{flex:none;width:56px;height:70px;object-fit:cover;border-radius:8px}
+
+/* alignment and readability fixes, 27 Nov */
+.res div{color:#f4f1ec}
+.privacy ul+p{margin-top:12px}
+.app.sand .strip .d i{border-color:rgba(36,28,22,.32);color:var(--text)}
+.app.sand .strip .d.future i{border-color:rgba(36,28,22,.18)}
+.app.sand .strip .d.counted i{background:#1b1511;color:#f4f1ec}
+.app.sand .strip .d.today i{outline-color:#a9651f}
+.app.sand .strip .d.today small{color:var(--text)}
+.app.sand .strip .d.future{opacity:.75}
+.app.sand .strip .d.future i{border-color:rgba(36,28,22,.3)}
